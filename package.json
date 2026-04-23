@@ -1,0 +1,18 @@
+{
+  "name": "13comp-database-and-game",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpx vite",
+    "build": "pnpx --package=typescript tsc && pnpx vite build",
+    "preview": "pnpx vite preview"
+  },
+  "dependencies": {
+    "firebase": "^12.11.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vite": "^8.0.1"
+  }
+}
