@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TicTacToe</title>
+  </head>
+  <body>
+    <div>
+        <div>
+            <h2>Tic Tac Toe</h2>
+            <p>Mode: Original</p>
+        </div>
+        <h1>PLAYER 1</h1>
+    </div>
+    <div class="mainContent">
+      <ul>
+        <title>Players</title>
+        <div>
+          <img
+            src="/src/profilemissing.jpg"
+            alt="Profile picture"
+            width="40"
+            height="40"
+          />
+          <div>
+            <p>
+              Squawkykaka<br />
+              6000 <i>K/D</i>
+            </p>
+          </div>
+        </div>
+      </ul>
+      <div id="grid">
+        <button></button>
+        <button></button>
+        <button></button>
+        <button></button>
+        <button></button>
+        <button></button>
+        <button></button>
+        <button></button>
+        <button></button>
+      </div>
+      <div id="tournamentDisplay">
+          <h2>Tournament</h2>
+      </div>
+    </div>
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+
+  <style>
+    html,
+    body {
+      margin: 0;
+    }
+    .mainContent {
+        margin: 0;
+        padding: 0;
+        /* align-items: center; */
+        display: flex;
+        /* flex-direction: column; */
+        justify-content: space-between;
+    }
+    ul {
+      width: 160px;
+    }
+    ul > div {
+      align-items: center;
+      justify-content: space-between;
+      display: flex;
+    }
+    ul > div > div {
+      display: flex;
+      flex-direction: column;
+    }
+    #grid {
+      flex: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 10px;
+      background: black;
+    }
+    #grid > button {
+      flex: 0;
+      min-width: 200px;
+      max-width: 1/5;
+      aspect-ratio: 1/1;
+      border: 0;
+      background-color: white;
+
+      font-size: 140px;
+      letter-spacing: 0;
+    }  
+    #grid > button:hover {
+        background-color: gainsboro;
+    }  
+    #grid > button:active {
+        background-color: gainsboro;
+        filter: brightness(85%);
+    }  
+    #grid > button:disabled {
+        background-color: white;
+    }
+  </style>
+  </style>
+</html>
