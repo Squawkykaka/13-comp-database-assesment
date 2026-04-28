@@ -12,9 +12,20 @@ function numberToBits(num) {
   return (num >>> 0).toString(2);
 }
 
+// A general class for everything related to a single tictactoe game.
+// This exposes two functions, one to run a move, and one to change a tile at a board position
+// The game works by storing two ints, one for cross's and one for circles which can be compared using bit operations to determine win conditions
+// e.g. a board like
+// | X | X | O |
+// | X | X | O |
+// | O | O | X |
+// would be represented as 
+// circles = 0b001001110
+// crosses = 0b110110001
+// checking for wins is super easy this way as you just AND the bit streams with all the possible win conditions, and if it equals the pattern
 export class Board {
-  $circleList = 0o000000000;
-  $crossList = 0o000000000;
+  $circleList = 0;
+  $crossList = 0;
   $currentlyCirclesTurn = true;
   $state: GameState = { status: "playing" };
 

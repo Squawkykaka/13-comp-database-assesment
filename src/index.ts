@@ -26,8 +26,14 @@ boardTiles.forEach((el, index) => {
       }
     }
 
+    // if its won it will be the only time its ran
     let gameState = BOARD.$state;
     console.log(gameState);
-    
   });
 });
+
+function gameEnd() {
+  for (const el of boardTiles) {
+    el.disabled = true;
+  }
+}
