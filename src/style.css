@@ -1,0 +1,67 @@
+:root {
+  --primary-bg-color: #ff9a86;
+  --secondary-bg-color: #ffb399;
+  --primary-detail-color: #ffd6a6;
+  --secondary-detail-color: #fff0be;
+}
+
+html,
+body {
+  margin: 0;
+}
+.mainContent {
+  margin: 0;
+  padding: 0;
+  /* align-items: center; */
+  display: flex;
+  /* flex-direction: column; */
+  justify-content: space-between;
+}
+ul {
+  width: 160px;
+
+  > div {
+    align-items: center;
+    justify-content: space-between;
+    display: flex;
+
+    > div {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+}
+
+.winner-Circle {
+  background-color: red !important;
+}
+.winner-Cross {
+  background-color: green !important;
+}
+#grid {
+  flex: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 10px;
+  background: black;
+
+  > button {
+    flex: 0;
+    min-width: 200px;
+    max-width: 1/5;
+    aspect-ratio: 1/1;
+    border: 0;
+    background-color: white;
+
+    font-size: 140px;
+    letter-spacing: 0;
+  }
+  > button:hover {
+    background-color: gainsboro;
+  }
+  > button:active {
+    background-color: gainsboro;
+    filter: brightness(85%);
+  }
+}
