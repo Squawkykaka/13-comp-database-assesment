@@ -3,20 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/src/style.css">
+    <link rel="stylesheet" href="/src/style.css" />
     <title>TicTacToe</title>
   </head>
   <body>
     <div>
-        <div>
-            <h2>Tic Tac Toe</h2>
-            <p>Mode: Original</p>
-        </div>
-        <h1>PLAYER 1</h1>
+      <div>
+        <h2>Tic Tac Toe</h2>
+        <p>Mode: Original</p>
+      </div>
+      <h1>PLAYER 1</h1>
     </div>
     <div class="mainContent">
-      <ul>
-        <title>Players</title>
+      <ul id="playerList">
+        <h2>Players</h2>
         <div>
           <img
             src="/src/profilemissing.jpg"
@@ -32,19 +32,22 @@
           </div>
         </div>
       </ul>
-      <div id="grid">
-        <button></button>
-        <button></button>
-        <button></button>
-        <button></button>
-        <button></button>
-        <button></button>
-        <button></button>
-        <button></button>
-        <button></button>
+      <div>
+        <div id="grid">
+          <button></button>
+          <button></button>
+          <button></button>
+          <button></button>
+          <button></button>
+          <button></button>
+          <button></button>
+          <button></button>
+          <button></button>
+        </div>
+        <button id="resetButton" disabled>RESET</button>
       </div>
       <div id="tournamentDisplay">
-          <h2>Tournament</h2>
+        <h2>Tournament</h2>
       </div>
     </div>
     <script type="module" src="/src/index.ts"></script>
