@@ -1,39 +1,21 @@
-import { Board, type TileType } from "./board";
+import { BoardUIRenderer, GameManager } from "./gamemanager";
 
-const BOARD = new Board();
+const gm = new GameManager();
+const ui = new BoardUIRenderer(gm);
 const boardTiles = Object.values(
   document.querySelectorAll("#grid > button"),
 ) as HTMLButtonElement[];
 
-boardTiles.forEach((el, index) => {
-  el.addEventListener("click", (event) => {
-    if (BOARD.$state.status != "playing") return;
+boardTiles.forEach((el, i) => {
+  el.addEventListener("click", () => {
+    const success = gm.takeTurn(i);
+    if (!success) return;
 
-    console.info(`Tile "${index}" pressed`);
-    let validMove = BOARD.runMove(index);
-    if (validMove) {
-      switch (BOARD.getTile(index)) {
-        case null:
-          el.innerText = "";
-          break;
+    ui.renderTile(el, i);
+    ui.renderTurn();
 
-        case "Circle":
-          el.innerText = "O";
-          break;
-        case "Cross":
-          el.innerText = "X";
-          break;
-      }
+    if (gm.board.$state.status !== "playing") {
+      ui.renderGameEnd(boardTiles);
     }
-
-    // if its won it will be the only time its ran
-    let gameState = BOARD.$state;
-    console.log(gameState);
   });
 });
-
-function gameEnd() {
-  for (const el of boardTiles) {
-    el.disabled = true;
-  }
-}

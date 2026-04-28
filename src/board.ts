@@ -8,7 +8,7 @@ export type GameState =
   | { status: "won"; data: WinData }
   | { status: "draw" };
 
-function numberToBits(num) {
+export function numberToBits(num: number) {
   return (num >>> 0).toString(2);
 }
 
@@ -29,7 +29,7 @@ export class Board {
   $currentlyCirclesTurn = true;
   $state: GameState = { status: "playing" };
 
-  runMove(position: number): boolean {
+  runMove(position: number): boolean | null{
     if (this.$state.status !== "playing") {
       return null;
     }
@@ -46,6 +46,10 @@ export class Board {
 
   public get currentTurn(): TileType {
     return this.$currentlyCirclesTurn ? "Circle" : "Cross";
+  }
+
+  get state(): GameState {
+    return this.$state;
   }
 
   change(position: number, circlesMove: boolean): boolean {
