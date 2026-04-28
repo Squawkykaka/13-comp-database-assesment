@@ -14,7 +14,7 @@ boardTiles.forEach((el, index) => {
       console.error(error);
     }
 
-    switch (BOARD.getTile(index).type) {
+    switch (BOARD.getTile(index)) {
       case null:
         el.innerText = "";
         break;
