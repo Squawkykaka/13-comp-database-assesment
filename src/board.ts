@@ -1,4 +1,12 @@
 export type TileType = "Circle" | "Cross" | null;
+export type WinData = {
+  winner: TileType;
+  winCond: number;
+};
+export type GameState =
+  | { status: "playing" }
+  | { status: "won"; data: WinData }
+  | { status: "draw" };
 
 function numberToBits(num) {
   return (num >>> 0).toString(2);
@@ -8,18 +16,24 @@ export class Board {
   $circleList = 0o000000000;
   $crossList = 0o000000000;
   $currentlyCirclesTurn = true;
+  $state: GameState = { status: "playing" };
 
-  runMove(position: number) {
-    console.info(
-      `${this.$currentlyCirclesTurn ? "Circle" : "Cross"} making move at position ${position}`,
-    );
+  runMove(position: number): boolean {
+    if (this.$state.status !== "playing") {
+      return null;
+    }
+
     let success = this.change(position, this.$currentlyCirclesTurn);
-    if (success) {
+    if (!success) return null;
+
+    this.$updateGameState();
+    if (this.$state.status === "playing") {
       this.$currentlyCirclesTurn = !this.$currentlyCirclesTurn;
     }
+    return success;
   }
 
-  public get currentTurn(): string {
+  public get currentTurn(): TileType {
     return this.$currentlyCirclesTurn ? "Circle" : "Cross";
   }
 
@@ -51,16 +65,39 @@ export class Board {
   }
 
   // checks the board to see if its been won
-  getWinner(): [TileType, number] | null {
+  $getWinner(): WinData | null {
     let circleWon = this.$checkWinCond(this.$circleList);
     let crossWon = this.$checkWinCond(this.$crossList);
 
-    if (circleWon !== null ) {
-      return ["Circle", circleWon]
+    if (circleWon !== null) {
+      return {
+        winner: "Circle",
+        winCond: circleWon,
+      };
     } else if (crossWon !== null) {
-      return ["Cross", crossWon];
+      return {
+        winner: "Cross",
+        winCond: crossWon,
+      };
     } else {
       return null;
+    }
+  }
+
+  $isBoardFull(): boolean {
+    const allMoves = this.$circleList | this.$crossList;
+    return allMoves === 0b111111111;
+  }
+
+  $updateGameState(): void {
+    const winner = this.$getWinner();
+
+    if (winner) {
+      this.$state = { status: "won", data: winner };
+    } else if (this.$isBoardFull()) {
+      this.$state = { status: "draw" };
+    } else {
+      this.$state = { status: "playing" };
     }
   }
 
