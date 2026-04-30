@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/src/game.css" />
+    <title>TicTacToe</title>
+  </head>
+  <body>
+    <div>
+      <div>
+        <h2>Tic Tac Toe</h2>
+        <p>Mode: Original</p>
+      </div>
+      <h1>PLAYER 1</h1>
+    </div>
+    <div class="mainContent">
+      <ul id="playerList">
+        <h2>Players</h2>
+        <div>
+          <img
+            src="/src/profilemissing.jpg"
+            alt="Profile picture"
+            width="40"
+            height="40"
+          />
+          <div>
+            <p>
+              Squawkykaka<br />
+              6000 <i>K/D</i>
+            </p>
+          </div>
+        </div>
+      </ul>
+      <div>
+        <div id="grid">
+          <button></button>
+          <button></button>
+          <button></button>
+          <button></button>
+          <button></button>
+          <button></button>
+          <button></button>
+          <button></button>
+          <button></button>
+        </div>
+        <button id="resetButton" disabled>RESET</button>
+      </div>
+      <div id="tournamentDisplay">
+        <h2>Tournament</h2>
+      </div>
+    </div>
+    <script type="module" src="/src/index.ts"></script>
+  </body>
+</html>

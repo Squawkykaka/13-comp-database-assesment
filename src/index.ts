@@ -23,5 +23,5 @@ boardTiles.forEach((el, i) => {
 });
 
 
-const resetButton = document.querySelector<HTMLButtonElement>("#resetButton");
+const resetButton = document.querySelector<HTMLButtonElement>("#resetButton")!;
 resetButton.onclick = () => ui.reset();

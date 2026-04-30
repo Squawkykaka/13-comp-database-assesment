@@ -1,9 +1,4 @@
-:root {
-  --primary-bg-color: #ff9a86;
-  --secondary-bg-color: #ffb399;
-  --primary-detail-color: #ffd6a6;
-  --secondary-detail-color: #fff0be;
-}
+@import url(/src/main.css);
 
 html,
 body {

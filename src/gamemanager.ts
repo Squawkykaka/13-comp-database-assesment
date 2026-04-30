@@ -1,5 +1,5 @@
 import { Board, type TileType } from "./board";
-const resetButton = document.querySelector<HTMLButtonElement>("#resetButton");
+const resetButton = document.querySelector<HTMLButtonElement>("#resetButton")!;
 
 type Player = { name: string; symbol: TileType; score: number };
 export class GameManager {
@@ -89,7 +89,7 @@ export class BoardUIRenderer {
   }
 
   renderPlayerList() {
-    const playerList = document.getElementById("playerList");
+    const playerList = document.getElementById("playerList")!;
 
     playerList.innerHTML = this.gm.players
       .map((player) => {

@@ -3,53 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/src/style.css" />
     <title>TicTacToe</title>
+    <link rel="stylesheet" href="/src/lobby.css" />
   </head>
   <body>
     <div>
       <div>
-        <h2>Tic Tac Toe</h2>
-        <p>Mode: Original</p>
+        <img src="/assets/tictactoe.png" alt="Image of tictactoe" />
       </div>
-      <h1>PLAYER 1</h1>
     </div>
-    <div class="mainContent">
-      <ul id="playerList">
-        <h2>Players</h2>
-        <div>
-          <img
-            src="/src/profilemissing.jpg"
-            alt="Profile picture"
-            width="40"
-            height="40"
+
+    <section>
+      <div class="isolate">
+        <div class="box1 noise"></div>
+        <div class="overlay"></div>
+      </div>
+    </section>
+
+    <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+      <defs>
+        <filter id="fancy-goo">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+          <feColorMatrix
+            in="blur"
+            mode="matrix"
+            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 19 -9"
+            result="goo"
           />
-          <div>
-            <p>
-              Squawkykaka<br />
-              6000 <i>K/D</i>
-            </p>
-          </div>
-        </div>
-      </ul>
-      <div>
-        <div id="grid">
-          <button></button>
-          <button></button>
-          <button></button>
-          <button></button>
-          <button></button>
-          <button></button>
-          <button></button>
-          <button></button>
-          <button></button>
-        </div>
-        <button id="resetButton" disabled>RESET</button>
-      </div>
-      <div id="tournamentDisplay">
-        <h2>Tournament</h2>
-      </div>
-    </div>
-    <script type="module" src="/src/index.ts"></script>
+          <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+        </filter>
+      </defs>
+    </svg>
   </body>
 </html>
