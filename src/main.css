@@ -4,3 +4,8 @@
   --primary-detail-color: #ffd6a6;
   --secondary-detail-color: #fff0be;
 }
+
+html,
+body {
+  margin: 0;
+}

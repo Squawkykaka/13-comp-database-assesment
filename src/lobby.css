@@ -1,51 +1,41 @@
 @import url(/src/main.css);
 
-body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  height: 100vh;
-  background-color: powderblue;
-}
+@media screen and (width <= 500px) {
+  section {
+    flex-direction: column;
+    justify-content: none;
 
-section {
-  position: relative;
-  width: 800px;
-  height: 200px;
-  box-shadow: rgb(50 50 93 / 20%) 0px 30px 60px -12px, rgb(0 0 0 / 28%) 0px 18px 36px -18px;}
-
-.noise {
-  background: linear-gradient(20deg, rebeccapurple, transparent), url(/src/grain.svg);   
-  filter: contrast(170%) brightness(100%);
-}
-
-/* Chrome-specific */
-@media all and (-webkit-min-device-pixel-ratio:0) and (min-resolution: .001dpcm) {
-  .noise {
-    filter: contrast(290%) brightness(100%);
+    > button {
+      width: 70%;
+      height: 40%;
+    }
   }
 }
 
-.isolate {
-  isolation: isolate;
-  position: relative;
+form > div {
+  height: calc(100vh - 100px);
   width: 100%;
-  height: 100%;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+
+  label {
+    width: 40%;
+    height: 50%;
+  }
 }
 
-.overlay {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: moccasin;
-  mix-blend-mode: multiply;
+input[type="radio"] {
+  display: none;
 }
+input[type="radio"]:disabled + label > div {
+  background-color: purple;
 
-.box1 {
-    position: relative;
-    width: 250px;
-    height: 150px;
-    background-color: black;
+}
+input[type="radio"]:checked + label > div {
+  background-color: blue;
+}
+form label:hover {
+  color: red;
+  cursor: pointer;
 }

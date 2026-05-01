@@ -1,9 +1,5 @@
 @import url(/src/main.css);
 
-html,
-body {
-  margin: 0;
-}
 .mainContent {
   margin: 0;
   padding: 0;
