@@ -8,6 +8,7 @@ export default defineConfig({
     },
     devSourcemap: true,
   },
+  base: "/13-comp-database-assesment",
   build: {
     target: "es2015",
     rolldownOptions: {
