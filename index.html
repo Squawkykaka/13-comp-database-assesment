@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TicTacToe</title>
-    <link rel="stylesheet" href="/src/lobby.css" />
+    <link rel="stylesheet" href="/src/lobby/lobby.css" />
   </head>
   <body>
     <h2>Join a match</h2>
@@ -14,7 +14,7 @@
     </form>
     <h2>OR</h2>
     <h2>Create One</h2>
-    <form id="lobbyCreateForm" autocomplete="off">
+    <form id="lobbyCreateForm" autocomplete="off" method="get" action="/lobby">
       <div>
         <input type="radio" id="original" name="game_select" value="original" />
         <label for="original">
@@ -104,6 +104,6 @@
         </label>
       </div>
     </form>
-    <script src="/src/lobby.ts"></script>
+    <script src="/src/lobby/createLobby.ts"></script>
   </body>
 </html>

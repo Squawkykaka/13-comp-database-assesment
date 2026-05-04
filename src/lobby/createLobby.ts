@@ -5,9 +5,3 @@ onevoneEl.forEach((el) =>
     createForm.requestSubmit();
   }),
 );
-
-createForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const formData = new FormData(createForm);
-  console.log(formData);
-});
