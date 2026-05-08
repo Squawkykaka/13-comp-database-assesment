@@ -16,14 +16,14 @@
 		<h2>Create One</h2>
 		<form id="lobbyCreateForm" autocomplete="off" method="get" action="/lobby">
 			<div>
-				<input type="radio" id="original" name="game_select" value="original">
+				<input type="radio" id="original" name="gameType" value="original">
 				<label for="original">
 					<div>
 						<h3>Original</h3>
 						<p>The original TicTacToe experience - 3x3 board</p>
 					</div>
 				</label>
-				<input type="radio" id="ultimate" name="game_select" value="ultimate" disabled>
+				<input type="radio" id="ultimate" name="gameType" value="ultimate" disabled>
 				<label for="ultimate">
 					<div>
 						<h3>Ultimate</h3>
@@ -38,14 +38,14 @@
 			<br>
 
 			<div>
-				<input type="radio" name="multiplayer_select" id="local" value="local">
+				<input type="radio" name="multiplayer" id="local" value="local">
 				<label for="local">
 					<div>
 						<h3>Local</h3>
 						<p>Play on your computer, changing the user every move.</p>
 					</div>
 				</label>
-				<input type="radio" name="multiplayer_select" id="multiplayer" value="multiplayer" disabled>
+				<input type="radio" name="multiplayer" id="multiplayer" value="multiplayer" disabled>
 				<label for="multiplayer">
 					<div>
 						<h3>Multiplayer</h3>
@@ -60,7 +60,7 @@
 			<br>
 
 			<div>
-				<input type="radio" name="style_select" id="tournament" value="tournament" disabled>
+				<input type="radio" name="style" id="tournament" value="tournament" disabled>
 				<label for="tournament">
 					<div>
 						<h3>Tournament</h3>
@@ -70,7 +70,7 @@
 						</p>
 					</div>
 				</label>
-				<input type="radio" name="style_select" id="onevone" value="onevone">
+				<input type="radio" name="style" id="onevone" value="onevone">
 				<label for="onevone">
 					<div>
 						<h3>One V One</h3>
