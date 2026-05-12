@@ -20,8 +20,9 @@ export const MULTIPLAYER_MODES = {
   },
   private: {
     display: "Private",
-    description: "Create a private game, that only people you send the code to can join"
-  }
+    description:
+      "Create a private game, that only people you send the code to can join",
+  },
 };
 export const GAME_STYLES = {
   onevone: {
@@ -41,3 +42,14 @@ export const GAME_STYLES = {
 export type GameMode = keyof typeof GAME_MODES;
 export type MultiplayerMode = keyof typeof MULTIPLAYER_MODES;
 export type GameStyle = keyof typeof GAME_STYLES;
+
+export type LobbySettings = {
+  gameType: GameMode;
+  multiplayer: MultiplayerMode;
+  style: GameStyle;
+};
+declare global {
+  interface EventMap {
+    "lobby.settings": { settings: LobbySettings };
+  }
+}

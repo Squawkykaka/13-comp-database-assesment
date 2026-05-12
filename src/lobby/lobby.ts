@@ -1,3 +1,4 @@
+import type { LobbySettings } from "../models/eventBus";
 import {
   GAME_MODES,
   GAME_STYLES,
@@ -9,11 +10,7 @@ import {
 
 const LOBBY_PARAMS = new URLSearchParams(window.location.search);
 
-export type LobbySettings = {
-  gameType: GameMode;
-  multiplayer: MultiplayerMode;
-  style: GameStyle;
-};
+
 
 // Checks if a string is inside T
 function isOneOf<T extends object>(
