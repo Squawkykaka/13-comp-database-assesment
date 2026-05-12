@@ -1,12 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lobby</title>
-</head>
-<body>
-    <p>Test</p>
+  </head>
+  <body>
+    <ul class="playerList">
+      <li>Squawkykaka</li>
+    </ul>
+    <table>
+      <caption>
+        Game Options
+      </caption>
+      <tbody>
+        <tr>
+          <th scope="row">Game Type</th>
+          <td>
+            <select name="gameType" id="gameType">
+              <option value="ultimate">Ultimate</option>
+              <option value="original">Original</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Multiplayer Type</th>
+          <td>
+            <select name="Multiplayer" id="multiplayer">
+              <option value="local">Local</option>
+              <option value="public">Public</option>
+              <option value="private">Private</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th scope="local">Game Mode</th>
+          <td>
+            <select name="gameStyle" id="gameStyle">
+              <option value="tournament">Tournament</option>
+              <option value="onevone">One v One</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
     <script type="module" src="/src/lobby/lobby.ts"></script>
-</body>
+  </body>
 </html>

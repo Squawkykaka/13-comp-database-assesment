@@ -1,86 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>TicTacToe</title>
-		<link rel="stylesheet" href="/src/lobby/lobby.css">
-	</head>
-	<body>
-		<h2>Join a match</h2>
-		<form autocomplete="off">
-			<label for="code">Code</label>
-			<input type="text" name="code" disabled>
-		</form>
-		<h2>OR</h2>
-		<h2>Create One</h2>
-		<form id="lobbyCreateForm" autocomplete="off" method="get" action="/lobby">
-			<div>
-				<input type="radio" id="original" name="gameType" value="original">
-				<label for="original">
-					<div>
-						<h3>Original</h3>
-						<p>The original TicTacToe experience - 3x3 board</p>
-					</div>
-				</label>
-				<input type="radio" id="ultimate" name="gameType" value="ultimate" disabled>
-				<label for="ultimate">
-					<div>
-						<h3>Ultimate</h3>
-						<p>
-							A variation on TicTacToe, where you play multiple smaller boards
-							at the same time
-						</p>
-					</div>
-				</label>
-			</div>
-
-			<br>
-
-			<div>
-				<input type="radio" name="multiplayer" id="local" value="local">
-				<label for="local">
-					<div>
-						<h3>Local</h3>
-						<p>Play on your computer, changing the user every move.</p>
-					</div>
-				</label>
-				<input type="radio" name="multiplayer" id="multiplayer" value="multiplayer" disabled>
-				<label for="multiplayer">
-					<div>
-						<h3>Multiplayer</h3>
-						<p>
-							The full multiplayer experience, send a code and get all your
-							friends connected
-						</p>
-					</div>
-				</label>
-			</div>
-
-			<br>
-
-			<div>
-				<input type="radio" name="style" id="tournament" value="tournament" disabled>
-				<label for="tournament">
-					<div>
-						<h3>Tournament</h3>
-						<p>
-							Battle your friends in a tournament style match, where the winners
-							advance to the next round
-						</p>
-					</div>
-				</label>
-				<input type="radio" name="style" id="onevone" value="onevone">
-				<label for="onevone">
-					<div>
-						<h3>One V One</h3>
-						<p>
-							Fight against one other person to see who gets the biggest score
-						</p>
-					</div>
-				</label>
-			</div>
-		</form>
-		<script type="module" src="/src/lobby/createLobby.ts"></script>
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TicTacToe</title>
+    <link rel="stylesheet" href="/src/lobby/lobby.css" />
+  </head>
+  <body>
+    <h2>Join a match</h2>
+    <form autocomplete="off">
+      <label for="code">Code</label>
+      <input type="text" name="code" disabled />
+    </form>
+    <h2>OR</h2>
+    <h2>Create One</h2>
+    <form
+      id="lobbyCreateForm"
+      autocomplete="off"
+      method="get"
+      action="/lobby"
+    ></form>
+    <script type="module" src="/src/lobby/createLobby.ts"></script>
+  </body>
 </html>

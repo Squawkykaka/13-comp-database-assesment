@@ -1,34 +1,33 @@
+import {
+  GAME_MODES,
+  GAME_STYLES,
+  MULTIPLAYER_MODES,
+  type GameMode,
+  type GameStyle,
+  type MultiplayerMode,
+} from "../models/gameSettings";
+
 const LOBBY_PARAMS = new URLSearchParams(window.location.search);
 
-const GAME_MODES = ["ultimate", "original"];
-const MULTIPLAYER_MODES = ["local", "multiplayer"];
-const GAME_STYLES = ["onevone", "tournament"];
-
-type GameMode = (typeof GAME_MODES)[number];
-type MultiplayerMode = (typeof MULTIPLAYER_MODES)[number];
-type GameStyle = (typeof GAME_STYLES)[number];
-type LobbySettings =
-  | {
-      gameType: GameMode;
-      multiplayer: MultiplayerMode;
-      style: GameStyle;
-    }
-  | {
-      code: string;
-    };
+export type LobbySettings = {
+  gameType: GameMode;
+  multiplayer: MultiplayerMode;
+  style: GameStyle;
+};
 
 // Checks if a string is inside T
-function isOneOf<T extends readonly string[]>(
+function isOneOf<T extends object>(
   value: string | null,
-  list: T,
-): value is T[number] {
-  return value !== null && list.includes(value);
+  object: T,
+): value is keyof T & string {
+  return value !== null && value in object;
 }
 
-function getSettings(): LobbySettings {
+function parseSettings(): LobbySettings | string {
   let code = LOBBY_PARAMS.get("code");
   if (code) {
-    return { code };
+    console.log("Joining Lobby:", code);
+    return code;
   }
 
   let gameType = LOBBY_PARAMS.get("gameType");
@@ -46,5 +45,9 @@ function getSettings(): LobbySettings {
   }
 }
 
-const LOBBY_SETTINGS = getSettings()
-console.log(LOBBY_SETTINGS);
+const gameTypeEl = document.querySelector<HTMLSelectElement>("#gameType");
+if (!gameTypeEl) throw new Error("gameType selector doesnt exist.");
+const multiplayerEl = document.querySelector<HTMLSelectElement>("#multiplayer");
+if (!multiplayerEl) throw new Error("multiplayer select element doesnt exist");
+const gameStyleEl = document.querySelector<HTMLSelectElement>("#gameStyle");
+if (!gameStyleEl) throw new Error("gameStyle element doesnt exist");
