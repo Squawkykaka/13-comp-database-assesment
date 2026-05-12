@@ -48,8 +48,3 @@ export type LobbySettings = {
   multiplayer: MultiplayerMode;
   style: GameStyle;
 };
-declare global {
-  interface EventMap {
-    "lobby.settings": { settings: LobbySettings };
-  }
-}
