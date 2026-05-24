@@ -4,31 +4,15 @@ const resetButton = document.querySelector<HTMLButtonElement>("#resetButton")!;
 type Player = { name: string; symbol: TileType; score: number };
 export class GameManager {
   board = new Board();
-  players: Player[] = [
-    { name: "Player 1", symbol: "Circle", score: 0 },
-    { name: "Player 2", symbol: "Cross", score: 0 },
- ];
-  playerTurnIndex = 0;
-
-  get currentPlayer() {
-    return this.players[this.playerTurnIndex];
-  }
 
   takeTurn(position: number): boolean | null {
     if (position > 9) return false;
     const success = this.board.runMove(position);
-    if (success && this.board.$state.status === "playing") {
-      this.playerTurnIndex = (this.playerTurnIndex + 1) % this.players.length;
-    }
-    if (this.board.$state.status === "won") {
-      this.currentPlayer.score++;
-    }
     return success;
   }
 
   reset() {
     this.board = new Board();
-    this.playerTurnIndex = 0;
   }
 }
 

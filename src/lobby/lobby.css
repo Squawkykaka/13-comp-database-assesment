@@ -73,4 +73,7 @@ form label:hover {
     background-color: gainsboro;
     filter: brightness(85%);
   }
+  > button:disabled {
+    background-color: brown;
+  }
 }

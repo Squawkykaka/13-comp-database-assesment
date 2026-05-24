@@ -62,18 +62,8 @@ export function renderOptionsUI() {
 
   EVENT_BUS.subscribe("lobby.settings_change", (event) => {
     const { gameType, multiplayer, style } = event.settings;
-
-    // only update if the value exists in the allowed options
-    if (isOneOf(gameType, GAME_MODES)) {
       gameTypeEl.value = gameType;
-    }
-
-    if (isOneOf(multiplayer, MULTIPLAYER_MODES)) {
       multiplayerEl.value = multiplayer;
-    }
-
-    if (isOneOf(style, GAME_STYLES)) {
       gameStyleEl.value = style;
-    }
   });
 }
