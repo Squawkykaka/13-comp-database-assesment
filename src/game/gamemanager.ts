@@ -7,7 +7,7 @@ export class GameManager {
   players: Player[] = [
     { name: "Player 1", symbol: "Circle", score: 0 },
     { name: "Player 2", symbol: "Cross", score: 0 },
-  ];
+ ];
   playerTurnIndex = 0;
 
   get currentPlayer() {

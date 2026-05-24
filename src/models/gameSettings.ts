@@ -14,26 +14,26 @@ export const MULTIPLAYER_MODES = {
     display: "Local",
     description: "Play tic-tac-toe on one device, friends optional",
   },
-  public: {
-    display: "Public",
-    description: "Create a online game that people can join from anywhere",
-  },
-  private: {
-    display: "Private",
-    description:
-      "Create a private game, that only people you send the code to can join",
-  },
+  // public: {
+  //   display: "Public",
+  //   description: "Create a online game that people can join from anywhere",
+  // },
+  // private: {
+  //   display: "Private",
+  //   description:
+  //     "Create a private game, that only people you send the code to can join",
+  // },
 };
 export const GAME_STYLES = {
   onevone: {
     display: "One v One",
     description: "Play against one person to see who gets the highest score",
   },
-  tournament: {
-    display: "Tournament",
-    description:
-      "A fight against many players, to find out the ruler of tic-tac-toe",
-  },
+  // tournament: {
+  //   display: "Tournament",
+  //   description:
+  //     "A fight against many players, to find out the ruler of tic-tac-toe",
+  // },
 };
 
 // I want a type, that contains an id, then a name for that id. I want gamemode to be a list of the id's but just as strings
@@ -48,3 +48,16 @@ export type LobbySettings = {
   multiplayer: MultiplayerMode;
   style: GameStyle;
 };
+export class LobbySettingsHandler {
+  private $settings: LobbySettings = {
+    gameType: "original",
+    multiplayer: "local",
+    style: "onevone",
+  };
+  get settings(): LobbySettings {
+    return this.$settings;
+  }
+  update(settings: Partial<LobbySettings>) {
+    settings = { ...this.$settings, ...settings };
+  }
+}

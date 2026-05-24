@@ -3,12 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/src/lobby/lobby.css">
     <title>Lobby</title>
   </head>
   <body>
-    <ul class="playerList">
-      <li>Squawkykaka</li>
-    </ul>
+    <ul class="playerList"></ul>
     <table>
       <caption>
         Game Options
@@ -17,26 +16,27 @@
         <tr>
           <th scope="row">Game Type</th>
           <td>
-            <select name="gameType" id="gameType">
-            </select>
+            <select name="gameType" id="gameType"></select>
           </td>
         </tr>
         <tr>
           <th scope="row">Multiplayer Type</th>
           <td>
-            <select name="Multiplayer" id="multiplayer">
-            </select>
+            <select name="Multiplayer" id="multiplayer"></select>
           </td>
         </tr>
         <tr>
           <th scope="local">Game Mode</th>
           <td>
-            <select name="gameStyle" id="gameStyle">
-            </select>
+            <select name="gameStyle" id="gameStyle"></select>
           </td>
         </tr>
       </tbody>
     </table>
+    <form id="startGameButton">
+      <button type="submit">Start Game</button>
+    </form>
+    <div id="gameBoard"></div>
     <script type="module" src="/src/lobby/lobby.ts"></script>
   </body>
 </html>

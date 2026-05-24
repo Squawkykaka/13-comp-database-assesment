@@ -2,24 +2,30 @@ import { EVENT_BUS } from "../models/eventBus";
 import {
   GAME_MODES,
   GAME_STYLES,
+  LobbySettingsHandler,
   MULTIPLAYER_MODES,
   type LobbySettings,
 } from "../models/gameSettings";
-import DataStore from "./settings";
+import { LobbyPlayerHandler } from "./playerList";
+import { renderOptionsUI } from "./render/optionUi";
+import { renderPlayerList } from "./render/playerList";
+import "./render/game";
 
 const LOBBY_PARAMS = new URLSearchParams(window.location.search);
-const DATA_STORE = new DataStore();
+export const LOBBY_SETTINGS = new LobbySettingsHandler();
+export const LOBBY_PLAYERS = new LobbyPlayerHandler();
 
 declare global {
   interface EventMap {
-    "lobby.join": { code: string; };
-    "lobby.create": { settings: LobbySettings; };
-    "lobby.settings.update": { settings: LobbySettings; };
+    "lobby.join": { code: string };
+    "lobby.settings_change": { settings: LobbySettings };
+    "game.begin": {};
+    reset: {};
   }
 }
 
 // Checks if a string is inside T
-function isOneOf<T extends object>(
+export function isOneOf<T extends object>(
   value: string | null,
   object: T,
 ): value is keyof T & string {
@@ -41,39 +47,19 @@ function parseSettings() {
       isOneOf(multiplayer, MULTIPLAYER_MODES) &&
       isOneOf(style, GAME_STYLES)
     ) {
-      let settings = { settings: { gameType, multiplayer, style } };
-      EVENT_BUS.publish("lobby.create", settings);
-      EVENT_BUS.publish("lobby.settings.update", settings);
-    }
-    else {
+      let settings: LobbySettings = { gameType, multiplayer, style };
+      LOBBY_SETTINGS.update(settings);
+
+      EVENT_BUS.publish("lobby.settings_change", { settings });
+    } else {
       console.error("Incorrect input to lobby settings");
     }
   }
 }
 
 
-const gameTypeEl = document.querySelector<HTMLSelectElement>("#gameType");
-if (!gameTypeEl) throw new Error("gameType selector doesnt exist.");
-const multiplayerEl = document.querySelector<HTMLSelectElement>("#multiplayer");
-if (!multiplayerEl) throw new Error("multiplayer select element doesnt exist");
-const gameStyleEl = document.querySelector<HTMLSelectElement>("#gameStyle");
-if (!gameStyleEl) throw new Error("gameStyle element doesnt exist");
-
-function renderOptionsUI() {
-  function renderSection(
-    list: Record<string, { display: string; description: string; }>,
-  ) {
-    return Object.entries(list).map(([id, settings]) => `
-      <option value="${id}">${settings.display}</option>
-    `);
-  }
-
-  gameTypeEl.innerHTML = `${renderSection(GAME_MODES)}`;
-  multiplayerEl.innerHTML = `${renderSection(MULTIPLAYER_MODES)}`;
-  gameStyleEl.innerHTML = `${renderSection(GAME_STYLES)}`;
-};
-renderOptionsUI();
-
-EVENT_BUS.subscribeAll((event) => console.log(`[event]: ${event.kind}`, event));
-
-parseSettings();
+window.addEventListener("DOMContentLoaded", (_) => {
+  renderPlayerList();
+  renderOptionsUI();
+  parseSettings();
+});

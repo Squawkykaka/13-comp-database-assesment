@@ -6,8 +6,7 @@ type DomainEvent = {
 }[keyof EventMap];
 
 export type EventKind = DomainEvent["kind"];
-export type EventOf<K extends EventKind> =
-  Extract<DomainEvent, { kind: K; }>;
+export type EventOf<K extends EventKind> = Extract<DomainEvent, { kind: K; }>;
 type Handler<K extends EventKind> = (e: EventOf<K>) => void | Promise<void>;
 
 class EventBus {
@@ -62,4 +61,10 @@ class EventBus {
   }
 }
 
-export const EVENT_BUS = new EventBus();
+const globalForBus = globalThis as typeof globalThis & {
+  __EVENT_BUS__?: EventBus;
+};
+
+export const EVENT_BUS =
+  globalForBus.__EVENT_BUS__ ??= new EventBus();
+
