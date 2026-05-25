@@ -19,7 +19,8 @@ declare global {
   interface EventMap {
     "lobby.join": { code: string };
     "lobby.settings_change": { settings: LobbySettings };
-    "game.begin": {};
+    "game.begin": { player1: { uid: number }; player2: { uid: number } };
+    "game.won": { winnerUid: string };
     reset: {};
   }
 }
@@ -56,7 +57,6 @@ function parseSettings() {
     }
   }
 }
-
 
 window.addEventListener("DOMContentLoaded", (_) => {
   renderPlayerList();

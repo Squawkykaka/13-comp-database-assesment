@@ -38,4 +38,22 @@ else
     else
     creates a local event bus, which doesnt do any syncing and just stores the data locally,
 
+# 25/05
+Made it so when i press the start game button, it shows the board and you can begin to play
+# 26/05 (birthday!)
+screenshots and graphics, start dev log
+for excellece:
+looks good
+full evence of design and stuff for one component
 
+programming:
+COMMENDTS, works
+make a testing table and plan, ALL TYPES
+boundry test is edge cases, something like a special case, labeling things properly, maybe vitest can work
+quality of testing has most bearing on your grade in programming
+
+today:
+make a mockup of what my database will look like, make sure this changes as i develop about 3-4
+give some wirframes of page layout, this is where iterative excellee development happens
+make some basic vitests tests to show teacher
+maybe setup the local firebase testing thingymagig

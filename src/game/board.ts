@@ -28,6 +28,8 @@ export class Board {
   $crossList = 0;
   $currentlyCirclesTurn = true;
   $state: GameState = { status: "playing" };
+  winHandler: () => void = () => {};
+  drawHandler: () => void = () => {};
 
   runMove(position: number): boolean | null{
     if (this.$state.status !== "playing") {
@@ -39,7 +41,20 @@ export class Board {
 
     this.$updateGameState();
     if (this.$state.status === "playing") {
+    }
+    switch (this.state.status) {
+      case "playing":
       this.$currentlyCirclesTurn = !this.$currentlyCirclesTurn;
+        break;
+    
+      case "won":
+        this.winHandler()
+        break;
+      case "draw":
+
+        break;
+      default:
+        break;
     }
     return success;
   }

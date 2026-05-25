@@ -1,9 +1,9 @@
 export const GAME_MODES = {
-  ultimate: {
-    display: "Ultimate",
-    description:
-      "A variation of tic-tac-toe where then are a 3x3 of boards and you have to cross off all of them",
-  },
+  // ultimate: {
+  //   display: "Ultimate",
+  //   description:
+  //     "A variation of tic-tac-toe where then are a 3x3 of boards and you have to cross off all of them",
+  // },
   original: {
     display: "Original",
     description: "The original form of tic-tac-toe",
