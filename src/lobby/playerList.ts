@@ -59,8 +59,8 @@ export class LobbyPlayerHandler {
   constructor() {
     let off = EVENT_BUS.subscribe("lobby.settings_change", (event) => {
       if (event.settings.multiplayer == "local") {
-        this.createPlayer({ displayName: "Player 1", type: "local" });
-        this.createPlayer({ displayName: "Player 2", type: "local" });
+        this.createPlayer({ displayName: "Circle", type: "local" });
+        this.createPlayer({ displayName: "Square", type: "local" });
       }
       off();
     });

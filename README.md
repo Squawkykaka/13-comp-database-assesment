@@ -37,6 +37,32 @@ else
     it then runs the lobby creation flow with firebase, creating the various data structures it needs, which then returns the firebase handler. (this can probably be two constructors).
     else
     creates a local event bus, which doesnt do any syncing and just stores the data locally,
+    
+# Database Development
+Initial root database:
+```yaml
+users: 
+    public:
+        uid:
+            defaultUsername: string <= 15 chars,
+            # statistics for each unique game can be set here
+            statistics:
+                tictactoe:
+                    wins: number
+                    losses: number
+            profileURL: url,
+            bio: string
+    private:
+        uid:
+            realName: string,
+            age: number,
+    roles:
+        # gives whoever is in this list access to the admin page, and roles grant them more edit permissions
+        owner: uid[]
+games:
+    tictactoe:
+        lobbys: Lobby[] # look above for the defintion of this
+```
 
 # 25/05
 Made it so when i press the start game button, it shows the board and you can begin to play

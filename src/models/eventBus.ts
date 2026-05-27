@@ -13,25 +13,17 @@ class EventBus {
   private handlers: {
     [K in EventKind]?: Set<Handler<K>>;
   } = {};
-  private allHandlers = new Set<
-    (e: DomainEvent) => void | Promise<void>
-  >();
 
   publish<K extends EventKind>(kind: K, event: Omit<EventOf<K>, "kind" | "date">): void {
+    
     let computedEvent = {
       ...event,
       date: new Date(),
       kind
     } as EventOf<K>;
-
-    for (const h of this.allHandlers) {
-      try {
-        void h(computedEvent);
-      } catch (error) {
-        console.error(`[bus (All Events)]: handler threw`, error);
-      }
-    }
-
+    
+    console.log("[EVENT]:", computedEvent);
+    
     const set = this.handlers[kind];
     if (!set) return;
 
@@ -50,14 +42,6 @@ class EventBus {
 
     set.add(handler);
     return () => set.delete(handler);
-  }
-
-
-  subscribeAll(
-    handler: (e: DomainEvent) => void | Promise<void>,
-  ) {
-    this.allHandlers.add(handler);
-    return () => this.allHandlers.delete(handler);
   }
 }
 

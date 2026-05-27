@@ -19,9 +19,12 @@ declare global {
   interface EventMap {
     "lobby.join": { code: string };
     "lobby.settings_change": { settings: LobbySettings };
-    "game.begin": { player1: { uid: number }; player2: { uid: number } };
-    "game.won": { winnerUid: string };
-    reset: {};
+    "game.begin": {
+      circlePlayer: { uid: number };
+      squarePlayer: { uid: number };
+      settings: LobbySettings;
+    };
+    "game.finished": { status: { winner: number } | "draw" };
   }
 }
 
