@@ -22,10 +22,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const DB = getFirestore(app);
-connectFirestoreEmulator(DB, "127.0.0.1", 9099);
 const AUTH = getAuth(app);
-connectAuthEmulator(AUTH, "http://localhost:9099");
 setPersistence(AUTH, browserLocalPersistence);
+
+if (import.meta.env.DEV) {
+  connectFirestoreEmulator(DB, "127.0.0.1", 9099);
+  connectAuthEmulator(AUTH, "http://localhost:9099");
+}
 
 declare global {
   interface EventMap {
