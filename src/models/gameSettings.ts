@@ -10,10 +10,10 @@ export const GAME_MODES = {
   },
 };
 export const MULTIPLAYER_MODES = {
-  local: {
-    display: "Local",
-    description: "Play tic-tac-toe on one device, friends optional",
-  },
+  // local: {
+  //   display: "Local",
+  //   description: "Play tic-tac-toe on one device, friends optional",
+  // },
   public: {
     display: "Public",
     description: "Create a online game that people can join from anywhere",
@@ -47,17 +47,6 @@ export type LobbySettings = {
   gameType: GameMode;
   multiplayer: MultiplayerMode;
   style: GameStyle;
+
+  // ownerUid: string,
 };
-export class LobbySettingsHandler {
-  private $settings: LobbySettings = {
-    gameType: "original",
-    multiplayer: "local",
-    style: "onevone",
-  };
-  get settings(): LobbySettings {
-    return this.$settings;
-  }
-  update(settings: Partial<LobbySettings>) {
-    settings = { ...this.$settings, ...settings };
-  }
-}

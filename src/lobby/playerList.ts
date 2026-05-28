@@ -1,11 +1,11 @@
 import { EVENT_BUS } from "../models/eventBus";
-import { players } from "../models/stores";
+import { lobbyMembers } from "../models/stores";
 import type { FirebaseUser } from "../models/user";
 
 export class LobbyPlayerHandler {
   private $players: Record<number, FirebaseUser> = [];
   private sync() {
-    players.set(this.$players);
+    lobbyMembers.set(this.$players);
   }
   get players() {
     return this.$players;

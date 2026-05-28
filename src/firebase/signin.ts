@@ -1,51 +1,53 @@
-import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup } from "firebase/auth";
-import { AUTH } from ".";
-import { userProfile } from "./user";
 import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  type Unsubscribe,
+} from "firebase/auth";
+import { AUTH } from ".";
+import {
+  doc,
   getDoc,
   onSnapshot,
   serverTimestamp,
   setDoc,
   updateDoc,
 } from "firebase/firestore";
-import { writable } from "svelte/store";
+import { derived, writable } from "svelte/store";
 import { type FirebaseUser } from "../models/user";
+import { firebaseAuthUser } from "../models/stores";
+import { userCollection } from "./user";
 
 export const currentUser = writable<FirebaseUser | null>(null);
+let off: null | Unsubscribe = null;
+// if the current user changes, remove the snapshot listener listening for changes to the profile, 
+// and then if the user is signed in add a new one
+firebaseAuthUser.subscribe((firebaseAuthUser) => {
+  if (off !== null) off();
+  if (firebaseAuthUser === null) {
+    off = null;
+    return;
+  }
+  // otherwise add the listener
+  off = onSnapshot(doc(userCollection, firebaseAuthUser.uid), (snapshot) => {
+    currentUser.set(snapshot.data() ?? null);
+  });
+});
 
 export async function signInGoogle() {
   const userCred = await signInWithPopup(AUTH, new GoogleAuthProvider());
-  let off = onSnapshot(userProfile(userCred.user.uid), (snapshot) => {
-    currentUser.set(snapshot.data() ?? null);
-  });
-  onAuthStateChanged(AUTH, user => {
-    if (user === null) {
-        off()
-    }
-  })
+  let ref = doc(userCollection, userCred.user.uid);
 
-  let doc = await getDoc(userProfile(userCred.user.uid));
-  let data = doc.data();
-  if (data !== undefined) {
-    currentUser.set(data);
-  } else {
+  let document = await getDoc(ref);
+  let data = document.data();
+  if (data === undefined) {
     console.log("MAKING DUMMY USER");
-    await setDoc(userProfile(userCred.user.uid), {
+    await setDoc(ref, {
       displayName: userCred.user.displayName ?? "TEST",
       joinDate: serverTimestamp(),
       losses: 0,
       wins: 0,
-      userUID: userCred.user.uid,
+      uid: userCred.user.uid,
       photoURL: undefined,
     });
   }
-}
-
-export async function saveUser(user: FirebaseUser) {
-  await updateDoc(userProfile(user.userUID), {
-    displayName: user.displayName,
-    losses: user.losses,
-    wins: user.wins,
-    photoURL: user.photoURL ?? null,
-  });
 }

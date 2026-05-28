@@ -7,12 +7,12 @@ import {
 import { DB } from ".";
 import type { FirebaseUser } from "../models/user";
 
-const userConverter = {
+export const userConverter = {
   fromFirestore(
     snapshot: QueryDocumentSnapshot,
     options: SnapshotOptions,
   ): FirebaseUser {
-    const data = snapshot.data(options)!;
+    const data = snapshot.data(options)!;    
 
     return {
       displayName: data.displayName,
@@ -20,16 +20,16 @@ const userConverter = {
       losses: data.losses,
       wins: data.wins,
       photoURL: data.photUrl === null ? undefined : data.photoURL,
-      userUID: snapshot.ref.parent.id,
+      uid: snapshot.id,
     };
   },
   toFirestore(user: FirebaseUser) {
+    const { uid: userUID, ...rest } = user;
+
     return {
-      ...user,
-      photoURL: user.photoURL ?? null
+      ...rest,
+      photoURL: user.photoURL ?? null,
     };
   },
 };
-export const userCollection = collection(DB, "users");
-export const userProfile = (uid: string) =>
-  doc(userCollection, uid, "public", "profile").withConverter(userConverter);
+export const userCollection = collection(DB, "users").withConverter(userConverter);

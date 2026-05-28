@@ -10,5 +10,5 @@ export type FirebaseUser = {
   wins: number,
   losses: number,
   joinDate: Date,
-  readonly userUID: string,
+  readonly uid: string,
 }

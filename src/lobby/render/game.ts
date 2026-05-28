@@ -2,12 +2,6 @@ import { Board } from "../../game/board";
 import { EVENT_BUS } from "../../models/eventBus";
 import type { LobbySettings } from "../../models/gameSettings";
 
-declare global {
-  interface EventMap {
-    "game.player_scored": { uid: number; newLosses: number; newWins: number };
-  }
-}
-
 type Player = {
   uid: number;
 };

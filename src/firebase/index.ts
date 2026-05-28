@@ -19,12 +19,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const DB = getFirestore(app);
 const AUTH = getAuth(app);
-await setPersistence(AUTH, browserLocalPersistence);
 
 if (import.meta.env.DEV) {
   connectFirestoreEmulator(DB, "localhost", 8081);
   connectAuthEmulator(AUTH, "http://localhost:9099");
 }
 
+await setPersistence(AUTH, browserLocalPersistence);
 
 export { AUTH, DB };

@@ -1,0 +1,101 @@
+import {
+  addDoc,
+  collection,
+  doc,
+  DocumentReference,
+  onSnapshot,
+  QueryDocumentSnapshot,
+  setDoc,
+  updateDoc,
+  type SnapshotOptions,
+} from "firebase/firestore";
+import { DB } from ".";
+import type { LobbySettings } from "../models/gameSettings";
+import { lobbyOwner, lobbySettings } from "../models/stores";
+import { SiteError } from "../models/error";
+import { userCollection, userConverter } from "./user";
+import type { FirebaseUser } from "../models/user";
+import { lobbyMembers as lobbyMembersStore } from "../models/stores";
+import { get } from "svelte/store";
+import { currentUser } from "./signin";
+
+type LobbyData = {
+  settings: LobbySettings;
+  owner: DocumentReference<FirebaseUser>;
+};
+
+const lobbyConverter = {
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options: SnapshotOptions,
+  ): LobbyData {
+    const data = snapshot.data(options)!;
+    return {
+      owner: data.owner,
+      settings: data.settings,
+    };
+  },
+  toFirestore(lobby: LobbyData) {
+    return {
+      settings: lobby.settings,
+      owner: lobby.owner,
+    };
+  },
+};
+
+const gameRef = doc(DB, "games", "tictactoe");
+const lobbies = collection(gameRef, "lobbies").withConverter(lobbyConverter);
+const lobbyRef = (gameUid: string) => doc(lobbies, gameUid);
+const lobbyMembers = (gameUid: string) =>
+  collection(lobbies, gameUid, "users").withConverter(userConverter);
+
+export async function handleLobbyCreation(settings: LobbySettings) {
+  try {
+    const user = get(currentUser);
+
+    if (user === null) {
+      throw new SiteError("USER_NOT_AUTHENTICATED");
+    }
+    let ref = await addDoc(lobbies, {
+      owner: doc(userCollection, user.uid),
+      settings,
+    });
+
+    // adds the current user to the lobby
+    setDoc(doc(lobbyMembers(ref.id), user.uid), user)
+    currentUser.subscribe(user => {
+        if (user === null) return
+        updateDoc(doc(lobbyMembers(ref.id), user.uid), user)
+    })
+    // adds the listener to update the user's info if they change any
+
+    onSnapshot(lobbyMembers(ref.id), (snapshot) => {
+      let data = snapshot.docChanges();
+      console.log(data);
+
+      lobbyMembersStore.update((prev) => {
+        for (const item of data) {
+          let docData = item.doc.data();
+          if (item.doc.exists()) {
+            prev[docData.uid] = docData;
+          } else {
+            delete prev[docData.uid];
+          }
+        }
+
+        return prev;
+      });
+    });
+
+    // TODO: add peerjs probably to make it so when a disconnect happens all members disappear,
+
+    lobbySettings.set(settings);
+    lobbyOwner.set(user);
+  } catch (error) {
+    if (error instanceof SiteError) {
+      throw error;
+    } else {
+      throw new SiteError("CANNOT_CREATE_LOBBY");
+    }
+  }
+}
