@@ -38,6 +38,7 @@ export class LobbyPlayerHandler {
   removePlayer(uid: number) {
     delete this.$players[uid];
     EVENT_BUS.publish("lobby.player", { uid, removed: true });
+    this.sync()
   }
   updatePlayer(uid: number, handler: (player_info: PlayerInfo) => void) {
     try {
@@ -79,5 +80,15 @@ export class LobbyPlayerHandler {
         }
       }
     });
+    EVENT_BUS.subscribe("game.finished", event => {
+      if (!(event.status == "draw")) {
+        this.updatePlayer(event.status.winner, (info) => {
+          info.wins++;
+        });
+        this.updatePlayer(event.status.loser, (info) => {
+          info.losses++;
+        })
+      }
+    })
   }
 }

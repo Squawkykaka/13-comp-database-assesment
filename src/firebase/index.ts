@@ -4,9 +4,7 @@ import {
   browserLocalPersistence,
   connectAuthEmulator,
   getAuth,
-  GoogleAuthProvider,
   setPersistence,
-  signInWithPopup,
   type User,
 } from "firebase/auth";
 import { EVENT_BUS } from "../models/eventBus";
@@ -30,16 +28,5 @@ if (import.meta.env.DEV) {
   connectAuthEmulator(AUTH, "http://localhost:9099");
 }
 
-declare global {
-  interface EventMap {
-    "auth.signin": { user: User };
-  }
-}
 
-let currentUser: User | null = null;
-async function signInGoogle() {
-  const userCred = await signInWithPopup(AUTH, new GoogleAuthProvider());
-  currentUser = userCred.user;
-  EVENT_BUS.publish("auth.signin", { user: currentUser });
-}
-export { AUTH, DB, signInGoogle };
+export { AUTH, DB };

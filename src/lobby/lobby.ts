@@ -24,7 +24,7 @@ declare global {
       squarePlayer: { uid: number };
       settings: LobbySettings;
     };
-    "game.finished": { status: { winner: number } | "draw" };
+    "game.finished": { status: { winner: number, loser: number } | "draw" };
   }
 }
 

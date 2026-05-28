@@ -2,7 +2,6 @@ import { Board } from "../../game/board";
 import { EVENT_BUS } from "../../models/eventBus";
 import type { LobbySettings } from "../../models/gameSettings";
 
-let boardEl = document.querySelector<HTMLDivElement>("#gameBoard")!;
 declare global {
   interface EventMap {
     "game.player_scored": { uid: number; newLosses: number; newWins: number };
@@ -19,7 +18,7 @@ class Game {
   settings: LobbySettings;
 
   gameBoard = new Board();
-  boardTileParent: HTMLElement = boardEl;
+  boardTileParent: HTMLElement = document.querySelector<HTMLDivElement>("#gameBoard")!;
   boardTiles: HTMLButtonElement[] = [];
 
   constructor(player1: Player, player2: Player, settings: LobbySettings) {
@@ -74,6 +73,10 @@ class Game {
             // return the circle players uid if the winner data is "Circle", otherwise the squares
             winner:
               this.gameBoard.$state.data.winner == "Circle"
+                ? this.playerCircle.uid
+                : this.playerSquare.uid,
+            loser:
+              this.gameBoard.$state.data.winner == "Cross"
                 ? this.playerCircle.uid
                 : this.playerSquare.uid,
           },
