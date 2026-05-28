@@ -1,19 +1,6 @@
 import { EVENT_BUS } from "../models/eventBus";
-
-type User = {
-  profilePicture: URL;
-  wonGames: number;
-  lostGames: number;
-  joinDate: Date;
-  level: number;
-};
-type PlayerInfo = {
-  displayName: string;
-  type: "local";
-  losses: number;
-  wins: number;
-  readonly user?: User;
-};
+import { players } from "../models/stores";
+import type { PlayerInfo } from "../models/user";
 
 declare global {
   interface EventMap {
@@ -27,6 +14,9 @@ declare global {
 
 export class LobbyPlayerHandler {
   private $players: Record<number, PlayerInfo> = [];
+  private sync() {
+    players.set(this.$players);
+  }
   get players() {
     return this.$players;
   }
@@ -41,6 +31,7 @@ export class LobbyPlayerHandler {
       uid: this.latestUID,
       data: calculatedSettings,
     });
+    this.sync();
     this.latestUID++;
     return this.latestUID - 1;
   }
@@ -57,6 +48,8 @@ export class LobbyPlayerHandler {
         uid,
         data: set,
       });
+
+      this.sync()
     } catch (error) {
       throw new Error("Tried to update a user that doesnt exist");
     }

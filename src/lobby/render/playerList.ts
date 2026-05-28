@@ -17,6 +17,10 @@ export function renderPlayerList() {
       return;
     }
 
+    if (event.data === undefined) {
+      return
+    }
+
     if (playerEl === null) {
       playerEl = document.createElement("li");
       playerEl.setAttribute("data-partid", event.uid.toString(10));
