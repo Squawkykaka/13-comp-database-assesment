@@ -39,12 +39,4 @@ async function signInGoogle() {
   currentUser = userCred.user;
   EVENT_BUS.publish("auth.signin", { user: currentUser });
 }
-function getUser(): User {
-  if (currentUser === null) {
-    window.location.href = "/";
-  } else {
-    return currentUser;
-  }
-}
-
-export { AUTH, DB, signInGoogle, getUser };
+export { AUTH, DB, signInGoogle };

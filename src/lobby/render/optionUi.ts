@@ -8,12 +8,9 @@ import { isOneOf } from "../lobby";
 
 
 export function renderOptionsUI() {
-  const gameTypeEl = document.querySelector<HTMLSelectElement>("#gameType");
-  if (gameTypeEl === null) throw new Error("gameType selector doesnt exist.");
-  const multiplayerEl = document.querySelector<HTMLSelectElement>("#multiplayer");
-  if (multiplayerEl === null) throw new Error("multiplayer select element doesnt exist");
-  const gameStyleEl = document.querySelector<HTMLSelectElement>("#gameStyle");
-  if (gameStyleEl === null) throw new Error("gameStyle element doesnt exist");
+  const gameTypeEl = document.querySelector<HTMLSelectElement>("#gameType")!;
+  const multiplayerEl = document.querySelector<HTMLSelectElement>("#multiplayer")!;
+  const gameStyleEl = document.querySelector<HTMLSelectElement>("#gameStyle")!;
 
   function renderSection(
     list: Record<string, { display: string; description: string }>,
@@ -54,11 +51,11 @@ export function renderOptionsUI() {
     multiplayerEl.disabled = true;
     gameStyleEl.disabled = true;
   });
-  EVENT_BUS.subscribe("reset", (_) => {
-    gameTypeEl.disabled = false;
-    multiplayerEl.disabled = false;
-    gameStyleEl.disabled = false;
-  });
+  // EVENT_BUS.subscribe("reset", (_) => {
+  //   gameTypeEl.disabled = false;
+  //   multiplayerEl.disabled = false;
+  //   gameStyleEl.disabled = false;
+  // });
 
   EVENT_BUS.subscribe("lobby.settings_change", (event) => {
     const { gameType, multiplayer, style } = event.settings;

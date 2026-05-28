@@ -73,7 +73,7 @@ export class Board {
       return true;
     } else {
       console.error(
-        `Attempted to set tile type to ${circlesMove ? "Circle" : "Cross"} at position ${position} when it is already ${this.getTile(position)}`,
+        `Attempted to set tile type to ${circlesMove ? "Circle" : "Cross"} at position ${position} when it is already ${this.getTile(position) ?? "Nothing"}`,
       );
       return false;
     }
@@ -138,7 +138,12 @@ export class Board {
     return null;
   }
 
-  getTile(position: number): TileType {
+  /**
+   * Returns the tile at the specified position. 
+   * @param position The index of the tile you want to fetch
+   * @returns The tile type, or null if none is present 
+   */
+  getTile(position: number): TileType | null {
     let circleShifted = this.$circleList >> position;
     let crossShifted = this.$crossList >> position;
 

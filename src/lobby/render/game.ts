@@ -2,7 +2,7 @@ import { Board } from "../../game/board";
 import { EVENT_BUS } from "../../models/eventBus";
 import type { LobbySettings } from "../../models/gameSettings";
 
-let boardEl = document.querySelector<HTMLDivElement>("#gameBoard");
+let boardEl = document.querySelector<HTMLDivElement>("#gameBoard")!;
 declare global {
   interface EventMap {
     "game.player_scored": { uid: number; newLosses: number; newWins: number };
