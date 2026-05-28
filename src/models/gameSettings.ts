@@ -14,10 +14,10 @@ export const MULTIPLAYER_MODES = {
     display: "Local",
     description: "Play tic-tac-toe on one device, friends optional",
   },
-  // public: {
-  //   display: "Public",
-  //   description: "Create a online game that people can join from anywhere",
-  // },
+  public: {
+    display: "Public",
+    description: "Create a online game that people can join from anywhere",
+  },
   // private: {
   //   display: "Private",
   //   description:

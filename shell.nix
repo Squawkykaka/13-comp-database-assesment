@@ -3,6 +3,8 @@
 }:
 pkgs.mkShell {
   packages = [
+    pkgs.temurin-bin-25
+    pkgs.firebase-tools
     pkgs.typst
     pkgs.tinymist
     pkgs.pnpm

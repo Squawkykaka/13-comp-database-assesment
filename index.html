@@ -7,19 +7,33 @@
     <link rel="stylesheet" href="/src/lobby/lobby.css" />
   </head>
   <body>
-    <h2>Join a match</h2>
-    <form autocomplete="off">
-      <label for="code">Code</label>
-      <input type="text" name="code" disabled />
-    </form>
-    <h2>OR</h2>
-    <h2>Create One</h2>
-    <form
-      id="lobbyCreateForm"
-      autocomplete="off"
-      method="get"
-      action="/lobby"
-    ></form>
-    <script type="module" src="/src/lobby/createLobby.ts"></script>
+    <div>
+      <section id="signUp">
+        <h2>Sign in, or create an account</h2>
+        <button id="signUp">HERE</button>
+        <p id="errorText"></p>
+      </section>
+      <section hidden>
+        <h3>User: Bob</h3>
+        <img src="" alt="Test">
+      </section>
+    </div>
+    <div id="lobbyOptions" hidden>
+      <h2>Join a match</h2>
+      <form autocomplete="off" id="lobbyJoinForm">
+        <label for="code">Code</label>
+        <input type="text" name="code" disabled />
+      </form>
+      <h2>OR</h2>
+      <h2>Create One</h2>
+      <form
+        id="lobbyCreateForm"
+        autocomplete="off"
+        method="get"
+        action="/lobby"
+      ></form>
+    </div>
+    <script type="module" src="/src/index/creationOptions.ts"></script>
+    <script type="module" src="/src/index/index.ts"></script>
   </body>
 </html>

@@ -10,6 +10,7 @@ import { LobbyPlayerHandler } from "./playerList";
 import { renderOptionsUI } from "./render/optionUi";
 import { renderPlayerList } from "./render/playerList";
 import "./render/game";
+import { AUTH } from "../firebase";
 
 const LOBBY_PARAMS = new URLSearchParams(window.location.search);
 export const LOBBY_SETTINGS = new LobbySettingsHandler();
