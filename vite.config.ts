@@ -13,7 +13,7 @@ export default defineConfig({
   build: {
     target: "es2015",
     rolldownOptions: {
-      input: "index.html",
+      input: ["index.html", "lobby.html"],
     },
   },
 });

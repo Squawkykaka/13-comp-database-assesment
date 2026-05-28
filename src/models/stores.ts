@@ -1,4 +1,9 @@
-import { writable } from "svelte/store";
-import type { PlayerInfo } from "./user";
+import { readonly, writable } from "svelte/store";
+import type { FirebaseUser } from "./user";
+import { onAuthStateChanged, type User } from "firebase/auth";
+import { AUTH } from "../firebase";
 
-export const players = writable<Record<number, PlayerInfo>>({});
+export const players = writable<Record<number, FirebaseUser>>({});
+const firebaseUserWritable = writable<User | null>(null);
+onAuthStateChanged(AUTH, firebaseUserWritable.set)
+export const firebaseUser = readonly(firebaseUserWritable);

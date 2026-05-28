@@ -1,19 +1,9 @@
 import { EVENT_BUS } from "../models/eventBus";
 import { players } from "../models/stores";
-import type { PlayerInfo } from "../models/user";
-
-declare global {
-  interface EventMap {
-    "lobby.player": {
-      uid: number;
-      data?: PlayerInfo;
-      removed?: boolean;
-    };
-  }
-}
+import type { FirebaseUser } from "../models/user";
 
 export class LobbyPlayerHandler {
-  private $players: Record<number, PlayerInfo> = [];
+  private $players: Record<number, FirebaseUser> = [];
   private sync() {
     players.set(this.$players);
   }

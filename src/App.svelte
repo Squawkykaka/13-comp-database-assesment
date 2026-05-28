@@ -1,8 +1,9 @@
 <script lang="ts">
+  import UserInfo from "./components/UserInfo.svelte";
   import { beginGames } from "./game/lobbySplitting";
   import { LOBBY_PLAYERS } from "./lobby/lobby";
   import { SiteError } from "./models/error";
-  import { players } from "./models/stores";
+  import { firebaseUser, players } from "./models/stores";
 
   let playerEntries = $derived(
     Object.entries($players).sort(([_, a], [__, b]) => a.wins + b.wins),
@@ -41,19 +42,19 @@
   };
 </script>
 
+<UserInfo></UserInfo>
 <div>
   <h3>Players: {playerEntries.length}</h3>
   <ul>
     {#each playerEntries as [uid, player]}
       <li>
-        {#if player.type == "local"}
+        {#if $firebaseUser && player.userUID == $firebaseUser.uid}
           <form data-user-uid={uid} onsubmit={updatePlayer}>
             <label for="displayName" hidden>New Name</label>
             <input type="text" name="displayName" value={player.displayName} />
             <button type="submit">Submit</button>
           </form>
-        {/if}
-        {#if player.type == "firebase"}
+        {:else}
           <p>{player.displayName}</p>
         {/if}
 

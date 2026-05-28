@@ -8,7 +8,6 @@ import {
 } from "../models/gameSettings";
 import { LobbyPlayerHandler } from "./playerList";
 import { renderOptionsUI } from "./render/optionUi";
-import { renderPlayerList } from "./render/playerList";
 import "./render/game";
 
 const LOBBY_PARAMS = new URLSearchParams(window.location.search);
@@ -62,7 +61,6 @@ function parseSettings() {
 }
 
 window.addEventListener("DOMContentLoaded", (_) => {
-  renderPlayerList();
   renderOptionsUI();
   parseSettings();
 });
