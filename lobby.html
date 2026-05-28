@@ -3,10 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/src/lobby/lobby.css">
+    <link rel="stylesheet" href="/src/lobby/lobby.css" />
     <title>Lobby</title>
   </head>
   <body>
+    <section class="player-profile">
+      <img
+        class="profile-picture"
+        src="https://placehold.co/80x80"
+        alt="Player Profile Picture"
+      />
+
+      <div class="player-info">
+        <p class="username">{USERNAME}</p>
+
+        <div class="stats">
+          <p><strong>Wins:</strong> {WINS}</p>
+          <p><strong>Losses:</strong> {LOSSES}</p>
+        </div>
+      </div>
+    </section>
     <ul class="playerList"></ul>
     <table>
       <caption>
@@ -37,6 +53,7 @@
       <button type="submit">Start Game</button>
     </form>
     <div id="gameBoard"></div>
+    <p id="errorBar"></p>
     <script type="module" src="/src/lobby/lobby.ts"></script>
   </body>
 </html>

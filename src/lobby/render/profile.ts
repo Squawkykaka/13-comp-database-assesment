@@ -1,0 +1,1 @@
+function renderUserProfile(profile_url: null | string, username: number, wins: number, losses: number)

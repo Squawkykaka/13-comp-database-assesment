@@ -1,15 +1,23 @@
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { AUTH, signInGoogle } from "../firebase";
 import { FirebaseError } from "firebase/app";
 function setupSigninButton() {
   let signupButtonEl =
     document.querySelector<HTMLButtonElement>("#signUp > button")!;
-  let signupSection = document.querySelector<HTMLButtonElement>("#signUp")!;
-  // let errorTextEl = document.querySelector<HTMLButtonElement>("#signUp > p");
-  signupButtonEl.onclick = async () => {
+
+  onAuthStateChanged(AUTH, (user) => {
     try {
-      await signInGoogle();
-      signupButtonEl.disabled = true;
+      if (user === null) {
+        signupButtonEl.innerText = "Sign In";
+        signupButtonEl.onclick = async () => {
+          await signInGoogle();
+        };
+      } else {
+        signupButtonEl.innerText = "Sign Out";
+        signupButtonEl.onclick = async () => {
+          await signOut(AUTH);
+        }
+      }
     } catch (error) {
       if (error instanceof FirebaseError) {
         // TODO: make more of these cases
@@ -23,14 +31,6 @@ function setupSigninButton() {
             break;
         }
       }
-    }
-  };
-
-  onAuthStateChanged(AUTH, (user) => {
-    if (user === null) {
-      signupSection.hidden = false;
-    } else {
-      signupSection.hidden = true;
     }
   });
 }

@@ -8,6 +8,15 @@ export function renderPlayerList() {
     let playerEl = document.querySelector<HTMLLIElement>(
       `.playerList>[data-partid="${event.uid}"]`,
     );
+
+    if (event.removed) {
+      if (playerEl) {
+        playerEl.remove();
+      }
+
+      return;
+    }
+
     if (playerEl === null) {
       playerEl = document.createElement("li");
       playerEl.setAttribute("data-partid", event.uid.toString(10));
@@ -57,15 +66,26 @@ export function renderPlayerList() {
 
   const gameStartButton =
     document.querySelector<HTMLFormElement>("#startGameButton")!;
+  const errorMessage =
+    document.querySelector<HTMLParagraphElement>("#errorBar")!;
   // start game when pressed
   gameStartButton.onsubmit = (event) => {
     event.preventDefault();
-    // TODO: change this for multiplayer
-    EVENT_BUS.publish("game.begin", {
-      circlePlayer: { uid: 0 },
-      squarePlayer: { uid: 1 },
-      settings: LOBBY_SETTINGS.settings,
-    });
+
+    let length = Object.keys(LOBBY_PLAYERS.players).length;
+    
+    if (length === 2) {
+      // TODO: change this for multiplayer
+      EVENT_BUS.publish("game.begin", {
+        circlePlayer: { uid: 0 },
+        squarePlayer: { uid: 1 },
+        settings: LOBBY_SETTINGS.settings,
+      });
+    } else if (length < 2) {
+      errorMessage.innerText = "There are too many players to start a game\nTHIS IS AN ERROR, GAME SPLITTING NOT IMPLEMENTED";
+    } else {
+      errorMessage.innerText = "Too few players to start a game";
+    }
   };
   // hide when games started
   EVENT_BUS.subscribe("game.begin", (_) => {

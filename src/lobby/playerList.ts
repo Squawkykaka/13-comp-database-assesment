@@ -19,7 +19,8 @@ declare global {
   interface EventMap {
     "lobby.player": {
       uid: number;
-      data: PlayerInfo;
+      data?: PlayerInfo;
+      removed?: boolean;
     };
   }
 }
@@ -43,6 +44,10 @@ export class LobbyPlayerHandler {
     this.latestUID++;
     return this.latestUID - 1;
   }
+  removePlayer(uid: number) {
+    delete this.$players[uid];
+    EVENT_BUS.publish("lobby.player", { uid, removed: true });
+  }
   updatePlayer(uid: number, handler: (player_info: PlayerInfo) => void) {
     try {
       let set = this.$players[uid];
@@ -57,12 +62,29 @@ export class LobbyPlayerHandler {
     }
   }
   constructor() {
-    let off = EVENT_BUS.subscribe("lobby.settings_change", (event) => {
+    let player1: null | number = null;
+    let player2: null | number = null;
+    EVENT_BUS.subscribe("lobby.settings_change", (event) => {
       if (event.settings.multiplayer == "local") {
-        this.createPlayer({ displayName: "Circle", type: "local" });
-        this.createPlayer({ displayName: "Square", type: "local" });
+        if (player1 === null && player2 === null) {
+          player1 = this.createPlayer({
+            displayName: "Circle",
+            type: "local",
+          });
+          player2 = this.createPlayer({
+            displayName: "Square",
+            type: "local",
+          });
+        }
+      } else {
+        if (player1 !== null && player2 !== null) {
+          this.removePlayer(player2);
+          this.removePlayer(player1);
+
+          player1 = null;
+          player2 = null;
+        }
       }
-      off();
     });
   }
 }
