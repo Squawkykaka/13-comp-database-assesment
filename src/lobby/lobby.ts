@@ -5,14 +5,12 @@ import {
   MULTIPLAYER_MODES,
   type LobbySettings,
 } from "../models/gameSettings";
-import { LobbyPlayerHandler } from "./playerList";
 import "./render/game";
 import { lobbySettings } from "../models/stores";
 import { handleLobbyCreation } from "../firebase/lobby";
-import { currentUser } from "../firebase/signin";
+import { currentUser } from "../firebase/user";
 
 const LOBBY_PARAMS = new URLSearchParams(window.location.search);
-export const LOBBY_PLAYERS = new LobbyPlayerHandler();
 
 declare global {
   interface EventMap {
@@ -22,7 +20,7 @@ declare global {
       squarePlayer: { uid: number };
       settings: LobbySettings;
     };
-    "game.finished": { status: { winner: number, loser: number } | "draw" };
+    "game.finished": { status: { winner: number; loser: number } | "draw" };
   }
 }
 
@@ -35,7 +33,7 @@ export function isOneOf<T extends object>(
 }
 
 // FIXME: this doesnt set the right setting still...
-async function parseSettings() {
+export async function parseSettings() {
   let code = LOBBY_PARAMS.get("code");
   if (code) {
     console.log("Joining Lobby:", code);
@@ -51,15 +49,14 @@ async function parseSettings() {
       isOneOf(style, GAME_STYLES)
     ) {
       let settings: LobbySettings = { gameType, multiplayer, style };
-      let off = currentUser.subscribe(async user => {
-        if (user === null) return
+      lobbySettings.set(settings);
+      let off = currentUser.subscribe(async (user) => {
+        if (user === null) return;
         await handleLobbyCreation(settings);
-        off()
-      })
+        off();
+      });
     } else {
       console.error("Incorrect input to lobby settings");
     }
   }
 }
-
-await parseSettings();

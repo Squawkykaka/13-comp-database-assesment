@@ -13,11 +13,10 @@ import { DB } from ".";
 import type { LobbySettings } from "../models/gameSettings";
 import { lobbyOwner, lobbySettings } from "../models/stores";
 import { SiteError } from "../models/error";
-import { userCollection, userConverter } from "./user";
+import { currentUser, userCollection, userConverter } from "./user";
 import type { FirebaseUser } from "../models/user";
 import { lobbyMembers as lobbyMembersStore } from "../models/stores";
 import { get } from "svelte/store";
-import { currentUser } from "./signin";
 
 type LobbyData = {
   settings: LobbySettings;
@@ -60,13 +59,19 @@ export async function handleLobbyCreation(settings: LobbySettings) {
       owner: doc(userCollection, user.uid),
       settings,
     });
+    lobbySettings.update((prev) => {
+      return {
+        ...prev,
+        lobbyId: ref.id,
+      };
+    });
 
     // adds the current user to the lobby
-    setDoc(doc(lobbyMembers(ref.id), user.uid), user)
-    currentUser.subscribe(user => {
-        if (user === null) return
-        updateDoc(doc(lobbyMembers(ref.id), user.uid), user)
-    })
+    setDoc(doc(lobbyMembers(ref.id), user.uid), user);
+    currentUser.subscribe((user) => {
+      if (user === null) return;
+      updateDoc(doc(lobbyMembers(ref.id), user.uid), user);
+    });
     // adds the listener to update the user's info if they change any
 
     onSnapshot(lobbyMembers(ref.id), (snapshot) => {

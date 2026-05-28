@@ -3,7 +3,7 @@ import type { FirebaseUser } from "./user";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { AUTH } from "../firebase";
 import { type LobbySettings } from "./gameSettings";
-import { type Game } from "../game/types";
+import type { Game } from "../game/lobbySplitting";
 
 // current auth status
 const firebaseUserWritable = writable<User | null>(null);
@@ -24,11 +24,7 @@ export const authReady = readonly(authReadyWritable);
 export const firebaseAuthUser = readonly(firebaseUserWritable);
 
 // current lobby settings.
-export const lobbySettings = writable<LobbySettings>({
-  gameType: "original",
-  multiplayer: "public",
-  style: "onevone",
-});
+export const lobbySettings = writable<LobbySettings>();
 export const lobbyOwner = writable<FirebaseUser>();
 export const isLobbyOwner = derived([lobbyOwner, firebaseAuthUser], ([lobbyOwner, firebaseAuthUser]) => {
     if (!firebaseAuthUser) return;

@@ -1,7 +1,7 @@
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { AUTH } from "../firebase";
 import { FirebaseError } from "firebase/app";
-import { signInGoogle } from "../firebase/signin";
+import { signInGoogle } from "../firebase/user";
 
 onAuthStateChanged(AUTH, (user) => {
   let signupButtonEl =

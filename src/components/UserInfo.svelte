@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { currentUser } from "../firebase/signin";
+  import { currentUser } from "../firebase/user";
+
   currentUser.subscribe(data => console.log("Current User:", data));
 </script>
 

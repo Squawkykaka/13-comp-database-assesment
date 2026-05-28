@@ -47,6 +47,7 @@ export type LobbySettings = {
   gameType: GameMode;
   multiplayer: MultiplayerMode;
   style: GameStyle;
+  lobbyId?: string;
 
   // ownerUid: string,
 };

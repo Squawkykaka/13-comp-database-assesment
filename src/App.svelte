@@ -1,7 +1,6 @@
 <script lang="ts">
   import UserInfo from "./components/UserInfo.svelte";
   import { beginGames } from "./game/lobbySplitting";
-  import { LOBBY_PLAYERS } from "./lobby/lobby";
   import { SiteError } from "./models/error";
   import {
     GAME_MODES,
@@ -16,6 +15,8 @@
     lobbyMembers,
     isLobbyOwner,
   } from "./models/stores";
+  import { currentUserRef } from "./firebase/user";
+  import { increment, updateDoc } from "firebase/firestore";
 
   let playerEntries = $derived(
     Object.entries($lobbyMembers).sort(([_, a], [__, b]) =>
@@ -49,10 +50,11 @@
 
     let formData = new FormData(target);
 
-    LOBBY_PLAYERS.updatePlayer(
-      parseInt(uid),
-      (info) => (info.displayName = formData.get("displayName") as string),
-    );
+    // if its null return itself, otherwise update the displayName
+    updateDoc(currentUserRef, {
+      displayName: formData.get("displayName") as string,
+      wins: increment(5)
+    });
   };
 
   let startButton = () => {
