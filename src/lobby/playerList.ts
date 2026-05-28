@@ -17,28 +17,18 @@ export class LobbyPlayerHandler {
   }): number {
     let calculatedSettings = { ...settings, losses: 0, wins: 0 };
     this.$players[this.latestUID] = calculatedSettings;
-    EVENT_BUS.publish("lobby.player", {
-      uid: this.latestUID,
-      data: calculatedSettings,
-    });
     this.sync();
     this.latestUID++;
     return this.latestUID - 1;
   }
   removePlayer(uid: number) {
     delete this.$players[uid];
-    EVENT_BUS.publish("lobby.player", { uid, removed: true });
     this.sync()
   }
   updatePlayer(uid: number, handler: (player_info: PlayerInfo) => void) {
     try {
       let set = this.$players[uid];
       handler(set);
-
-      EVENT_BUS.publish("lobby.player", {
-        uid,
-        data: set,
-      });
 
       this.sync()
     } catch (error) {

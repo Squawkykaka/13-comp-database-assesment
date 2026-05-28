@@ -1,13 +1,16 @@
 <script lang="ts">
-  import { firebaseUser } from "../models/stores";
+  import { currentUser } from "../firebase/signin";
+  currentUser.subscribe(data => console.log("Current User:", data));
 </script>
 
 <div>
-  {#if $firebaseUser !== null}
+  {#if $currentUser !== null}
     <img
-      src={$firebaseUser.photoURL ?? "https://placehold.co/80"}
+      src={$currentUser.photoURL ?? "https://placehold.co/80"}
       alt="user profile"
     />
-    <p>{$firebaseUser.displayName}</p>
+    <p>{$currentUser.displayName}</p>
+    <p><strong>Wins:</strong> {$currentUser.wins}</p>
+    <p><strong>Losses:</strong> {$currentUser.losses}</p>
   {/if}
 </div>

@@ -3,7 +3,7 @@
   import { beginGames } from "./game/lobbySplitting";
   import { LOBBY_PLAYERS } from "./lobby/lobby";
   import { SiteError } from "./models/error";
-  import { firebaseUser, players } from "./models/stores";
+  import { firebaseAuthUser, players } from "./models/stores";
 
   let playerEntries = $derived(
     Object.entries($players).sort(([_, a], [__, b]) => a.wins + b.wins),
@@ -48,7 +48,7 @@
   <ul>
     {#each playerEntries as [uid, player]}
       <li>
-        {#if $firebaseUser && player.userUID == $firebaseUser.uid}
+        {#if $firebaseAuthUser && player.userUID == $firebaseAuthUser.uid}
           <form data-user-uid={uid} onsubmit={updatePlayer}>
             <label for="displayName" hidden>New Name</label>
             <input type="text" name="displayName" value={player.displayName} />

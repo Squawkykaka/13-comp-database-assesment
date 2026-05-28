@@ -5,9 +5,7 @@ import {
   connectAuthEmulator,
   getAuth,
   setPersistence,
-  type User,
 } from "firebase/auth";
-import { EVENT_BUS } from "../models/eventBus";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBjjSwm8ARN8jb-Z23XXMEymlCgLzv7qOI",
@@ -21,10 +19,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const DB = getFirestore(app);
 const AUTH = getAuth(app);
-setPersistence(AUTH, browserLocalPersistence);
+await setPersistence(AUTH, browserLocalPersistence);
 
 if (import.meta.env.DEV) {
-  connectFirestoreEmulator(DB, "127.0.0.1", 9099);
+  connectFirestoreEmulator(DB, "localhost", 8081);
   connectAuthEmulator(AUTH, "http://localhost:9099");
 }
 

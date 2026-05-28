@@ -1,6 +1,7 @@
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { AUTH } from "../firebase";
 import { FirebaseError } from "firebase/app";
+import { signInGoogle } from "../firebase/signin";
 function setupSigninButton() {
   let signupButtonEl =
     document.querySelector<HTMLButtonElement>("#signUp > button")!;
@@ -33,11 +34,6 @@ function setupSigninButton() {
       }
     }
   });
-}
-
-
-async function signInGoogle() {
-  await signInWithPopup(AUTH, new GoogleAuthProvider())
 }
 
 window.addEventListener("DOMContentLoaded", () => {

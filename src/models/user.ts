@@ -5,7 +5,7 @@ export type LocalUser = {
 }
 
 export type FirebaseUser = {
-  photoURL: string;
+  photoURL?: string;
   displayName: string
   wins: number,
   losses: number,
