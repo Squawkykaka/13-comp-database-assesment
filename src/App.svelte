@@ -1,5 +1,6 @@
 <script lang="ts">
   import UserInfo from "./components/UserInfo.svelte";
+  import { currentUser, userCollection } from "./firebase/user";
   import { beginGames } from "./game/lobbySplitting";
   import { SiteError } from "./models/error";
   import {
@@ -15,8 +16,7 @@
     lobbyMembers,
     isLobbyOwner,
   } from "./models/stores";
-  import { currentUserRef } from "./firebase/user";
-  import { increment, updateDoc } from "firebase/firestore";
+  import { doc, increment, updateDoc } from "firebase/firestore";
 
   let playerEntries = $derived(
     Object.entries($lobbyMembers).sort(([_, a], [__, b]) =>
@@ -51,7 +51,7 @@
     let formData = new FormData(target);
 
     // if its null return itself, otherwise update the displayName
-    updateDoc(currentUserRef, {
+    updateDoc(doc(userCollection, $currentUser?.uid), {
       displayName: formData.get("displayName") as string,
       wins: increment(5)
     });

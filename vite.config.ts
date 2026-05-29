@@ -12,6 +12,7 @@ export default defineConfig({
   base: "/13-comp-database-assesment",
   build: {
     target: "es2015",
+    sourcemap: true,
     rolldownOptions: {
       input: ["index.html", "lobby.html"],
     },

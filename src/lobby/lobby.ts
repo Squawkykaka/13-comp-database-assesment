@@ -5,10 +5,9 @@ import {
   MULTIPLAYER_MODES,
   type LobbySettings,
 } from "../models/gameSettings";
-import "./render/game";
 import { lobbySettings } from "../models/stores";
-import { handleLobbyCreation } from "../firebase/lobby";
 import { currentUser } from "../firebase/user";
+import { handleLobbyCreation } from "../firebase/lobby";
 
 const LOBBY_PARAMS = new URLSearchParams(window.location.search);
 

@@ -67,16 +67,17 @@ export async function handleLobbyCreation(settings: LobbySettings) {
     });
 
     // adds the current user to the lobby
-    setDoc(doc(lobbyMembers(ref.id), user.uid), user);
+    let lobbyUserRef = doc(lobbyMembers(ref.id), user.uid)
+    setDoc(lobbyUserRef, user);
+  
     currentUser.subscribe((user) => {
       if (user === null) return;
-      updateDoc(doc(lobbyMembers(ref.id), user.uid), user);
+      updateDoc(lobbyUserRef, user);
     });
     // adds the listener to update the user's info if they change any
 
     onSnapshot(lobbyMembers(ref.id), (snapshot) => {
       let data = snapshot.docChanges();
-      console.log(data);
 
       lobbyMembersStore.update((prev) => {
         for (const item of data) {
@@ -87,6 +88,9 @@ export async function handleLobbyCreation(settings: LobbySettings) {
             delete prev[docData.uid];
           }
         }
+        
+        console.log(prev);
+        
 
         return prev;
       });
@@ -94,7 +98,6 @@ export async function handleLobbyCreation(settings: LobbySettings) {
 
     // TODO: add peerjs probably to make it so when a disconnect happens all members disappear,
 
-    lobbySettings.set(settings);
     lobbyOwner.set(user);
   } catch (error) {
     if (error instanceof SiteError) {

@@ -42,7 +42,6 @@ export const userConverter = {
   },
 };
 export const userCollection = collection(DB, "users").withConverter(userConverter);
-export const currentUserRef = doc(userCollection, getAuth().currentUser?.uid)
 const currentUserWritable = writable<FirebaseUser | null>(null);
 export const currentUser = readonly(currentUserWritable);
 
