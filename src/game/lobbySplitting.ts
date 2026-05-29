@@ -12,11 +12,7 @@ export type Game = {
 import { SiteError } from "../models/error";
 import { EVENT_BUS } from "../models/eventBus";
 import type { LobbySettings } from "../models/gameSettings";
-import {
-  activeGameSettings,
-  lobbySettings,
-  lobbyMembers,
-} from "../models/stores";
+import { activeGameSettings, lobbySettings, lobbyMembers } from "../models/stores";
 import { get } from "svelte/store";
 
 export function beginGames() {

@@ -5,9 +5,9 @@ import {
   MULTIPLAYER_MODES,
   type LobbySettings,
 } from "../models/gameSettings";
-import { lobbySettings } from "../models/stores";
-import { currentUser } from "../firebase/user";
+import { lobbySettings, currentUser } from "../models/stores";
 import { handleLobbyCreation } from "../firebase/lobby";
+import { AUTH } from "../firebase";
 
 const LOBBY_PARAMS = new URLSearchParams(window.location.search);
 
@@ -48,12 +48,9 @@ export async function parseSettings() {
       isOneOf(style, GAME_STYLES)
     ) {
       let settings: LobbySettings = { gameType, multiplayer, style };
-      lobbySettings.set(settings);
-      let off = currentUser.subscribe(async (user) => {
-        if (user === null) return;
-        await handleLobbyCreation(settings);
-        off();
-      });
+      lobbySettings.set(settings);      
+
+      await handleLobbyCreation(settings);
     } else {
       console.error("Incorrect input to lobby settings");
     }

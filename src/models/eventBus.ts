@@ -6,7 +6,7 @@ type DomainEvent = {
 }[keyof EventMap];
 
 export type EventKind = DomainEvent["kind"];
-export type EventOf<K extends EventKind> = Extract<DomainEvent, { kind: K; }>;
+export type EventOf<K extends EventKind> = Extract<DomainEvent, { kind: K }>;
 type Handler<K extends EventKind> = (e: EventOf<K>) => void | Promise<void>;
 
 class EventBus {
@@ -15,15 +15,14 @@ class EventBus {
   } = {};
 
   publish<K extends EventKind>(kind: K, event: Omit<EventOf<K>, "kind" | "date">): void {
-    
     let computedEvent = {
       ...event,
       date: new Date(),
-      kind
+      kind,
     } as EventOf<K>;
-    
+
     console.log("[EVENT]:", computedEvent);
-    
+
     const set = this.handlers[kind];
     if (!set) return;
 
@@ -37,8 +36,7 @@ class EventBus {
   }
 
   subscribe<K extends EventKind>(kind: K, handler: Handler<K>) {
-    const set =
-      (this.handlers[kind] as Set<Handler<K>>) ??= new Set();
+    const set = ((this.handlers[kind] as Set<Handler<K>>) ??= new Set());
 
     set.add(handler);
     return () => set.delete(handler);
@@ -49,6 +47,4 @@ const globalForBus = globalThis as typeof globalThis & {
   __EVENT_BUS__?: EventBus;
 };
 
-export const EVENT_BUS =
-  globalForBus.__EVENT_BUS__ ??= new EventBus();
-
+export const EVENT_BUS = (globalForBus.__EVENT_BUS__ ??= new EventBus());

@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { currentUser } from "../firebase/user";
+  import { currentUser } from "../models/stores";
 
   currentUser.subscribe(data => console.log("Current User:", data));
 </script>
 
 <div>
-  {#if $currentUser !== null}
+  {#if $currentUser !== undefined}
     <img
       src={$currentUser.photoURL ?? "https://placehold.co/80"}
       alt="user profile"

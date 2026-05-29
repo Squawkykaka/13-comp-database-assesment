@@ -1,6 +1,6 @@
 <script lang="ts">
   import UserInfo from "./components/UserInfo.svelte";
-  import { currentUser, userCollection } from "./firebase/user";
+  import { userCollection } from "./firebase/user";
   import { beginGames } from "./game/lobbySplitting";
   import { SiteError } from "./models/error";
   import {
@@ -15,6 +15,7 @@
     lobbySettings,
     lobbyMembers,
     isLobbyOwner,
+    currentUser,
   } from "./models/stores";
   import { doc, increment, updateDoc } from "firebase/firestore";
 

@@ -30,7 +30,6 @@ input[type="radio"] {
 }
 input[type="radio"]:disabled + label > div {
   background-color: purple;
-
 }
 input[type="radio"]:checked + label > div {
   background-color: blue;

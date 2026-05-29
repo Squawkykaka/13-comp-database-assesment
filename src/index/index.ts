@@ -4,8 +4,7 @@ import { FirebaseError } from "firebase/app";
 import { signInGoogle } from "../firebase/user";
 
 onAuthStateChanged(AUTH, (user) => {
-  let signupButtonEl =
-    document.querySelector<HTMLButtonElement>("#signUp > button")!;
+  let signupButtonEl = document.querySelector<HTMLButtonElement>("#signUp > button")!;
 
   try {
     if (user === null) {
@@ -25,9 +24,7 @@ onAuthStateChanged(AUTH, (user) => {
       switch (error.code) {
         default:
           console.log(error);
-          console.log(
-            "There is no case handling this error. Please report to the admin",
-          );
+          console.log("There is no case handling this error. Please report to the admin");
 
           break;
       }

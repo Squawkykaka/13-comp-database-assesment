@@ -19,7 +19,7 @@ export function numberToBits(num: number) {
 // | X | X | O |
 // | X | X | O |
 // | O | O | X |
-// would be represented as 
+// would be represented as
 // circles = 0b001001110
 // crosses = 0b110110001
 // checking for wins is super easy this way as you just AND the bit streams with all the possible win conditions, and if it equals the pattern
@@ -29,7 +29,7 @@ export class Board {
   $currentlyCirclesTurn = true;
   $state: GameState = { status: "playing" };
 
-  runMove(position: number): boolean | null{
+  runMove(position: number): boolean | null {
     if (this.$state.status !== "playing") {
       return null;
     }
@@ -139,9 +139,9 @@ export class Board {
   }
 
   /**
-   * Returns the tile at the specified position. 
+   * Returns the tile at the specified position.
    * @param position The index of the tile you want to fetch
-   * @returns The tile type, or null if none is present 
+   * @returns The tile type, or null if none is present
    */
   getTile(position: number): TileType | null {
     let circleShifted = this.$circleList >> position;

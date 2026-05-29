@@ -15,58 +15,63 @@ a button to start the game is visible and the lobby code is shown in multiplayer
 - [ ] add code enter to the top of the screen
 - [ ] make it so you can only change the next and previous elements in the signup, not all
 
-
 # lobby flow
+
 have a abstract class that has functions for setting and getting various values from the lobby
 there can be a local implementation, and a firebase implementation.
 this gets listened on with a lobbyrenderer which then updates the web page with the data from the data store
 
 the data handler can expose an event bus where it posts the data it receives, and you can post to this as well
-This data handler handles *only* lobby specific data, when a game is created either by recieving or posting an event
+This data handler handles _only_ lobby specific data, when a game is created either by recieving or posting an event
 a game handler is returned which can then be attached to the game and it then handles the games data
 
 oop im recreating an ECS :p
 
 Enters, page args are passed
 if code then
-    create the lobby class, and sets the editing permission to false for all the settings except username
-    if the lobby is a firebase one it sets up the firebase data handler which then adds itself to the lobby and begins joining process
+create the lobby class, and sets the editing permission to false for all the settings except username
+if the lobby is a firebase one it sets up the firebase data handler which then adds itself to the lobby and begins joining process
 else
-    create the lobby class, set editing perms to true
-    if gametype == "firebase" then
-    it then runs the lobby creation flow with firebase, creating the various data structures it needs, which then returns the firebase handler. (this can probably be two constructors).
-    else
-    creates a local event bus, which doesnt do any syncing and just stores the data locally,
-    
+create the lobby class, set editing perms to true
+if gametype == "firebase" then
+it then runs the lobby creation flow with firebase, creating the various data structures it needs, which then returns the firebase handler. (this can probably be two constructors).
+else
+creates a local event bus, which doesnt do any syncing and just stores the data locally,
+
 # Database Development
+
 Initial root database:
+
 ```yaml
-users: 
-    public:
-        uid:
-            defaultUsername: string <= 15 chars,
-            # statistics for each unique game can be set here
-            statistics:
-                tictactoe:
-                    wins: number
-                    losses: number
-            profileURL: url,
-            bio: string
-    private:
-        uid:
-            realName: string,
-            age: number,
-    roles:
-        # gives whoever is in this list access to the admin page, and roles grant them more edit permissions
-        owner: uid[]
+users:
+  public:
+    uid:
+      defaultUsername: string <= 15 chars,
+      # statistics for each unique game can be set here
+      statistics:
+        tictactoe:
+          wins: number
+          losses: number
+      profileURL: url,
+      bio: string
+  private:
+    uid:
+      realName: string,
+      age: number,
+  roles:
+    # gives whoever is in this list access to the admin page, and roles grant them more edit permissions
+    owner: uid[]
 games:
-    tictactoe:
-        lobbys: Lobby[] # look above for the defintion of this
+  tictactoe:
+    lobbys: Lobby[] # look above for the defintion of this
 ```
 
 # 25/05
+
 Made it so when i press the start game button, it shows the board and you can begin to play
+
 # 26/05 (birthday!)
+
 screenshots and graphics, start dev log
 for excellece:
 looks good

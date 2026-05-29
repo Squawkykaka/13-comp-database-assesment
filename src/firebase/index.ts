@@ -1,11 +1,19 @@
 import { initializeApp } from "firebase/app";
-import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
+import {
+  CollectionReference,
+  connectFirestoreEmulator,
+  getFirestore,
+  onSnapshot,
+  query,
+  type DocumentData,
+} from "firebase/firestore";
 import {
   browserLocalPersistence,
   connectAuthEmulator,
   getAuth,
   setPersistence,
 } from "firebase/auth";
+import { readable, writable } from "svelte/store";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBjjSwm8ARN8jb-Z23XXMEymlCgLzv7qOI",
@@ -26,5 +34,19 @@ if (import.meta.env.DEV) {
 }
 
 await setPersistence(AUTH, browserLocalPersistence);
+
+export function createFirestoreCollectionStore<T, U extends DocumentData>(
+  reference: CollectionReference<T, U>,
+) {
+  return readable<T[]>([], (set) => {
+    const q = query(reference);
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      set(snapshot.docs.map((doc) => doc.data()));
+    });
+
+    return unsubscribe;
+  });
+}
 
 export { AUTH, DB };
