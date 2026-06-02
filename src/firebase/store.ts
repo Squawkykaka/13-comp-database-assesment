@@ -18,8 +18,6 @@ let currentUserWritable = writable<GameUser | undefined>();
 currentFirebaseUser.subscribe((user) => {
   if (user) {
     return onSnapshot(doc(userCollection, user.uid), (next) => {
-      console.log("NExt thing fired");
-
       currentUserWritable.set(next.data());
     });
   }

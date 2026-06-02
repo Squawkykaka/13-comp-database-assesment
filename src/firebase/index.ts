@@ -14,6 +14,7 @@ import {
   setPersistence,
 } from "firebase/auth";
 import { readable, writable } from "svelte/store";
+import { connectDatabaseEmulator, getDatabase } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBjjSwm8ARN8jb-Z23XXMEymlCgLzv7qOI",
@@ -26,11 +27,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const DB = getFirestore(app);
+const RDB = getDatabase(app);
 const AUTH = getAuth(app);
 
 if (import.meta.env.DEV) {
   connectFirestoreEmulator(DB, "localhost", 8081);
   connectAuthEmulator(AUTH, "http://localhost:9099");
+  connectDatabaseEmulator(RDB, "localhost", 9000)
 }
 
 await setPersistence(AUTH, browserLocalPersistence);

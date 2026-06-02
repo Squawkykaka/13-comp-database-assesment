@@ -27,12 +27,8 @@
 
     let formData = new FormData(target);
 
-    // if its null return itself, otherwise update the displayName
-    $LOBBY.currentUser.update((old) => {
-      return {
-        ...old,
-        displayName: formData.get("displayName") as string,
-      };
+    updateDoc(doc(userCollection, $currentUser.info?.uid), {
+      displayName: formData.get("displayName") as string,
     });
   };
 

@@ -1,23 +1,18 @@
 import {
   addDoc,
-  arrayUnion,
   collection,
   doc,
   DocumentReference,
   getDoc,
   onSnapshot,
-  QueryDocumentSnapshot,
-  runTransaction,
   setDoc,
   updateDoc,
-  writeBatch,
-  type SnapshotOptions,
 } from "firebase/firestore";
-import { AUTH, DB } from ".";
+import { DB } from ".";
 import type { GameUser, LobbyMember } from "../models/user";
 import { currentUser } from "./store";
-import { get, readable, readonly, writable, type Writable } from "svelte/store";
-import { REQUESTED_LOBBY, type JoinLobby, type LobbySettings } from "../lobby";
+import { derived, get, writable, type Readable, type Writable } from "svelte/store";
+import { REQUESTED_LOBBY, type LobbySettings } from "../lobby";
 import { SiteError } from "../models/error";
 import { userCollection } from "./user";
 
@@ -29,26 +24,29 @@ class Lobby {
   owner: GameUser;
   settings: Writable<LobbySettings>;
   lobbyRef: DocumentReference;
-  currentUser: Writable<LobbyMember>;
+  currentUser: Readable<LobbyMember>;
 
   private constructor(
     owner: GameUser,
     settings: LobbySettings,
     lobbyRef: typeof this.lobbyRef,
   ) {
-    let localUser = get(currentUser).info;
-    if (localUser == undefined) throw new SiteError("USER_NOT_AUTHENTICATED");
-
     this.owner = owner;
     this.settings = writable(settings);
     this.lobbyRef = lobbyRef;
-    this.currentUser = writable({
-      displayName: localUser.displayName,
-      losses: 0,
-      wins: 0,
-      quote: localUser.quote,
-      user: localUser.dbRef,
-      uid: localUser.uid,
+    this.currentUser = derived(currentUser, currentUser => {
+      if (currentUser.info) {
+        return {
+          displayName: currentUser.info.displayName,
+          losses: 0,
+          wins: 0,
+          quote: currentUser.info.quote,
+          user: currentUser.info.dbRef,
+          uid: currentUser.info.uid,
+        }
+      } else {
+        throw new SiteError("USER_NOT_AUTHENTICATED")
+      }
     });
 
     // if the settings change
