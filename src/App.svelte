@@ -1,6 +1,11 @@
 <script lang="ts">
   import { currentUser } from "./firebase";
   import { LOBBY } from "./firebase/lobby.";
+  import {
+    GAME_MODES,
+    GAME_STYLES,
+    MULTIPLAYER_MODES,
+  } from "./models/gameSettings";
 
   function renderSection(
     list: Record<string, { display: string; description: string }>,
@@ -29,7 +34,9 @@
   };
 
   let lobbyMembers = $derived($LOBBY.members);
-  let members = $derived(Object.entries($lobbyMembers))
+  let members = $derived(Object.entries($lobbyMembers));
+  let settings = $derived($LOBBY.settings);
+  let isLobbyOwner = $derived($currentUser.auth?.uid == $LOBBY.owner.uid);
   // let currentLobbyUser = $derived($LOBBY.currentUser);
 </script>
 
@@ -62,49 +69,46 @@
         </li>
       {/each}
     </ul>
+
+    <section>
+      <table>
+        <caption>Game Options</caption>
+        <tbody>
+          <tr>
+            <th scope="row">Game Mode</th>
+            <td>
+              <select bind:value={$settings.gameMode} disabled={!isLobbyOwner}>
+                {@html renderSection(GAME_MODES)}
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Multiplayer Type</th>
+            <td>
+              <select
+                bind:value={$settings.multiplayerType}
+                disabled={!isLobbyOwner}
+              >
+                {@html renderSection(MULTIPLAYER_MODES)}
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Game Mode</th>
+            <td>
+              <select bind:value={$settings.gameStyle} disabled={!isLobbyOwner}>
+                {@html renderSection(GAME_STYLES)}
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
   </div>
 {/if}
 
 <!-- 
-<section>
-  <table>
-    <caption>Game Options</caption>
-    <tbody>
-      <tr>
-        <th scope="row">Game Type</th>
-        <td>
-          <select
-            bind:value={$lobbySettings.gameType}
-            disabled={$activeGame !== undefined && !$isLobbyOwner}
-          >
-            {@html renderSection(GAME_MODES)}
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <th scope="row">Multiplayer Type</th>
-        <td>
-          <select
-            bind:value={$lobbySettings.multiplayer}
-            disabled={$activeGame !== undefined && !$isLobbyOwner}
-          >
-            {@html renderSection(MULTIPLAYER_MODES)}
-          </select>
-        </td>
-      </tr>
-      <tr>
-        <th scope="row">Game Mode</th>
-        <td>
-          <select
-            bind:value={$lobbySettings.style}
-            disabled={$activeGame !== undefined && !$isLobbyOwner}
-          >
-            {@html renderSection(GAME_STYLES)}
-          </select>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+>
 
   <button onclick={startButton}>Start Game</button>
 
