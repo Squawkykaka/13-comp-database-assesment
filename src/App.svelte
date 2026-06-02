@@ -1,6 +1,6 @@
 <script lang="ts">
   import { currentUser } from "./firebase";
-  import { LOBBY } from "./firebase/lobby.";
+  import { LOBBY } from "./firebase/lobby";
   import {
     GAME_MODES,
     GAME_STYLES,
@@ -35,9 +35,14 @@
 
   let lobbyMembers = $derived($LOBBY.members);
   let members = $derived(Object.entries($lobbyMembers));
-  let settings = $derived($LOBBY.settings);
+  let settings = $derived(
+    $LOBBY?.settings ?? {
+      gameMode: "loading...",
+      multiplayerType: "loading...",
+      gameStyle: "loading...",
+    },
+  );
   let isLobbyOwner = $derived($currentUser.auth?.uid == $LOBBY.owner.uid);
-  // let currentLobbyUser = $derived($LOBBY.currentUser);
 </script>
 
 {#if $LOBBY}
@@ -69,7 +74,9 @@
         </li>
       {/each}
     </ul>
+  </div>
 
+  {#if $settings !== undefined}
     <section>
       <table>
         <caption>Game Options</caption>
@@ -104,9 +111,8 @@
         </tbody>
       </table>
     </section>
-  </div>
+  {/if}
 {/if}
-
 <!-- 
 >
 

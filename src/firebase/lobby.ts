@@ -85,16 +85,12 @@ class Lobby {
 
     onValue(settingsRef, (snapshot) => {
       if (snapshot.exists()) {
-        let data = snapshot.val();
-        let settings = data.settings as LobbySettings;
-        this.settings.set(settings);
+        this.settings.set(snapshot.val() as LobbySettings);
       }
     });
     this.settings.subscribe((next) => {
       if (next) {
-        update(settingsRef, {
-          settings: next,
-        });
+        update(settingsRef, next);
       }
     });
 

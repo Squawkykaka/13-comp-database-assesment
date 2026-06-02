@@ -17,13 +17,20 @@ import {
 } from "firebase/auth";
 import { derived, readable, writable } from "svelte/store";
 import type { GameUser } from "../models/user";
-import type { CollectionReference, DocumentData, QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
+import type {
+  CollectionReference,
+  DocumentData,
+  QueryDocumentSnapshot,
+  SnapshotOptions,
+} from "firebase/firestore";
 import type { User } from "firebase/auth";
 import { connectDatabaseEmulator, getDatabase } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBjjSwm8ARN8jb-Z23XXMEymlCgLzv7qOI",
   authDomain: "comp-database-assesment.firebaseapp.com",
+  databaseURL:
+    "https://comp-database-assesment-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "comp-database-assesment",
   storageBucket: "comp-database-assesment.firebasestorage.app",
   messagingSenderId: "744210310754",
@@ -103,14 +110,21 @@ onAuthStateChanged(AUTH, (user) => {
   }
 });
 
+let unsubscribeUserDoc: (() => void) | undefined;
 let currentUserWritable = writable<GameUser | undefined>();
 currentFirebaseUser.subscribe((user) => {
+  unsubscribeUserDoc?.();
+
   if (user) {
-    return onSnapshot(doc(userCollection, user.uid), (next) => {
+    unsubscribeUserDoc = onSnapshot(doc(userCollection, user.uid), (next) => {
       currentUserWritable.set(next.data());
     });
+  } else {
+    currentUserWritable.set(undefined);
   }
 });
+
+
 export const currentUser = derived(
   [currentFirebaseUser, currentUserWritable],
   ([currentFirebaseUser, currentUserWritable]) => {
