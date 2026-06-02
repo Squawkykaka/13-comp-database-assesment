@@ -2,19 +2,24 @@ import {
   addDoc,
   collection,
   doc,
-  DocumentReference,
   getDoc,
   onSnapshot,
   setDoc,
   updateDoc,
 } from "firebase/firestore";
-import { DB } from ".";
+import { currentUser, DB } from ".";
 import type { GameUser, LobbyMember } from "../models/user";
-import { currentUser } from "./store";
-import { derived, get, writable, type Readable, type Writable } from "svelte/store";
+import {
+  derived,
+  get,
+  writable,
+  type Readable,
+  type Writable,
+} from "svelte/store";
 import { REQUESTED_LOBBY, type LobbySettings } from "../lobby";
 import { SiteError } from "../models/error";
 import { userCollection } from "./user";
+import type { DocumentReference } from "firebase/firestore";
 
 const gameRef = doc(DB, "games", "tictactoe");
 const lobbies = collection(gameRef, "lobbies");
@@ -34,7 +39,7 @@ class Lobby {
     this.owner = owner;
     this.settings = writable(settings);
     this.lobbyRef = lobbyRef;
-    this.currentUser = derived(currentUser, currentUser => {
+    this.currentUser = derived(currentUser, (currentUser) => {
       if (currentUser.info) {
         return {
           displayName: currentUser.info.displayName,
@@ -43,9 +48,9 @@ class Lobby {
           quote: currentUser.info.quote,
           user: currentUser.info.dbRef,
           uid: currentUser.info.uid,
-        }
+        };
       } else {
-        throw new SiteError("USER_NOT_AUTHENTICATED")
+        throw new SiteError("USER_NOT_AUTHENTICATED");
       }
     });
 

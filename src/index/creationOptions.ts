@@ -1,5 +1,9 @@
 import { onAuthStateChanged } from "firebase/auth";
-import { GAME_MODES, GAME_STYLES, MULTIPLAYER_MODES } from "../models/gameSettings";
+import {
+  GAME_MODES,
+  GAME_STYLES,
+  MULTIPLAYER_MODES,
+} from "../models/gameSettings";
 import { AUTH } from "../firebase";
 
 let createForm = document.querySelector<HTMLFormElement>("#lobbyCreateForm")!;

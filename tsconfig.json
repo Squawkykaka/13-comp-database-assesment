@@ -3,7 +3,12 @@
   "compilerOptions": {
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
     "noFallthroughCasesInSwitch": true
   },
-  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
 }

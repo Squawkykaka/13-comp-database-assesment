@@ -1,20 +1,24 @@
 import { initializeApp } from "firebase/app";
 import {
-  CollectionReference,
   connectFirestoreEmulator,
+  doc,
   getFirestore,
   onSnapshot,
   query,
-  type DocumentData,
+  updateDoc,
 } from "firebase/firestore";
 import {
   browserLocalPersistence,
   connectAuthEmulator,
   getAuth,
+  onAuthStateChanged,
   setPersistence,
 } from "firebase/auth";
-import { readable, writable } from "svelte/store";
-import { connectDatabaseEmulator, getDatabase } from "firebase/database";
+import { derived, readable, writable } from "svelte/store";
+import type { GameUser } from "../models/user";
+import { userCollection } from "./user";
+import type { CollectionReference, DocumentData } from "firebase/firestore";
+import type { User } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBjjSwm8ARN8jb-Z23XXMEymlCgLzv7qOI",
@@ -27,13 +31,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const DB = getFirestore(app);
-const RDB = getDatabase(app);
+// const RDB = getDatabase(app);
 const AUTH = getAuth(app);
 
 if (import.meta.env.DEV) {
   connectFirestoreEmulator(DB, "localhost", 8081);
   connectAuthEmulator(AUTH, "http://localhost:9099");
-  connectDatabaseEmulator(RDB, "localhost", 9000)
+  // connectDatabaseEmulator(RDB, "localhost", 9000);
 }
 
 await setPersistence(AUTH, browserLocalPersistence);
@@ -51,5 +55,42 @@ export function createFirestoreCollectionStore<T, U extends DocumentData>(
     return unsubscribe;
   });
 }
+
+// #####################
+// Firebase Svelte Stores
+// These keep local variables in sync with firestore
+// #####################
+
+let currentFirebaseUser = writable<User | undefined>();
+onAuthStateChanged(AUTH, (user) => {
+  if (user === null) {
+    currentFirebaseUser.set(undefined);
+  } else {
+    currentFirebaseUser.set(user);
+  }
+});
+
+let currentUserWritable = writable<GameUser | undefined>();
+currentFirebaseUser.subscribe((user) => {
+  if (user) {
+    return onSnapshot(doc(userCollection, user.uid), (next) => {
+      currentUserWritable.set(next.data());
+    });
+  }
+});
+export const currentUser = derived(
+  [currentFirebaseUser, currentUserWritable],
+  ([currentFirebaseUser, currentUserWritable]) => {
+    return {
+      auth: currentFirebaseUser,
+      info: currentUserWritable,
+      async updateDisplay(displayName: string) {
+        updateDoc(doc(userCollection, currentUserWritable?.uid), {
+          displayName,
+        });
+      },
+    };
+  },
+);
 
 export { AUTH, DB };

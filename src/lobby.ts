@@ -1,4 +1,3 @@
-import type { User } from "firebase/auth";
 import { SiteError } from "./models/error";
 import {
   GAME_MODES,

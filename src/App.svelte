@@ -1,8 +1,6 @@
 <script lang="ts">
+  import { currentUser } from "./firebase";
   import { LOBBY } from "./firebase/lobby.";
-  import { currentUser } from "./firebase/store";
-  import { userCollection } from "./firebase/user";
-  import { doc, increment, updateDoc } from "firebase/firestore";
 
   function renderSection(
     list: Record<string, { display: string; description: string }>,
@@ -27,9 +25,7 @@
 
     let formData = new FormData(target);
 
-    updateDoc(doc(userCollection, $currentUser.info?.uid), {
-      displayName: formData.get("displayName") as string,
-    });
+    $currentUser.updateDisplay(formData.get("displayName") as string);
   };
 
   let members = $derived($LOBBY.members);

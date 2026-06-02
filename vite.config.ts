@@ -12,9 +12,26 @@ export default defineConfig({
   base: "/13-comp-database-assesment",
   build: {
     target: "es2015",
-    sourcemap: true,
     rolldownOptions: {
       input: ["index.html", "lobby.html"],
+      output: {
+        codeSplitting: {
+          groups: [
+            {
+              test: /node_modules\/firebase\/auth/,
+              name: "auth",
+            },
+            {
+              test: /node_modules\/firebase\/database/,
+              name: "realtime",
+            },
+            {
+              test: /node_modules\/firebase\/firestore/,
+              name: "firestore",
+            },
+          ],
+        },
+      },
     },
   },
 });
