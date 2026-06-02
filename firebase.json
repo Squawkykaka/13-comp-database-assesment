@@ -19,5 +19,8 @@
   },
   "auth": {
     "providers": {}
+  },
+  "database": {
+    "rules": "database.rules.json"
   }
 }

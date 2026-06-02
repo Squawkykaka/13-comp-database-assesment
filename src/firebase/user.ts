@@ -50,9 +50,8 @@ export async function signInGoogle() {
     await setDoc(ref.withConverter(null), {
       displayName: userCred.user.displayName ?? "TEST",
       joinDate: serverTimestamp(),
-      losses: 0,
-      wins: 0,
-      photoURL: null,
+      quote: "",
+      photoURL: userCred.user.photoURL
     });
   }
 }

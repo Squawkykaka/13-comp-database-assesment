@@ -36,16 +36,19 @@ class Lobby {
     settings: LobbySettings,
     lobbyRef: typeof this.lobbyRef,
   ) {
+    let localUser = get(currentUser).info;
+    if (localUser == undefined) throw new SiteError("USER_NOT_AUTHENTICATED");
+
     this.owner = owner;
     this.settings = writable(settings);
     this.lobbyRef = lobbyRef;
     this.currentUser = writable({
-      displayName: owner.displayName,
+      displayName: localUser.displayName,
       losses: 0,
       wins: 0,
-      quote: owner.quote,
-      user: owner.dbRef,
-      uid: owner.uid,
+      quote: localUser.quote,
+      user: localUser.dbRef,
+      uid: localUser.uid,
     });
 
     // if the settings change
@@ -80,7 +83,6 @@ class Lobby {
     });
 
     this.currentUser.subscribe((user) => {
-      console.log(user);
       setDoc(doc(this.lobbyRef, "members", user.uid), {
         displayName: user.displayName,
         quote: user.quote,
@@ -130,9 +132,19 @@ class Lobby {
 
     if (snapshot.exists()) {
       let data = snapshot.data();
-      let userData = (await getDoc(data.owner)).data();
+      let userData = (await getDoc(data.owner)).data() as any;
 
-      return { owner: userData as GameUser, settings: data.settings };
+      return {
+        owner: {
+          displayName: userData.displayName,
+          joinDate: userData.joinDate,
+          quote: userData.quote,
+          photoURL: userData.photoURL === null ? undefined : userData.photoURL,
+          dbRef: data.owner,
+          uid: data.owner.id,
+        },
+        settings: data.settings,
+      };
     } else {
       throw new SiteError("LOBBY_NONEXISTENT");
     }
