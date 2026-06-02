@@ -88,3 +88,39 @@ make a mockup of what my database will look like, make sure this changes as i de
 give some wirframes of page layout, this is where iterative excellee development happens
 make some basic vitests tests to show teacher
 maybe setup the local firebase testing thingymagig
+
+# 02/06 
+Ive realised that my ENTIRE way of using firebase is bad and gross
+currently i use svelete stores, which i did not understand how they work and are making things difficult
+lobbySettings and lobbyMembers are global variables which when i dont magically set them, my game page then breaks when i go to it
+
+i need to fix it.
+- When i navigate to the active lobby page, i want it so it shows a loading screen, then behind the scenes connecting / creating the lobby happens
+  - firebase data needs a reliable way to be synced to a store, perhaps $effect could be useful
+  - stuff needs to not be gross 
+
+Ive decided to change the way user information is stored in the database, instead of in a lobby having a reference to a user, it will contain data for that user in the current session
+## user (as member)
+```yaml
+{userid}:
+  displayName: string
+  quote: string
+  wins: number
+  loses: number
+```
+## user (in root users)
+```yaml
+{userid}:
+  displayName: string,
+  joinDate: date,
+  photoURL: string,
+  quote: string,
+```
+
+## gamehistory (later feature)
+```yaml
+gameHistory:
+  {gameid}:
+    winner: ref
+    loser: ref
+``` 

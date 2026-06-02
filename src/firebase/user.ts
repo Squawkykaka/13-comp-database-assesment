@@ -8,30 +8,36 @@ import {
   type SnapshotOptions,
 } from "firebase/firestore";
 import { AUTH, DB } from ".";
-import type { FirebaseUser } from "../models/user";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import type { GameUser } from "../models/user";
 
 export const userConverter = {
-  fromFirestore(snapshot: QueryDocumentSnapshot, options: SnapshotOptions): FirebaseUser {
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options: SnapshotOptions,
+  ): GameUser {
     const data = snapshot.data(options)!;
 
     return {
       displayName: data.displayName,
       joinDate: data.joinDate,
-      losses: data.losses,
-      wins: data.wins,
-      photoURL: data.photUrl === null ? undefined : data.photoURL,
+      quote: "",
+      photoURL: data.photoUrl === null ? undefined : data.photoURL,
       uid: snapshot.id,
+      dbRef: doc(userCollection, snapshot.id),
     };
   },
-  toFirestore(user: FirebaseUser) {
+  toFirestore(user: GameUser) {
     return {
-      ...user,
+      displayName: user.displayName,
+      joinDate: user.joinDate,
       photoURL: user.photoURL ?? null,
     };
   },
 };
-export const userCollection = collection(DB, "users").withConverter(userConverter);
+export const userCollection = collection(DB, "users").withConverter(
+  userConverter,
+);
 
 export async function signInGoogle() {
   const userCred = await signInWithPopup(AUTH, new GoogleAuthProvider());
@@ -41,13 +47,12 @@ export async function signInGoogle() {
   let data = document.data();
   if (data === undefined) {
     console.log("MAKING DUMMY USER");
-    await setDoc(ref, {
+    await setDoc(ref.withConverter(null), {
       displayName: userCred.user.displayName ?? "TEST",
       joinDate: serverTimestamp(),
       losses: 0,
       wins: 0,
-      uid: userCred.user.uid,
-      photoURL: undefined,
+      photoURL: null,
     });
   }
 }

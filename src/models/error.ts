@@ -5,14 +5,18 @@ export const ERROR_MESSAGES = {
   USER_NOT_AUTHENTICATED: "The user is not signed in.",
   USER_INFO_DOES_NOT_EXIST: "The user information does not exist",
   CANNOT_CREATE_LOBBY: "Failed to create the lobby",
+  LOBBY_NONEXISTENT: "The requested lobby does not exist",
+  INVALID_LOBBY_SETTINGS: "The requested lobby settings are invalid."
 };
 type ErrorCode = keyof typeof ERROR_MESSAGES;
 
 export class SiteError {
   readonly code: ErrorCode;
   readonly message: string;
-  constructor(code: ErrorCode) {
+  readonly extra: any[] = [];
+  constructor(code: ErrorCode, ...extraInfo: any[]) {
     this.code = code;
     this.message = ERROR_MESSAGES[code];
+    this.extra = extraInfo;
   }
 }

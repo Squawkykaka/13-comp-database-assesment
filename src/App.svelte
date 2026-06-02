@@ -1,32 +1,8 @@
 <script lang="ts">
-  import UserInfo from "./components/UserInfo.svelte";
+  import { LOBBY } from "./firebase/lobby.";
+  import { currentUser } from "./firebase/store";
   import { userCollection } from "./firebase/user";
-  import { beginGames } from "./game/lobbySplitting";
-  import { SiteError } from "./models/error";
-  import {
-    GAME_MODES,
-    GAME_STYLES,
-    MULTIPLAYER_MODES,
-  } from "./models/gameSettings";
-  import {
-    activeGame,
-    authReady,
-    firebaseAuthUser,
-    lobbySettings,
-    lobbyMembers,
-    isLobbyOwner,
-    currentUser,
-  } from "./models/stores";
   import { doc, increment, updateDoc } from "firebase/firestore";
-
-  let playerEntries = $derived(
-    Object.entries($lobbyMembers).sort(([_, a], [__, b]) =>
-      a.uid == $firebaseAuthUser?.uid ? 1 : a.wins + b.wins,
-    ),
-  );
-  let errorMessage = $state("");
-  activeGame.subscribe((stuff) => console.log(stuff));
-  lobbySettings.subscribe((stuff) => console.log(stuff));
 
   function renderSection(
     list: Record<string, { display: string; description: string }>,
@@ -52,54 +28,51 @@
     let formData = new FormData(target);
 
     // if its null return itself, otherwise update the displayName
-    updateDoc(doc(userCollection, $currentUser?.uid), {
-      displayName: formData.get("displayName") as string,
-      wins: increment(5)
+    $LOBBY.currentUser.update((old) => {
+      return {
+        ...old,
+        displayName: formData.get("displayName") as string,
+      };
     });
   };
 
-  let startButton = () => {
-    try {
-      beginGames();
-    } catch (error) {
-      if (error instanceof SiteError) {
-        errorMessage = error.message;
-      }
-    }
-  };
+  let members = $derived($LOBBY.members);
+  // let currentLobbyUser = $derived($LOBBY.currentUser);
 </script>
 
-<div>
-  {#if $authReady}
-    <p>{$firebaseAuthUser?.email}</p>
-  {:else}
-    <p>Loading...</p>
-  {/if}
-</div>
+{#if $LOBBY}
+  <section>
+    <p><strong>Code: </strong> {$LOBBY.lobbyRef.id}</p>
+  </section>
+  <div>
+    <h3>Players: {$members.length}</h3>
+    <ul>
+      {#each $members as participant}
+        <li>
+          {#if $currentUser.auth && participant.uid == $currentUser.auth.uid}
+            <form data-user-uid={participant.uid} onsubmit={updatePlayer}>
+              <label for="displayName" hidden>New Name</label>
+              <input
+                type="text"
+                name="displayName"
+                value={participant.displayName}
+              />
+              <button type="submit">Submit</button>
+            </form>
+          {:else}
+            <p>{participant.displayName}</p>
+          {/if}
 
-<UserInfo></UserInfo>
-<div>
-  <h3>Players: {playerEntries.length}</h3>
-  <ul>
-    {#each playerEntries as [uid, player]}
-      <li>
-        {#if $firebaseAuthUser && player.uid == $firebaseAuthUser.uid}
-          <form data-user-uid={uid} onsubmit={updatePlayer}>
-            <label for="displayName" hidden>New Name</label>
-            <input type="text" name="displayName" value={player.displayName} />
-            <button type="submit">Submit</button>
-          </form>
-        {:else}
-          <p>{player.displayName}</p>
-        {/if}
+          <p><em>{participant.quote == "" ? "..." : participant.quote}</em></p>
+          <p><strong>Wins:</strong> {participant.wins}</p>
+          <p><strong>Losses:</strong> {participant.losses}</p>
+        </li>
+      {/each}
+    </ul>
+  </div>
+{/if}
 
-        <p><strong>Wins:</strong> {player.wins}</p>
-        <p><strong>Losses:</strong> {player.losses}</p>
-      </li>
-    {/each}
-  </ul>
-</div>
-
+<!-- 
 <section>
   <table>
     <caption>Game Options</caption>
@@ -144,4 +117,4 @@
 
   <div id="gameBoard"></div>
   <p id="errorBar">{errorMessage}</p>
-</section>
+</section> -->
