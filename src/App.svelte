@@ -28,21 +28,22 @@
     $currentUser.updateDisplay(formData.get("displayName") as string);
   };
 
-  let members = $derived($LOBBY.members);
+  let lobbyMembers = $derived($LOBBY.members);
+  let members = $derived(Object.entries($lobbyMembers))
   // let currentLobbyUser = $derived($LOBBY.currentUser);
 </script>
 
 {#if $LOBBY}
   <section>
-    <p><strong>Code: </strong> {$LOBBY.lobbyRef.id}</p>
+    <p><strong>Code: </strong> {$LOBBY.lobbyCode}</p>
   </section>
   <div>
-    <h3>Players: {$members.length}</h3>
+    <h3>Players: {members.length}</h3>
     <ul>
-      {#each $members as participant}
+      {#each members as [uid, participant]}
         <li>
-          {#if $currentUser.auth && participant.uid == $currentUser.auth.uid}
-            <form data-user-uid={participant.uid} onsubmit={updatePlayer}>
+          {#if $currentUser.auth && uid == $currentUser.auth.uid}
+            <form data-user-uid={uid} onsubmit={updatePlayer}>
               <label for="displayName" hidden>New Name</label>
               <input
                 type="text"
@@ -52,7 +53,7 @@
               <button type="submit">Submit</button>
             </form>
           {:else}
-            <p>{participant.displayName}</p>
+            <p>Name: {participant.displayName}</p>
           {/if}
 
           <p><em>{participant.quote == "" ? "..." : participant.quote}</em></p>

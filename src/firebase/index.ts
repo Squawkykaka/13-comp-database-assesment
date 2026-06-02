@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import {
+  collection,
   connectFirestoreEmulator,
   doc,
   getFirestore,
@@ -16,9 +17,9 @@ import {
 } from "firebase/auth";
 import { derived, readable, writable } from "svelte/store";
 import type { GameUser } from "../models/user";
-import { userCollection } from "./user";
-import type { CollectionReference, DocumentData } from "firebase/firestore";
+import type { CollectionReference, DocumentData, QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 import type { User } from "firebase/auth";
+import { connectDatabaseEmulator, getDatabase } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBjjSwm8ARN8jb-Z23XXMEymlCgLzv7qOI",
@@ -31,13 +32,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const DB = getFirestore(app);
-// const RDB = getDatabase(app);
+const RDB = getDatabase(app);
 const AUTH = getAuth(app);
 
 if (import.meta.env.DEV) {
   connectFirestoreEmulator(DB, "localhost", 8081);
   connectAuthEmulator(AUTH, "http://localhost:9099");
-  // connectDatabaseEmulator(RDB, "localhost", 9000);
+  connectDatabaseEmulator(RDB, "localhost", 9000);
 }
 
 await setPersistence(AUTH, browserLocalPersistence);
@@ -55,6 +56,38 @@ export function createFirestoreCollectionStore<T, U extends DocumentData>(
     return unsubscribe;
   });
 }
+
+// #####################
+// User collection converter
+// #####################
+export const userConverter = {
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options: SnapshotOptions,
+  ): GameUser {
+    const data = snapshot.data(options)!;
+
+    return {
+      displayName: data.displayName,
+      joinDate: data.joinDate,
+      quote: data.quote,
+      photoURL: data.photoUrl === null ? undefined : data.photoURL,
+      uid: snapshot.id,
+      dbRef: doc(userCollection, snapshot.id),
+    };
+  },
+  toFirestore(user: GameUser) {
+    return {
+      displayName: user.displayName,
+      joinDate: user.joinDate,
+      photoURL: user.photoURL ?? null,
+      quote: user.quote,
+    };
+  },
+};
+export const userCollection = collection(DB, "users").withConverter(
+  userConverter,
+);
 
 // #####################
 // Firebase Svelte Stores
@@ -93,4 +126,4 @@ export const currentUser = derived(
   },
 );
 
-export { AUTH, DB };
+export { AUTH, DB, RDB };

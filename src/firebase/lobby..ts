@@ -1,13 +1,5 @@
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  onSnapshot,
-  setDoc,
-  updateDoc,
-} from "firebase/firestore";
-import { currentUser, DB } from ".";
+import { doc, getDoc } from "firebase/firestore";
+import { currentUser, RDB, userCollection } from ".";
 import type { GameUser, LobbyMember } from "../models/user";
 import {
   derived,
@@ -18,27 +10,54 @@ import {
 } from "svelte/store";
 import { REQUESTED_LOBBY, type LobbySettings } from "../lobby";
 import { SiteError } from "../models/error";
-import { userCollection } from "./user";
-import type { DocumentReference } from "firebase/firestore";
 
-const gameRef = doc(DB, "games", "tictactoe");
-const lobbies = collection(gameRef, "lobbies");
+import {
+  DataSnapshot,
+  onChildAdded,
+  onChildChanged,
+  onChildRemoved,
+  onValue,
+  push,
+  ref,
+  set,
+  get as getRef,
+  update,
+  type DatabaseReference,
+  child,
+  onDisconnect,
+} from "firebase/database";
+
+function makeid(length: number) {
+  let result = "";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const charactersLength = characters.length;
+  let counter = 0;
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    counter += 1;
+  }
+  return result;
+}
 
 class Lobby {
-  members: Writable<LobbyMember[]> = writable([]);
+  members: Writable<{ [x: string]: LobbyMember }> = writable({});
   owner: GameUser;
   settings: Writable<LobbySettings>;
-  lobbyRef: DocumentReference;
+  lobbyRef: DatabaseReference;
   currentUser: Readable<LobbyMember>;
+  lobbyCode: string;
 
   private constructor(
     owner: GameUser,
     settings: LobbySettings,
-    lobbyRef: typeof this.lobbyRef,
+    lobbyRef: DatabaseReference,
+    lobbyCode: string,
   ) {
     this.owner = owner;
     this.settings = writable(settings);
     this.lobbyRef = lobbyRef;
+    this.lobbyCode = lobbyCode;
     this.currentUser = derived(currentUser, (currentUser) => {
       if (currentUser.info) {
         return {
@@ -54,39 +73,57 @@ class Lobby {
       }
     });
 
-    // if the settings change
-    // TODO: find some way to remove these when a lobby is deleted
-    onSnapshot(lobbyRef, (next) => {
-      if (next.exists()) {
-        let data = next.data();
+    let membersRef = child(this.lobbyRef, "members");
+    let settingsRef = child(this.lobbyRef, "settings");
+
+    // delete the lobby and pincode when the game is over
+    if (owner.uid == get(currentUser).info?.uid) {
+      onDisconnect(this.lobbyRef).remove();
+    } else {
+      onDisconnect(child(membersRef, get(currentUser).info!.uid)).remove();
+    }
+    onDisconnect(ref(RDB, "pincodes/" + this.lobbyCode)).remove();
+
+    onValue(settingsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        let data = snapshot.val();
         let settings = data.settings as LobbySettings;
         this.settings.set(settings);
       }
     });
     this.settings.subscribe((next) => {
-      updateDoc(this.lobbyRef, {
-        settings: next,
-      });
+      if (next) {
+        update(settingsRef, {
+          settings: next,
+        });
+      }
     });
 
-    onSnapshot(collection(lobbyRef, "members"), (next) => {
-      let docs: LobbyMember[] = next.docs.map((current) => {
-        let data = current.data();
-        return {
-          dbRef: current,
-          displayName: data.displayName,
-          quote: data.quote,
-          losses: data.losses,
-          wins: data.wins,
-          uid: current.id,
-          user: doc(userCollection, current.id),
+    let updateChild = (data: DataSnapshot) => {
+      this.members.update((old) => {
+        old[data.key!] = {
+          displayName: data.val().displayName,
+          quote: data.val().quote,
+          losses: data.val().losses,
+          wins: data.val().wins,
+          uid: data.key!,
         };
+        return old;
       });
-      this.members.set(docs);
+    };
+
+    onChildAdded(membersRef, updateChild);
+    onChildChanged(membersRef, updateChild);
+    onChildRemoved(membersRef, (snapshot) => {
+      this.members.update((old) => {
+        delete old[snapshot.key!];
+        return old;
+      });
     });
 
     this.currentUser.subscribe((user) => {
-      setDoc(doc(this.lobbyRef, "members", user.uid), {
+      let userRef = child(membersRef, user.uid);
+      set(userRef, {
         displayName: user.displayName,
         quote: user.quote,
         losses: user.losses,
@@ -102,40 +139,48 @@ class Lobby {
       throw new Error("Attempted to create a lobby without a logged in user");
     }
 
-    let ref = await Lobby.createLobby(info, settings);
-    const lobby = new Lobby(info, settings, ref);
+    let { code, lobbyRef } = await Lobby.createLobby(info, settings);
+    const lobby = new Lobby(info, settings, lobbyRef, code);
 
     return lobby;
   }
 
   static async join(code: string): Promise<Lobby> {
-    const { owner, settings } = await Lobby.joinLobby(code);
+    const { owner, settings, reference } = await Lobby.joinLobby(code);
 
-    return new Lobby(owner, settings, doc(lobbies, code));
+    return new Lobby(owner, settings, reference, code);
   }
 
   private static async createLobby(
     owner: GameUser,
     settings: LobbySettings,
-  ): Promise<DocumentReference> {
-    // create lobby on server
-    let ref = await addDoc(lobbies, {
-      owner: owner.dbRef,
+  ): Promise<{ code: string; lobbyRef: DatabaseReference }> {
+    let lobbysRef = ref(RDB, "lobbies");
+    let lobby = push(lobbysRef);
+    set(lobby, {
+      owner: owner.uid,
       settings,
     });
-
-    return ref;
+    let code = makeid(5);
+    set(ref(RDB, "pincodes/" + code), lobby.key);
+    return { code, lobbyRef: lobby };
   }
 
   private static async joinLobby(code: string): Promise<{
     owner: GameUser;
     settings: LobbySettings;
+    reference: DatabaseReference;
   }> {
-    let snapshot = await getDoc(doc(lobbies, code));
+    let lobbyId = (await getRef(ref(RDB, "pincodes/" + code))).val();
+
+    let lobbyRef = ref(RDB, "lobbies/" + lobbyId);
+    let snapshot = await getRef(lobbyRef);
 
     if (snapshot.exists()) {
-      let data = snapshot.data();
-      let userData = (await getDoc(data.owner)).data() as any;
+      let data = snapshot.val();
+      let userData = (
+        await getDoc(doc(userCollection, data.owner))
+      ).data() as any;
 
       return {
         owner: {
@@ -147,6 +192,7 @@ class Lobby {
           uid: data.owner.id,
         },
         settings: data.settings,
+        reference: lobbyRef,
       };
     } else {
       throw new SiteError("LOBBY_NONEXISTENT");

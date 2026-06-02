@@ -1,8 +1,7 @@
 import { GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
-import { AUTH } from "../firebase";
+import { AUTH, userCollection } from "../firebase";
 import { FirebaseError } from "firebase/app";
 import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
-import { userCollection } from "../firebase/user";
 
 export async function signInGoogle() {
   const userCred = await signInWithPopup(AUTH, new GoogleAuthProvider());

@@ -15,5 +15,4 @@ export type LobbyMember = {
   losses: number;
   wins: number;
   readonly uid: string
-  user: DocumentReference<GameUser>;
 };
