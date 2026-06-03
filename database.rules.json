@@ -1,7 +1,50 @@
 {
   /* Visit https://firebase.google.com/docs/database/security to learn more about security rules. */
   "rules": {
-    ".read": true,
-    ".write": true
+    "lobbies": {
+      "$lobbyid": {
+        // Anyone can read a lobby's structure
+        ".read": true,
+
+        // Allows creating the lobby itself if it doesn't exist yet
+        ".write": "!data.exists() && newData.exists() || !newData.exists() && auth.uid === data.child('owner').val()",
+
+        "members": {
+          "$uid": {
+            // Anyone can read member info, but a user can only write to their own UID slot
+            ".read": true,
+            ".write": "auth !== null && $uid === auth.uid",
+            ".validate": "newData.hasChildren(['displayName', 'losses', 'quote', 'wins'])",
+            "$other": { ".validate": false }
+          }
+        },
+
+        "owner": {
+          // Can only be written to on creation (immutable).
+          // Enforces that the string value matches the creator's UID.
+          ".write": "!data.exists() && auth !== null && newData.val() === auth.uid",
+          ".validate": "newData.isString()"
+        },
+
+        "settings": {
+          // Only the user whose UID matches the 'owner' string value can modify settings
+          ".write": "auth !== null && data.parent().child('owner').val() === auth.uid"
+        },
+
+        // Prevents any keys other than members, owner, or settings from being created
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "pincodes": {
+      "$shortid": {
+        ".read": true,
+        ".validate": "newData.isString()",
+
+        // Dynamically picks newData (creation) or data (deletion) to do a single owner check
+        ".write": "auth !== null && root.child('lobbies/' + (newData.exists() ? newData.val() : data.val()) + '/owner').val() === auth.uid"
+      }
+    }
   }
 }
