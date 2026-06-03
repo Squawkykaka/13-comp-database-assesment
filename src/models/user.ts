@@ -14,5 +14,5 @@ export type LobbyMember = {
   quote: string;
   losses: number;
   wins: number;
-  readonly uid: string
+  readonly uid: string;
 };

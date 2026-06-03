@@ -29,8 +29,7 @@ import { connectDatabaseEmulator, getDatabase } from "firebase/database";
 const firebaseConfig = {
   apiKey: "AIzaSyBjjSwm8ARN8jb-Z23XXMEymlCgLzv7qOI",
   authDomain: "comp-database-assesment.firebaseapp.com",
-  databaseURL:
-    "https://comp-database-assesment-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL: "https://comp-database-assesment-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "comp-database-assesment",
   storageBucket: "comp-database-assesment.firebasestorage.app",
   messagingSenderId: "744210310754",
@@ -68,10 +67,7 @@ export function createFirestoreCollectionStore<T, U extends DocumentData>(
 // User collection converter
 // #####################
 export const userConverter = {
-  fromFirestore(
-    snapshot: QueryDocumentSnapshot,
-    options: SnapshotOptions,
-  ): GameUser {
+  fromFirestore(snapshot: QueryDocumentSnapshot, options: SnapshotOptions): GameUser {
     const data = snapshot.data(options)!;
 
     return {
@@ -92,9 +88,7 @@ export const userConverter = {
     };
   },
 };
-export const userCollection = collection(DB, "users").withConverter(
-  userConverter,
-);
+export const userCollection = collection(DB, "users").withConverter(userConverter);
 
 // #####################
 // Firebase Svelte Stores
@@ -123,7 +117,6 @@ currentFirebaseUser.subscribe((user) => {
     currentUserWritable.set(undefined);
   }
 });
-
 
 export const currentUser = derived(
   [currentFirebaseUser, currentUserWritable],

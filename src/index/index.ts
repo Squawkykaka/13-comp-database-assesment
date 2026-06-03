@@ -20,7 +20,6 @@ export async function signInGoogle() {
   }
 }
 
-
 onAuthStateChanged(AUTH, (user) => {
   let signupButtonEl = document.querySelector<HTMLButtonElement>("#signUp > button")!;
 

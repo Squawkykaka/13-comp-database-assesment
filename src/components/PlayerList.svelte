@@ -18,8 +18,7 @@
     $currentUser.updateDisplay(formData.get("displayName") as string);
   };
 
-  let lobbyMembers = $derived($LOBBY.members);
-  let members = $derived(Object.entries($lobbyMembers));
+  let members = $derived(Object.entries($LOBBY.members));
 </script>
 
 <section>

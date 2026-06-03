@@ -1,13 +1,7 @@
 import { doc, getDoc } from "firebase/firestore";
 import { currentUser, RDB, userCollection } from ".";
 import type { GameUser, LobbyMember } from "../models/user";
-import {
-  derived,
-  get,
-  writable,
-  type Readable,
-  type Writable,
-} from "svelte/store";
+import { derived, get, writable, type Readable } from "svelte/store";
 import { REQUESTED_LOBBY, type LobbySettings } from "../lobby";
 import { SiteError } from "../models/error";
 
@@ -40,9 +34,9 @@ function makeid(length: number) {
 }
 
 class Lobby {
-  members: Writable<{ [x: string]: LobbyMember }> = writable({});
+  members: { [x: string]: LobbyMember } = {};
   owner: GameUser;
-  settingsData: LobbySettings;
+  private settingsData: LobbySettings;
   lobbyRef: DatabaseReference;
   // stores the current lobby member, this is different from the global user
   currentMember: Readable<LobbyMember>;
@@ -51,9 +45,7 @@ class Lobby {
   set settings(next: LobbySettings) {
     let settingsRef = child(this.lobbyRef, "settings");
     this.settingsData = next;
-    if (next) {
-      update(settingsRef, next);
-    }
+    update(settingsRef, next);
   }
   get settings() {
     return this.settingsData;
@@ -103,25 +95,19 @@ class Lobby {
     });
 
     let updateChild = (data: DataSnapshot) => {
-      this.members.update((old) => {
-        old[data.key!] = {
-          displayName: data.val().displayName,
-          quote: data.val().quote,
-          losses: data.val().losses,
-          wins: data.val().wins,
-          uid: data.key!,
-        };
-        return old;
-      });
+      this.members[data.key!] = {
+        displayName: data.val().displayName,
+        quote: data.val().quote,
+        losses: data.val().losses,
+        wins: data.val().wins,
+        uid: data.key!,
+      };
     };
 
     onChildAdded(membersRef, updateChild);
     onChildChanged(membersRef, updateChild);
     onChildRemoved(membersRef, (snapshot) => {
-      this.members.update((old) => {
-        delete old[snapshot.key!];
-        return old;
-      });
+      delete this.members[snapshot.key!];
     });
 
     this.currentMember.subscribe((user) => {
@@ -181,9 +167,7 @@ class Lobby {
 
     if (snapshot.exists()) {
       let data = snapshot.val();
-      let userData = (
-        await getDoc(doc(userCollection, data.owner))
-      ).data() as any;
+      let userData = (await getDoc(doc(userCollection, data.owner))).data() as any;
 
       return {
         owner: {

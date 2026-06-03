@@ -6,7 +6,7 @@ export const ERROR_MESSAGES = {
   USER_INFO_DOES_NOT_EXIST: "The user information does not exist",
   CANNOT_CREATE_LOBBY: "Failed to create the lobby",
   LOBBY_NONEXISTENT: "The requested lobby does not exist",
-  INVALID_LOBBY_SETTINGS: "The requested lobby settings are invalid."
+  INVALID_LOBBY_SETTINGS: "The requested lobby settings are invalid.",
 };
 type ErrorCode = keyof typeof ERROR_MESSAGES;
 

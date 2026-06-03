@@ -42,4 +42,3 @@ export const GAME_STYLES = {
 export type GameMode = keyof typeof GAME_MODES;
 export type MultiplayerMode = keyof typeof MULTIPLAYER_MODES;
 export type GameStyle = keyof typeof GAME_STYLES;
-

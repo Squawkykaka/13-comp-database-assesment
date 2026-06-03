@@ -21,10 +21,7 @@ export type LobbySettings = {
 };
 
 // Checks if a string is inside T
-function isOneOf<T extends object>(
-  value: string | null,
-  object: T,
-): value is keyof T & string {
+function isOneOf<T extends object>(value: string | null, object: T): value is keyof T & string {
   return value !== null && value in object;
 }
 
@@ -61,8 +58,7 @@ function getLobbyRequestFromUrlParams():
   }
 }
 
-export const REQUESTED_LOBBY =
-  getLobbyRequestFromUrlParams();
+export const REQUESTED_LOBBY = getLobbyRequestFromUrlParams();
 
 AUTH.authStateReady().then(() => {
   console.log("Auth ready");
