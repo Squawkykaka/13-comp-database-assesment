@@ -42,11 +42,22 @@ function makeid(length: number) {
 class Lobby {
   members: Writable<{ [x: string]: LobbyMember }> = writable({});
   owner: GameUser;
-  settings: Writable<LobbySettings>;
+  settingsData: LobbySettings;
   lobbyRef: DatabaseReference;
   // stores the current lobby member, this is different from the global user
   currentMember: Readable<LobbyMember>;
   lobbyCode: string;
+
+  set settings(next: LobbySettings) {
+    let settingsRef = child(this.lobbyRef, "settings");
+    this.settingsData = next;
+    if (next) {
+      update(settingsRef, next);
+    }
+  }
+  get settings() {
+    return this.settingsData;
+  }
 
   private constructor(
     owner: GameUser,
@@ -55,9 +66,10 @@ class Lobby {
     lobbyCode: string,
   ) {
     this.owner = owner;
-    this.settings = writable(settings);
     this.lobbyRef = lobbyRef;
     this.lobbyCode = lobbyCode;
+    this.settingsData = settings;
+    this.settings = settings;
     this.currentMember = derived(currentUser, (currentUser) => {
       if (currentUser.info) {
         return {
@@ -74,7 +86,6 @@ class Lobby {
     });
 
     let membersRef = child(this.lobbyRef, "members");
-    let settingsRef = child(this.lobbyRef, "settings");
 
     // delete the lobby and pincode when the game is over
     if (owner.uid == get(currentUser).info?.uid) {
@@ -84,14 +95,10 @@ class Lobby {
     }
     onDisconnect(ref(RDB, "pincodes/" + this.lobbyCode)).remove();
 
+    let settingsRef = child(this.lobbyRef, "settings");
     onValue(settingsRef, (snapshot) => {
       if (snapshot.exists()) {
-        this.settings.set(snapshot.val() as LobbySettings);
-      }
-    });
-    this.settings.subscribe((next) => {
-      if (next) {
-        update(settingsRef, next);
+        this.settings = snapshot.val() as LobbySettings;
       }
     });
 
