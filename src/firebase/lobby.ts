@@ -44,7 +44,8 @@ class Lobby {
   owner: GameUser;
   settings: Writable<LobbySettings>;
   lobbyRef: DatabaseReference;
-  currentUser: Readable<LobbyMember>;
+  // stores the current lobby member, this is different from the global user
+  currentMember: Readable<LobbyMember>;
   lobbyCode: string;
 
   private constructor(
@@ -57,7 +58,7 @@ class Lobby {
     this.settings = writable(settings);
     this.lobbyRef = lobbyRef;
     this.lobbyCode = lobbyCode;
-    this.currentUser = derived(currentUser, (currentUser) => {
+    this.currentMember = derived(currentUser, (currentUser) => {
       if (currentUser.info) {
         return {
           displayName: currentUser.info.displayName,
@@ -116,7 +117,7 @@ class Lobby {
       });
     });
 
-    this.currentUser.subscribe((user) => {
+    this.currentMember.subscribe((user) => {
       let userRef = child(membersRef, user.uid);
       set(userRef, {
         displayName: user.displayName,
