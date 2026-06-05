@@ -10,16 +10,11 @@ body {
   margin: 0;
 }
 
-@media screen and (width <= 500px) {
-  section {
-    flex-direction: column;
-    justify-content: none;
-
-    > button {
-      width: 70%;
-      height: 40%;
-    }
-  }
+input:invalid {
+  background-color: red;
+}
+input:valid {
+  background-color: green;
 }
 
 form > div {

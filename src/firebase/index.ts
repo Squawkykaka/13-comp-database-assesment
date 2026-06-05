@@ -3,17 +3,22 @@ import {
   collection,
   connectFirestoreEmulator,
   doc,
+  getDoc,
   getFirestore,
   onSnapshot,
   query,
+  serverTimestamp,
+  setDoc,
   updateDoc,
 } from "firebase/firestore";
 import {
   browserLocalPersistence,
   connectAuthEmulator,
   getAuth,
+  GoogleAuthProvider,
   onAuthStateChanged,
   setPersistence,
+  signInWithPopup,
 } from "firebase/auth";
 import { derived, readable, writable } from "svelte/store";
 import type { GameUser } from "../models/user";
@@ -48,6 +53,23 @@ if (import.meta.env.DEV) {
 }
 
 await setPersistence(AUTH, browserLocalPersistence);
+
+export async function signInGoogle() {
+  const userCred = await signInWithPopup(AUTH, new GoogleAuthProvider());
+  let ref = doc(userCollection, userCred.user.uid);
+
+  let document = await getDoc(ref);
+  let data = document.data();
+  if (data === undefined) {
+    console.log("MAKING DUMMY USER");
+    await setDoc(ref.withConverter(null), {
+      displayName: userCred.user.displayName ?? "TEST",
+      joinDate: serverTimestamp(),
+      quote: "",
+      photoURL: userCred.user.photoURL,
+    });
+  }
+}
 
 export function createFirestoreCollectionStore<T, U extends DocumentData>(
   reference: CollectionReference<T, U>,

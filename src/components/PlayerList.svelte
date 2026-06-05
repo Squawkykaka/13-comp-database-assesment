@@ -18,7 +18,8 @@
     $currentUser.updateDisplay(formData.get("displayName") as string);
   };
 
-  let members = $derived(Object.entries($LOBBY.members));
+  let { members: membersOrig } = $LOBBY;
+  let members = $derived(Object.entries($membersOrig));
 </script>
 
 <section>

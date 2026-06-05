@@ -58,13 +58,13 @@ function getLobbyRequestFromUrlParams():
   }
 }
 
-export const REQUESTED_LOBBY = getLobbyRequestFromUrlParams();
+// export const REQUESTED_LOBBY = getLobbyRequestFromUrlParams();
 
-AUTH.authStateReady().then(() => {
-  console.log("Auth ready");
-  let user = AUTH.currentUser;
+// AUTH.authStateReady().then(() => {
+//   console.log("Auth ready");
+//   let user = AUTH.currentUser;
 
-  if (user === null) {
-    window.location.href = import.meta.env.BASE_URL;
-  }
-});
+//   if (user === null) {
+//     window.location.href = import.meta.env.BASE_URL;
+//   }
+// });

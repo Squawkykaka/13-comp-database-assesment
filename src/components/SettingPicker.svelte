@@ -8,6 +8,8 @@
   } from "../models/gameSettings";
 
   let isLobbyOwner = $derived($currentUser.auth?.uid == $LOBBY.owner.uid);
+  let settings = $derived($LOBBY?.settings);
+  $inspect($settings)
 </script>
 
 {#snippet options(input: { [s: string]: any })}
@@ -24,7 +26,7 @@
         <th scope="row">Game Mode</th>
         <td>
           <select
-            bind:value={$LOBBY.settings.gameMode}
+            bind:value={$settings.gameMode}
             disabled={!isLobbyOwner}
           >
             {@render options(GAME_MODES)}
@@ -35,7 +37,7 @@
         <th scope="row">Multiplayer Type</th>
         <td>
           <select
-            bind:value={$LOBBY.settings.multiplayerType}
+            bind:value={$settings.multiplayerType}
             disabled={!isLobbyOwner}
           >
             {@render options(MULTIPLAYER_MODES)}
@@ -46,7 +48,7 @@
         <th scope="row">Game Mode</th>
         <td>
           <select
-            bind:value={$LOBBY.settings.gameStyle}
+            bind:value={$settings.gameStyle}
             disabled={!isLobbyOwner}
           >
             {@render options(GAME_STYLES)}

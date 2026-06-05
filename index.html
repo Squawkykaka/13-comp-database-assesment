@@ -3,37 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TicTacToe</title>
-    <link rel="stylesheet" href="/src/main.css" />
+    <title>Lobby</title>
   </head>
   <body>
-    <div>
-      <section id="signUp">
-        <h2>Sign in, or create an account</h2>
-        <button>Sign In</button>
-        <p id="errorText"></p>
-      </section>
-      <section hidden>
-        <h3>User: Bob</h3>
-        <img src="" alt="Test" />
-      </section>
-    </div>
-    <div id="lobbyOptions" hidden>
-      <h2>Join a match</h2>
-      <form autocomplete="off" method="get" action="/13-comp-database-assesment/lobby">
-        <label for="code">Code</label>
-        <input type="text" name="code" />
-      </form>
-      <h2>OR</h2>
-      <h2>Create One</h2>
-      <form
-        id="lobbyCreateForm"
-        autocomplete="off"
-        method="get"
-        action="/13-comp-database-assesment/lobby"
-      ></form>
-    </div>
-    <script type="module" src="/src/index/creationOptions.ts"></script>
-    <script type="module" src="/src/index/index.ts"></script>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
