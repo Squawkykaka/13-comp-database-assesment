@@ -2,6 +2,7 @@
   /* Visit https://firebase.google.com/docs/database/security to learn more about security rules. */
   "rules": {
     "lobbies": {
+      ".read": true,
       "$lobbyid": {
         // Anyone can read a lobby's structure
         ".read": true,

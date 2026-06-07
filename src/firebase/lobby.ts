@@ -1,13 +1,7 @@
 import { doc, getDoc } from "firebase/firestore";
 import { AUTH, currentUser, RDB, userCollection } from ".";
 import type { GameUser, LobbyMember } from "../models/user";
-import {
-  derived,
-  get,
-  writable,
-  type Readable,
-  type Writable,
-} from "svelte/store";
+import { derived, get, writable, type Readable, type Writable } from "svelte/store";
 import { type LobbySettings } from "../lobby";
 import { SiteError } from "../models/error";
 
@@ -153,6 +147,13 @@ export class Lobby {
     return lobby;
   }
 
+  static async joinPincode(code: string): Promise<Lobby> {
+    let lobbyId = (await getRef(ref(RDB, "pincodes/" + code))).val();
+
+    const { owner, settings, reference, members } = await Lobby.joinLobby(lobbyId);
+
+    return new Lobby(owner, settings, reference, code, members);
+  }
   static async join(code: string): Promise<Lobby> {
     const { owner, settings, reference, members } = await Lobby.joinLobby(code);
 
@@ -176,21 +177,18 @@ export class Lobby {
     return { code, lobbyRef: lobby };
   }
 
-  private static async joinLobby(code: string): Promise<{
+  private static async joinLobby(lobbyId: string): Promise<{
     owner: GameUser;
     settings: LobbySettings;
     reference: DatabaseReference;
     members: { [x: string]: LobbyMember };
   }> {
-    let lobbyId = (await getRef(ref(RDB, "pincodes/" + code))).val();
     let lobbyRef = ref(RDB, "lobbies/" + lobbyId);
     let snapshot = await getRef(lobbyRef);
 
     if (snapshot.exists()) {
       let data = snapshot.val();
-      let userData = (
-        await getDoc(doc(userCollection, data.owner))
-      ).data() as any;
+      let userData = (await getDoc(doc(userCollection, data.owner))).data() as any;
 
       let membersData = (await getRef(child(lobbyRef, "members"))).val() ?? {};
       for (const id of Object.keys(membersData)) {

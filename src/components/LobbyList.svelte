@@ -8,6 +8,8 @@
   import { RDB } from "../firebase";
   import type { LobbyMember } from "../models/user";
   import type { LobbySettings } from "../lobby";
+  import { LOBBY, Lobby } from "../firebase/lobby";
+  import { writable } from "svelte/store";
 
   type Lobby = {
     owner: string;
@@ -16,20 +18,44 @@
   };
 
   let q = ref(RDB, "/lobbies");
-  let lobbies = $state<{ [id: string]: Lobby }>({});  
+  let lobbies = writable<{ [id: string]: Lobby }>({});
   onChildAdded(q, (snapshot) => {
-    console.log("added child");
-    
-    lobbies[snapshot.key!] = snapshot.val() as Lobby;
+    lobbies.update((old) => {
+      old[snapshot.key!] = snapshot.val() as Lobby;
+      return old;
+    });
   });
   onChildChanged(q, (snapshot) => {
-    lobbies[snapshot.key!] = snapshot.val() as Lobby;
+    lobbies.update((old) => {
+      old[snapshot.key!] = snapshot.val() as Lobby;
+      return old;
+    });
   });
   onChildRemoved(q, (snapshot) => {
-    delete lobbies[snapshot.key!];
+    lobbies.update((old) => {
+      delete old[snapshot.key!];
+      return old;
+    });
   });
 
-  $inspect(lobbies)
+  $inspect(lobbies);
 </script>
 
-<p>Lobbies: {Object.entries(lobbies)}</p>
+<div>
+  <ul>
+    {#each Object.entries($lobbies) as [id, information]}
+      <p>Owner: {information.members[information.owner].displayName}</p>
+      <em
+        >{information.settings.description
+          ? information.settings.description
+          : "No description"}</em
+      >
+      <p>Members: {Object.entries(information.members ?? {}).length}</p>
+      <em
+        >{information.settings.gameMode} -- {information.settings.gameStyle}</em
+      >
+      <button onclick={async () => LOBBY.set(await Lobby.join(id))}>Join</button
+      >
+    {/each}
+  </ul>
+</div>

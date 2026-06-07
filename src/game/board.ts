@@ -29,19 +29,17 @@ export class Board {
   $currentlyCirclesTurn = true;
   $state: GameState = { status: "playing" };
 
-  runMove(position: number): boolean | null {
+  runMove(position: number) {
     if (this.$state.status !== "playing") {
       return null;
     }
 
-    let success = this.change(position, this.$currentlyCirclesTurn);
-    if (!success) return null;
+    this.change(position, this.$currentlyCirclesTurn ? "Circle" : "Cross");
 
     this.$updateGameState();
     if (this.$state.status === "playing") {
       this.$currentlyCirclesTurn = !this.$currentlyCirclesTurn;
     }
-    return success;
   }
 
   public get currentTurn(): TileType {
@@ -52,9 +50,9 @@ export class Board {
     return this.$state;
   }
 
-  change(position: number, circlesMove: boolean): boolean {
+  change(position: number, tileType: TileType) {
     if (position > 8) {
-      return false;
+      throw "Out of bounds"
     }
     console.log("Circle:", numberToBits(this.$circleList));
     console.log("Cross:", numberToBits(this.$crossList));
@@ -65,17 +63,15 @@ export class Board {
     // if any bit is not in the same spot as another then we can set that, and move on otherwise error out.
     if ((moveInt & mergedSides) == 0) {
       // if it is circles move OR in the new move
-      if (circlesMove) {
+      if (tileType == "Circle") {
         this.$circleList |= moveInt;
       } else {
         this.$crossList |= moveInt;
       }
-      return true;
     } else {
       console.error(
-        `Attempted to set tile type to ${circlesMove ? "Circle" : "Cross"} at position ${position} when it is already ${this.getTile(position) ?? "Nothing"}`,
+        `Attempted to set tile type to ${tileType} at position ${position} when it is already ${this.getTile(position) ?? "Nothing"}`,
       );
-      return false;
     }
   }
 

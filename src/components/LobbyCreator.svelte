@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Lobby, LOBBY } from "../firebase/lobby";
-  import type { JoinLobby, LobbySettings } from "../lobby";
+  import type { LobbySettings } from "../lobby";
   import {
     GAME_MODES,
     GAME_STYLES,
@@ -46,28 +46,38 @@
   }
 
   async function createLobby(event: SubmitEvent) {
-    event.preventDefault()
-    let createForm = Object.fromEntries(new FormData(event.target as HTMLFormElement)) as LobbySettings;
+    event.preventDefault();
+    let createForm = Object.fromEntries(
+      new FormData(event.target as HTMLFormElement),
+    ) as LobbySettings;
     LOBBY.set(await Lobby.create(createForm));
   }
-  async function joinLobby(event:SubmitEvent) {
-    event.preventDefault()
-    let joinForm = (new FormData(event.target as HTMLFormElement)).get("lobbyCode");
+  async function joinLobby(event: SubmitEvent) {
+    event.preventDefault();
+    let joinForm = new FormData(event.target as HTMLFormElement).get(
+      "lobbyCode",
+    );
     console.log(joinForm);
-    
-    LOBBY.set(await Lobby.join(joinForm as string))
+
+    LOBBY.set(await Lobby.joinPincode(joinForm as string));
   }
 </script>
 
 <form autocomplete="off" onsubmit={joinLobby}>
   <label for="lobbyCode">Code</label>
-  <input type="text" name="lobbyCode" required pattern="[a-z]{"{5}"}"/>
+  <input type="text" name="lobbyCode" required pattern="[a-z]{'{5}'}" />
   <button type="submit">Join Lobby</button>
 </form>
 
-<form autocomplete="off" onsubmit={createLobby} >
+<form autocomplete="off" onsubmit={createLobby}>
   {@html renderOptions()}
-  <input type="text" name="description" placeholder="Description" aria-label="Description" defaultValue="">
+  <input
+    type="text"
+    name="description"
+    placeholder="Description"
+    aria-label="Description"
+    defaultValue=""
+  />
 
   <button type="submit">Create</button>
 </form>
