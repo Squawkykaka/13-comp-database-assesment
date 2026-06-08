@@ -13,6 +13,7 @@
       ? child($LOBBY.lobbyRef, `members/${AUTH.currentUser?.uid}/activeGame`)
       : undefined,
   );
+  let members = $derived($LOBBY.members);
   let boardShape = $derived($activeGame?.boardShape);
   $effect(() => {
     if (activeGameRefRef === undefined) {
@@ -32,7 +33,7 @@
 <div class="container">
   {#if $activeGame}
     <p>
-      {($activeGame.ourTurn ? "Our Turn" : "Their Turn") +
+      {($activeGame.ourTurn ? "Our Turn" : `${$members[$activeGame.opponentUid].displayName}'s Turn`) +
         ($activeGame.ourTurn
           ? $activeGame.tileType === "Circle"
             ? " (O)"
@@ -43,8 +44,15 @@
     </p>
     <div id="gameBoard">
       {#each $boardShape?.entries() as [idx, tile]}
-        <button onclick={() => handleClick(idx)} aria-label="Tile {idx}"
-          >{tile == "Cross" ? "X" : tile == "Circle" ? "O" : ""}</button
+        <button
+          onclick={() => handleClick(idx)}
+          aria-label="Tile {idx}"
+          class={tile?.win ? `winner-${tile.type}` : ""}
+          >{tile?.type == "Cross"
+            ? "X"
+            : tile?.type == "Circle"
+              ? "O"
+              : ""}</button
         >
       {/each}
     </div>

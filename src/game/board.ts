@@ -139,14 +139,17 @@ export class Board {
    * @param position The index of the tile you want to fetch
    * @returns The tile type, or null if none is present
    */
-  getTile(position: number): TileType | null {
+  getTile(position: number): { type: TileType; win: boolean } | null {
     let circleShifted = this.$circleList >> position;
     let crossShifted = this.$crossList >> position;
+    let winData =
+      (this.state.status == "won" ? this.state.data.winCond : 0) >> position;
+    let win = (winData & 1) != 0;
 
     if ((circleShifted & 1) != 0) {
-      return "Circle";
+      return { type: "Circle", win };
     } else if ((crossShifted & 1) != 0) {
-      return "Cross";
+      return { type: "Cross", win };
     } else {
       return null;
     }

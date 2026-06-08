@@ -61,9 +61,9 @@ export class Game {
   gameRef: DatabaseReference;
   board = $state(new Board());
 
-  private _boardShapeStore = writable<(TileType | null)[]>(Array(9).fill(null));
+  private _boardShapeStore = writable<({ type: TileType, win: boolean } | null)[]>(Array(9).fill(null));
 
-  get boardShape(): Readable<(TileType | null)[]> {
+  get boardShape(): Readable<({ type: TileType, win: boolean } | null)[]> {
     return { subscribe: this._boardShapeStore.subscribe };
   }
 
