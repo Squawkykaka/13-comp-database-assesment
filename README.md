@@ -16,6 +16,7 @@ a button to start the game is visible and the lobby code is shown in multiplayer
 - [ ] make it so you can only change the next and previous elements in the signup, not all
 
 # TODO
+
 fix incorrectly displayed code when joining from lobby list
 make it so when a lobby is deleted, users get sent to home screen
 make it so it displays when a lobby is locked, and allows you to unlock

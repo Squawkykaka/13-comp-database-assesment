@@ -2,7 +2,7 @@
   import { child, onValue } from "firebase/database";
   import { AUTH } from "../firebase";
   import { LOBBY } from "../firebase/lobby";
-  import { activeGame, Game } from "../firebase/game";
+  import { activeGame, Game } from "../firebase/game.svelte";
 
   async function handleClick(index: number) {
     await $activeGame?.createMove(index);
@@ -33,17 +33,19 @@
   {#if $activeGame}
     <p>
       {($activeGame.ourTurn ? "Our Turn" : "Their Turn") +
-        $activeGame.tileType ==
-      "Circle"
-        ? "(O)"
-        : "(X)"}
+        ($activeGame.ourTurn
+          ? $activeGame.tileType === "Circle"
+            ? " (O)"
+            : " (X)"
+          : $activeGame.tileType === "Circle"
+            ? " (X)"
+            : " (O)")}
     </p>
     <div id="gameBoard">
       {#each $boardShape?.entries() as [idx, tile]}
         <button onclick={() => handleClick(idx)} aria-label="Tile {idx}"
           >{tile == "Cross" ? "X" : tile == "Circle" ? "O" : ""}</button
         >
-
       {/each}
     </div>
   {/if}

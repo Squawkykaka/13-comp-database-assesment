@@ -1,14 +1,7 @@
 import { doc, getDoc } from "firebase/firestore";
 import { AUTH, currentUser, RDB, userCollection } from ".";
 import type { GameUser, LobbyMember } from "../models/user";
-import {
-  derived,
-  get,
-  writable,
-  type Readable,
-  type Writable,
-} from "svelte/store";
-import { type LobbySettings } from "../lobby";
+import { derived, get, writable, type Readable, type Writable } from "svelte/store";
 import { SiteError } from "../models/error";
 
 import {
@@ -26,6 +19,7 @@ import {
   child,
   onDisconnect,
 } from "firebase/database";
+import type { LobbySettings } from "../models/gameSettings";
 
 function makeid(length: number) {
   let result = "";
@@ -51,18 +45,17 @@ export class Lobby {
   cleanup: (() => void)[] = [];
 
   async startGames() {
-    if (this.owner.uid !== AUTH.currentUser?.uid)
-      throw "You are not the lobby owner";
+    if (this.owner.uid !== AUTH.currentUser?.uid) throw "You are not the lobby owner";
     let gamesRef = ref(RDB, "games");
     let membersRef = child(this.lobbyRef, "members");
 
     let members = Object.entries(get(this.members));
-    if (members.length % 2 !== 0) throw "There is an uneven amount of players in the lobby"
+    if (members.length % 2 !== 0) throw "There is an uneven amount of players in the lobby";
     set(child(this.lobbyRef, "locked"), true);
 
     for (let i = 0; i < members.length; i += 2) {
       const crossUid = members[i][0];
-      const circleUid = members[i+1][0];
+      const circleUid = members[i + 1][0];
 
       let gameRef = push(gamesRef, {
         circleUid,
@@ -187,8 +180,7 @@ export class Lobby {
   static async joinPincode(code: string): Promise<Lobby> {
     let lobbyId = (await getRef(ref(RDB, "pincodes/" + code))).val();
 
-    const { owner, settings, reference, members } =
-      await Lobby.joinLobby(lobbyId);
+    const { owner, settings, reference, members } = await Lobby.joinLobby(lobbyId);
 
     return new Lobby(owner, settings, reference, code, members);
   }
@@ -226,9 +218,7 @@ export class Lobby {
 
     if (snapshot.exists()) {
       let data = snapshot.val();
-      let userData = (
-        await getDoc(doc(userCollection, data.owner))
-      ).data() as any;
+      let userData = (await getDoc(doc(userCollection, data.owner))).data() as any;
 
       let membersData = (await getRef(child(lobbyRef, "members"))).val() ?? {};
       for (const id of Object.keys(membersData)) {

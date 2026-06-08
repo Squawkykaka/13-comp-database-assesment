@@ -42,3 +42,14 @@ export const GAME_STYLES = {
 export type GameMode = keyof typeof GAME_MODES;
 export type MultiplayerMode = keyof typeof MULTIPLAYER_MODES;
 export type GameStyle = keyof typeof GAME_STYLES;
+
+export type JoinLobby = { lobbyCode: string };
+export type LobbySettings = {
+  // The gamemode of the lobby `original` for now
+  gameMode: GameMode;
+  // The type of multiplayer `public` for now
+  multiplayerType: MultiplayerMode;
+  // the style of gameplay `onevone` for now
+  gameStyle: GameStyle;
+  description: string | null;
+};

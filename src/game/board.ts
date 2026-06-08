@@ -52,7 +52,7 @@ export class Board {
 
   change(position: number, tileType: TileType) {
     if (position > 8) {
-      throw "Out of bounds"
+      throw "Out of bounds";
     }
     console.log("Circle:", numberToBits(this.$circleList));
     console.log("Cross:", numberToBits(this.$crossList));

@@ -7,9 +7,9 @@
   } from "firebase/database";
   import { RDB } from "../firebase";
   import type { LobbyMember } from "../models/user";
-  import type { LobbySettings } from "../lobby";
   import { LOBBY, Lobby } from "../firebase/lobby";
   import { writable } from "svelte/store";
+  import type { LobbySettings } from "../models/gameSettings";
 
   type Lobby = {
     owner: string;

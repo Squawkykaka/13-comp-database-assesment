@@ -1,15 +1,8 @@
-import {
-  child,
-  get,
-  onChildAdded,
-  push,
-  ref,
-  type DatabaseReference,
-} from "firebase/database";
+import { child, get, onChildAdded, push, ref, type DatabaseReference } from "firebase/database";
 import { Board, type TileType } from "../game/board";
 import { AUTH, RDB } from ".";
 import { SiteError } from "../models/error";
-import { derived, writable, type Readable } from "svelte/store";
+import { writable, type Readable } from "svelte/store";
 
 // the host when starting the game splits members into games, setting the `activeGame` setting in there members list to the game id
 // the host chooses what member is circle or cross
@@ -57,7 +50,7 @@ export class Game {
   tileType: TileType;
   ourTurn: boolean;
   gameRef: DatabaseReference;
-  board = new Board();
+  board = $state(new Board());
 
   private _boardShapeStore = writable<(TileType | null)[]>(Array(9).fill(null));
 
@@ -73,15 +66,11 @@ export class Game {
     this._boardShapeStore.set(array);
   }
 
-  private constructor(
-    tileType: TileType,
-    opponentUid: string,
-    gameRef: DatabaseReference,
-  ) {
+  private constructor(tileType: TileType, opponentUid: string, gameRef: DatabaseReference) {
     this.tileType = tileType;
     this.gameRef = gameRef;
     this.opponentUid = opponentUid;
-    this.ourTurn = tileType == "Circle" ? true : false;
+    this.ourTurn = $state(tileType == "Circle" ? true : false);
 
     this.updateBoardShapeStore();
 
@@ -116,7 +105,7 @@ export class Game {
   }
 
   async createMove(index: number) {
-    if (!this.ourTurn) return;
+    if (!this.ourTurn || this.board.state.status !== "playing") return;
     // no need to set it locally, the listener will handle that
     await push(child(this.gameRef, "moves"), {
       position: index,
@@ -130,8 +119,7 @@ export class Game {
     let gameRef = ref(RDB, "games/" + gameId);
     let info = (await get(gameRef)).val() as DatabaseGame;
 
-    let opponentUid =
-      info.circleUid == AUTH.currentUser?.uid ? info.crossUid : info.circleUid;
+    let opponentUid = info.circleUid == AUTH.currentUser?.uid ? info.crossUid : info.circleUid;
     let tileType: TileType | undefined =
       info.circleUid == AUTH.currentUser?.uid
         ? "Circle"
