@@ -41,8 +41,12 @@ export default defineConfig({
           groups: [
             {
               test: /node_modules\/firebase/,
-              name: "libs",
+              name: "firebase",
             },
+            {
+              test: /node_modules\/svelte/,
+              name: "svelte"
+            }
           ],
         },
       },
