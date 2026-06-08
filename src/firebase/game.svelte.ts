@@ -6,12 +6,14 @@ import {
   onValue,
   push,
   ref,
+  runTransaction,
   type DatabaseReference,
 } from "firebase/database";
 import { Board, type TileType } from "../game/board";
 import { AUTH, RDB } from ".";
 import { SiteError } from "../models/error";
-import { writable, type Readable } from "svelte/store";
+import { writable, type Readable, get as getStore } from "svelte/store";
+import { LOBBY } from "./lobby.svelte";
 
 // the host when starting the game splits members into games, setting the `activeGame` setting in there members list to the game id
 // the host chooses what member is circle or cross
@@ -61,14 +63,16 @@ export class Game {
   gameRef: DatabaseReference;
   board = $state(new Board());
 
-  private _boardShapeStore = writable<({ type: TileType, win: boolean } | null)[]>(Array(9).fill(null));
+  private _boardShapeStore = writable<
+    ({ type: TileType; win: boolean } | null)[]
+  >(Array(9).fill(null));
 
-  get boardShape(): Readable<({ type: TileType, win: boolean } | null)[]> {
+  get boardShape(): Readable<({ type: TileType; win: boolean } | null)[]> {
     return { subscribe: this._boardShapeStore.subscribe };
   }
 
   private updateBoardShapeStore() {
-    let array: (TileType | null)[] = [];
+    let array = [];
     for (let i = 0; i < 9; i++) {
       array.push(this.board.getTile(i));
     }
@@ -117,7 +121,7 @@ export class Game {
     onValue(gameRef, (snapshot) => {
       if (!snapshot.exists()) {
         console.log("yerted");
-        
+
         _subscriptions.forEach((unsub) => unsub());
         activeGame.set(undefined);
       }
@@ -126,7 +130,33 @@ export class Game {
   }
 
   private async handleFinish() {
-    throw "not implemented ";
+    const status = this.board.state.status;
+    const currentUid = AUTH.currentUser?.uid;
+    const lobbyInstance = getStore(LOBBY);
+
+    if (!currentUid || !lobbyInstance) return;
+
+    // Check if there's a definitive winner (ignore draws)
+    if (status === "won") {
+      const weWon = this.board.state.data.winner == this.tileType;
+
+      const memberScoreRef = child(
+        lobbyInstance.lobbyRef,
+        `members/${currentUid}`,
+      );
+
+      // Run a transaction to safely increment win/loss records inside the lobby
+      await runTransaction(memberScoreRef, (memberData) => {
+        if (memberData) {
+          if (weWon) {
+            memberData.wins = (memberData.wins || 0) + 1;
+          } else {
+            memberData.losses = (memberData.losses || 0) + 1;
+          }
+        }
+        return memberData;
+      });
+    }
   }
 
   async createMove(index: number) {

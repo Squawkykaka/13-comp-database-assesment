@@ -20,6 +20,7 @@ import {
   onDisconnect,
 } from "firebase/database";
 import type { LobbySettings } from "../models/gameSettings";
+import { activeGame } from "./game.svelte";
 
 function makeid(length: number) {
   let result = "";
@@ -154,11 +155,9 @@ export class Lobby {
       }),
       this.currentMember.subscribe((user) => {
         let userRef = child(membersRef, user.uid);
-        set(userRef, {
+        update(userRef, {
           displayName: user.displayName,
           quote: user.quote,
-          losses: user.losses,
-          wins: user.wins,
         });
       }),
     );

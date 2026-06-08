@@ -16,7 +16,7 @@
             // Anyone can read member info, but a user can only write to their own UID slot
             ".read": true,
             ".write": "(data.parent().child('banned').val() !== true && $uid === auth.uid && (data.parent().parent().child('locked').val() === true ? data.exists() : true)) || auth.uid === data.parent().parent().child('owner').val()",
-            ".validate": "newData.hasChildren(['displayName', 'losses', 'quote', 'wins'])",
+            ".validate": "newData.hasChildren(['displayName', 'quote'])",
             "displayName": { ".validate": true },
             "losses": { ".validate": true },
             "quote": { ".validate": true },
