@@ -1,4 +1,13 @@
-import { child, get, onChildAdded, push, ref, type DatabaseReference } from "firebase/database";
+import {
+  child,
+  get,
+  onChildAdded,
+  onDisconnect,
+  onValue,
+  push,
+  ref,
+  type DatabaseReference,
+} from "firebase/database";
 import { Board, type TileType } from "../game/board";
 import { AUTH, RDB } from ".";
 import { SiteError } from "../models/error";
@@ -66,11 +75,18 @@ export class Game {
     this._boardShapeStore.set(array);
   }
 
-  private constructor(tileType: TileType, opponentUid: string, gameRef: DatabaseReference) {
+  private constructor(
+    tileType: TileType,
+    opponentUid: string,
+    gameRef: DatabaseReference,
+  ) {
     this.tileType = tileType;
     this.gameRef = gameRef;
     this.opponentUid = opponentUid;
     this.ourTurn = $state(tileType == "Circle" ? true : false);
+    let _subscriptions: (() => void)[] = [];
+
+    onDisconnect(this.gameRef).remove();
 
     this.updateBoardShapeStore();
 
@@ -98,6 +114,15 @@ export class Game {
         this.handleFinish();
       }
     });
+    onValue(gameRef, (snapshot) => {
+      if (!snapshot.exists()) {
+        console.log("yerted");
+        
+        _subscriptions.forEach((unsub) => unsub());
+        activeGame.set(undefined);
+      }
+    });
+    _subscriptions.push(moveUnsubscribe);
   }
 
   private async handleFinish() {
@@ -119,7 +144,8 @@ export class Game {
     let gameRef = ref(RDB, "games/" + gameId);
     let info = (await get(gameRef)).val() as DatabaseGame;
 
-    let opponentUid = info.circleUid == AUTH.currentUser?.uid ? info.crossUid : info.circleUid;
+    let opponentUid =
+      info.circleUid == AUTH.currentUser?.uid ? info.crossUid : info.circleUid;
     let tileType: TileType | undefined =
       info.circleUid == AUTH.currentUser?.uid
         ? "Circle"

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { currentUser } from "../firebase";
   import { activeGame } from "../firebase/game.svelte";
-  import { LOBBY } from "../firebase/lobby";
+  import { LOBBY } from "../firebase/lobby.svelte";
   import {
     GAME_MODES,
     GAME_STYLES,

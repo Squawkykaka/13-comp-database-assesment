@@ -41,7 +41,7 @@ export class Lobby {
   // stores the current lobby member, this is different from the global user
   readonly currentMember: Readable<LobbyMember>;
   readonly lobbyCode: string;
-  locked: boolean = false;
+  locked: boolean = $state(false);
   cleanup: (() => void)[] = [];
 
   async startGames() {

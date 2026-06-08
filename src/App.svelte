@@ -6,14 +6,15 @@
   import SettingPicker from "./components/SettingPicker.svelte";
   import SignIn from "./components/SignIn.svelte";
   import { currentUser } from "./firebase";
-  import { LOBBY } from "./firebase/lobby";
+  import { LOBBY } from "./firebase/lobby.svelte";
 </script>
 
 {#if $currentUser.auth === undefined}
   <SignIn></SignIn>
 {:else if $LOBBY}
   <div class="container">
-    <section class="settings">
+    <p hidden={!$LOBBY.locked}>Lobby Locked</p>
+    <section class="settings {$LOBBY.locked ? "locked" : ""}">
       <PlayerList />
       <SettingPicker />
     </section>
@@ -33,6 +34,10 @@
     display: grid;
     grid-template-columns: 1fr 3fr;
     width: 100%;
+  }
+
+  .locked {
+    background-color: gray;
   }
 
   .settings {

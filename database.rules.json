@@ -64,8 +64,8 @@
     },
     "games": {
       "$uid": {
-        ".write": true,
-        ".read": true
+        ".read": true,
+        ".write": "!data.exists() || (auth.uid === data.child('circleUid').val() || auth.uid === data.child('crossUid').val())"
       }
     }
   }

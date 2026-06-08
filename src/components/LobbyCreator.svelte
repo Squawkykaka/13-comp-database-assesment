@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { Lobby, LOBBY } from "../firebase/lobby";
-  import type { LobbySettings } from "../lobby";
+  import { Lobby, LOBBY } from "../firebase/lobby.svelte";
   import {
     GAME_MODES,
     GAME_STYLES,
     MULTIPLAYER_MODES,
+    type LobbySettings,
   } from "../models/gameSettings";
 
   function renderOptions(): string {

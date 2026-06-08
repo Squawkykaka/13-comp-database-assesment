@@ -7,7 +7,7 @@
   } from "firebase/database";
   import { RDB } from "../firebase";
   import type { LobbyMember } from "../models/user";
-  import { LOBBY, Lobby } from "../firebase/lobby";
+  import { LOBBY, Lobby } from "../firebase/lobby.svelte";
   import { writable } from "svelte/store";
   import type { LobbySettings } from "../models/gameSettings";
 

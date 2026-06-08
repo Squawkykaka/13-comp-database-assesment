@@ -1,7 +1,7 @@
 <script lang="ts">
   import { child, onValue } from "firebase/database";
   import { AUTH } from "../firebase";
-  import { LOBBY } from "../firebase/lobby";
+  import { LOBBY } from "../firebase/lobby.svelte";
   import { activeGame, Game } from "../firebase/game.svelte";
 
   async function handleClick(index: number) {

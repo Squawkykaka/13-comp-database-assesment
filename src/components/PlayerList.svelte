@@ -1,6 +1,6 @@
 <script lang="ts">
   import { AUTH, currentUser } from "../firebase";
-  import { LOBBY } from "../firebase/lobby";
+  import { LOBBY } from "../firebase/lobby.svelte";
 
   let updatePlayer = (event: SubmitEvent) => {
     event.preventDefault();
