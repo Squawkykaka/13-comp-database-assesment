@@ -7,8 +7,6 @@
   import SignIn from "./components/SignIn.svelte";
   import { currentUser } from "./firebase";
   import { LOBBY } from "./firebase/lobby";
-
-  let settings = $derived($LOBBY?.settings);
 </script>
 
 {#if $currentUser.auth === undefined}

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { currentUser } from "../firebase";
+  import { activeGame } from "../firebase/game";
   import { LOBBY } from "../firebase/lobby";
   import {
     GAME_MODES,
@@ -9,7 +10,20 @@
 
   let isLobbyOwner = $derived($currentUser.auth?.uid == $LOBBY.owner.uid);
   let settings = $derived($LOBBY?.settings);
-  $inspect($settings)
+
+  let error = $state("");
+
+  let onclick = async () => {
+    try {
+      await $LOBBY.startGames();
+    } catch (e) {
+      error = e as string;
+    }
+  };
+
+  let disabled = $derived(!isLobbyOwner || $activeGame !== undefined);
+
+  $inspect($activeGame);
 </script>
 
 {#snippet options(input: { [s: string]: any })}
@@ -25,10 +39,7 @@
       <tr>
         <th scope="row">Game Mode</th>
         <td>
-          <select
-            bind:value={$settings.gameMode}
-            disabled={!isLobbyOwner}
-          >
+          <select bind:value={$settings.gameMode} {disabled}>
             {@render options(GAME_MODES)}
           </select>
         </td>
@@ -36,10 +47,7 @@
       <tr>
         <th scope="row">Multiplayer Type</th>
         <td>
-          <select
-            bind:value={$settings.multiplayerType}
-            disabled={!isLobbyOwner}
-          >
+          <select bind:value={$settings.multiplayerType} {disabled}>
             {@render options(MULTIPLAYER_MODES)}
           </select>
         </td>
@@ -47,10 +55,7 @@
       <tr>
         <th scope="row">Game Mode</th>
         <td>
-          <select
-            bind:value={$settings.gameStyle}
-            disabled={!isLobbyOwner}
-          >
+          <select bind:value={$settings.gameStyle} {disabled}>
             {@render options(GAME_STYLES)}
           </select>
         </td>
@@ -58,3 +63,6 @@
     </tbody>
   </table>
 </section>
+
+<button {onclick} hidden={disabled}>Start Game</button>
+<p>{error}</p>

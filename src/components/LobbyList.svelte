@@ -44,18 +44,21 @@
 <div>
   <ul>
     {#each Object.entries($lobbies) as [id, information]}
-      <p>Owner: {information.members[information.owner].displayName}</p>
-      <em
-        >{information.settings.description
+      <p>Owner: {information?.members?.[information.owner]?.displayName ?? "Loading..."}</p>
+      
+      <em>
+        {information.settings?.description
           ? information.settings.description
-          : "No description"}</em
-      >
+          : "No description"}
+      </em>
+      
       <p>Members: {Object.entries(information.members ?? {}).length}</p>
-      <em
-        >{information.settings.gameMode} -- {information.settings.gameStyle}</em
-      >
-      <button onclick={async () => LOBBY.set(await Lobby.join(id))}>Join</button
-      >
+      
+      <em>
+        {information.settings?.gameMode ?? "Default"} -- {information.settings?.gameStyle ?? "Default"}
+      </em>
+      
+      <button onclick={async () => LOBBY.set(await Lobby.join(id))}>Join</button>
     {/each}
   </ul>
 </div>

@@ -5,21 +5,27 @@
       ".read": true,
       "$lobbyid": {
         // Anyone can read a lobby's structure
+        // TODO: make it so its only readable if the lobby isnt private
         ".read": true,
 
         // Allows creating the lobby itself if it doesn't exist yet
-        ".write": "!data.exists() && newData.exists() || !newData.exists() && auth.uid === data.child('owner').val()",
+        ".write": "(!data.exists() && newData.exists()) || (!newData.exists() && auth.uid === data.child('owner').val())",
 
         "members": {
           "$uid": {
             // Anyone can read member info, but a user can only write to their own UID slot
             ".read": true,
-            ".write": "auth !== null && $uid === auth.uid",
+            ".write": "(data.parent().child('banned').val() !== true && $uid === auth.uid && (data.parent().parent().child('locked').val() === true ? data.exists() : true)) || auth.uid === data.parent().parent().child('owner').val()",
             ".validate": "newData.hasChildren(['displayName', 'losses', 'quote', 'wins'])",
             "displayName": { ".validate": true },
             "losses": { ".validate": true },
             "quote": { ".validate": true },
             "wins": { ".validate": true },
+            "banned": { ".validate": "newData.isBoolean()" },
+            "activeGame": {
+              ".validate": "newData.isString()",
+              ".write": "data.parent().parent().parent().child('owner').val() === auth.uid"
+            },
             "$other": { ".validate": false }
           }
         },
@@ -27,13 +33,18 @@
         "owner": {
           // Can only be written to on creation (immutable).
           // Enforces that the string value matches the creator's UID.
-          ".write": "!data.exists() && auth !== null && newData.val() === auth.uid",
+          ".write": "!data.exists() && newData.val() === auth.uid",
           ".validate": "newData.isString()"
         },
 
         "settings": {
           // Only the user whose UID matches the 'owner' string value can modify settings
-          ".write": "auth !== null && data.parent().child('owner').val() === auth.uid"
+          ".write": "data.parent().child('owner').val() === auth.uid"
+        },
+
+        "locked": {
+          ".write": "data.parent().child('owner').val() === auth.uid",
+          ".validate": "newData.isBoolean()"
         },
 
         // Prevents any keys other than members, owner, or settings from being created
@@ -48,7 +59,13 @@
         ".validate": "newData.isString()",
 
         // Dynamically picks newData (creation) or data (deletion) to do a single owner check
-        ".write": "auth !== null && root.child('lobbies/' + (newData.exists() ? newData.val() : data.val()) + '/owner').val() === auth.uid"
+        ".write": "root.child('lobbies/' + (newData.exists() ? newData.val() : data.val()) + '/owner').val() === auth.uid"
+      }
+    },
+    "games": {
+      "$uid": {
+        ".write": true,
+        ".read": true
       }
     }
   }

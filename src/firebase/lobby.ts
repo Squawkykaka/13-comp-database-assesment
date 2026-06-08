@@ -1,7 +1,13 @@
 import { doc, getDoc } from "firebase/firestore";
 import { AUTH, currentUser, RDB, userCollection } from ".";
 import type { GameUser, LobbyMember } from "../models/user";
-import { derived, get, writable, type Readable, type Writable } from "svelte/store";
+import {
+  derived,
+  get,
+  writable,
+  type Readable,
+  type Writable,
+} from "svelte/store";
 import { type LobbySettings } from "../lobby";
 import { SiteError } from "../models/error";
 
@@ -41,7 +47,34 @@ export class Lobby {
   // stores the current lobby member, this is different from the global user
   readonly currentMember: Readable<LobbyMember>;
   readonly lobbyCode: string;
+  locked: boolean = false;
   cleanup: (() => void)[] = [];
+
+  async startGames() {
+    if (this.owner.uid !== AUTH.currentUser?.uid)
+      throw "You are not the lobby owner";
+    let gamesRef = ref(RDB, "games");
+    let membersRef = child(this.lobbyRef, "members");
+
+    let members = Object.entries(get(this.members));
+    if (members.length % 2 !== 0) throw "There is an uneven amount of players in the lobby"
+    set(child(this.lobbyRef, "locked"), true);
+
+    for (let i = 0; i < members.length; i += 2) {
+      const crossUid = members[i][0];
+      const circleUid = members[i+1][0];
+
+      let gameRef = push(gamesRef, {
+        circleUid,
+        crossUid,
+        moves: {},
+        completed: false,
+      });
+
+      set(child(membersRef, crossUid + "/activeGame"), gameRef.key);
+      set(child(membersRef, circleUid + "/activeGame"), gameRef.key);
+    }
+  }
 
   async updateSettings(next: LobbySettings) {
     if (this.owner.uid !== AUTH.currentUser?.uid) {
@@ -93,7 +126,7 @@ export class Lobby {
     });
 
     // delete the lobby and pincode when the game is over
-    if (owner.uid == get(currentUser).info?.uid) {
+    if (owner.uid == AUTH.currentUser?.uid) {
       onDisconnect(this.lobbyRef).remove();
     } else {
       onDisconnect(child(membersRef, get(currentUser).info!.uid)).remove();
@@ -121,6 +154,10 @@ export class Lobby {
           delete old[snapshot.key!];
           return old;
         });
+      }),
+      onValue(child(this.lobbyRef, "locked"), (snapshot) => {
+        let data = snapshot.val() as boolean;
+        this.locked = data;
       }),
       this.currentMember.subscribe((user) => {
         let userRef = child(membersRef, user.uid);
@@ -150,7 +187,8 @@ export class Lobby {
   static async joinPincode(code: string): Promise<Lobby> {
     let lobbyId = (await getRef(ref(RDB, "pincodes/" + code))).val();
 
-    const { owner, settings, reference, members } = await Lobby.joinLobby(lobbyId);
+    const { owner, settings, reference, members } =
+      await Lobby.joinLobby(lobbyId);
 
     return new Lobby(owner, settings, reference, code, members);
   }
@@ -188,7 +226,9 @@ export class Lobby {
 
     if (snapshot.exists()) {
       let data = snapshot.val();
-      let userData = (await getDoc(doc(userCollection, data.owner))).data() as any;
+      let userData = (
+        await getDoc(doc(userCollection, data.owner))
+      ).data() as any;
 
       let membersData = (await getRef(child(lobbyRef, "members"))).val() ?? {};
       for (const id of Object.keys(membersData)) {

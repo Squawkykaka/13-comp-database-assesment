@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { currentUser } from "../firebase";
+  import { AUTH, currentUser } from "../firebase";
   import { LOBBY } from "../firebase/lobby";
 
   let updatePlayer = (event: SubmitEvent) => {
@@ -22,9 +22,11 @@
   let members = $derived(Object.entries($membersOrig));
 </script>
 
-<section>
-  <p><strong>Code: </strong> {$LOBBY.lobbyCode}</p>
-</section>
+{#if AUTH.currentUser?.uid === $LOBBY.owner.uid}
+  <section>
+    <p><strong>Code: </strong> {$LOBBY.lobbyCode}</p>
+  </section>
+{/if}
 <div>
   <h3>Players: {members.length}</h3>
   <ul>

@@ -1,9 +1,15 @@
-import { child, get, onChildAdded, push, ref, type DatabaseReference } from "firebase/database";
+import {
+  child,
+  get,
+  onChildAdded,
+  push,
+  ref,
+  type DatabaseReference,
+} from "firebase/database";
 import { Board, type TileType } from "../game/board";
-import type { LobbyMember } from "../models/user";
-import { LOBBY } from "./lobby";
 import { AUTH, RDB } from ".";
 import { SiteError } from "../models/error";
+import { derived, writable, type Readable } from "svelte/store";
 
 // the host when starting the game splits members into games, setting the `activeGame` setting in there members list to the game id
 // the host chooses what member is circle or cross
@@ -27,100 +33,115 @@ import { SiteError } from "../models/error";
 // when theres enough players for another round without the same users the host starts a new game
 
 // after 15 minutes, the player with the highest score is declared the winner (this is for onevone mode)
+//
+
+export const activeGame = writable<Game | undefined>();
 
 type DatabaseMove = {
-    userUid: string;
-    position: number;
+  userUid: string;
+  position: number;
 };
 
 type DatabaseGame = {
-    circleUid: string;
-    crossUid: string;
+  circleUid: string;
+  crossUid: string;
 
-    moves: { [id: string]: DatabaseMove };
+  moves: { [id: string]: DatabaseMove };
 
-    winner: string;
-    completed: boolean;
+  winner: string | undefined;
+  completed: boolean;
 };
 
-class Game {
-    opponentUid: string;
-    tileType: TileType;
-    ourTurn: boolean;
-    gameRef: DatabaseReference;
-    board = new Board();
+export class Game {
+  opponentUid: string;
+  tileType: TileType;
+  ourTurn: boolean;
+  gameRef: DatabaseReference;
+  board = new Board();
 
-    get boardShape(): (TileType | null)[] {
-        let array: (TileType | null)[] = [];
-        for (let i = 0; i < 9; i++) {
-            array.push(this.board.getTile(i));
-        }
+  private _boardShapeStore = writable<(TileType | null)[]>(Array(9).fill(null));
 
-        return array
+  get boardShape(): Readable<(TileType | null)[]> {
+    return { subscribe: this._boardShapeStore.subscribe };
+  }
+
+  private updateBoardShapeStore() {
+    let array: (TileType | null)[] = [];
+    for (let i = 0; i < 9; i++) {
+      array.push(this.board.getTile(i));
+    }
+    this._boardShapeStore.set(array);
+  }
+
+  private constructor(
+    tileType: TileType,
+    opponentUid: string,
+    gameRef: DatabaseReference,
+  ) {
+    this.tileType = tileType;
+    this.gameRef = gameRef;
+    this.opponentUid = opponentUid;
+    this.ourTurn = tileType == "Circle" ? true : false;
+
+    this.updateBoardShapeStore();
+
+    // runs when theres a new move
+    let moveUnsubscribe = onChildAdded(child(gameRef, "moves"), (snapshot) => {
+      let data = snapshot.val() as DatabaseMove;
+
+      if (data.userUid == opponentUid) {
+        this.ourTurn = true;
+      }
+
+      let tileType: TileType =
+        data.userUid == opponentUid
+          ? this.tileType == "Circle"
+            ? "Cross"
+            : "Circle"
+          : this.tileType;
+
+      this.board.change(data.position, tileType);
+      this.board.$updateGameState();
+      this.updateBoardShapeStore();
+
+      if (this.board.state.status !== "playing") {
+        moveUnsubscribe();
+        this.handleFinish();
+      }
+    });
+  }
+
+  private async handleFinish() {
+    throw "not implemented ";
+  }
+
+  async createMove(index: number) {
+    if (!this.ourTurn) return;
+    // no need to set it locally, the listener will handle that
+    await push(child(this.gameRef, "moves"), {
+      position: index,
+      userUid: AUTH.currentUser?.uid,
+    } as DatabaseMove);
+
+    this.ourTurn = false;
+  }
+
+  static async joinGame(gameId: string): Promise<Game> {
+    let gameRef = ref(RDB, "games/" + gameId);
+    let info = (await get(gameRef)).val() as DatabaseGame;
+
+    let opponentUid =
+      info.circleUid == AUTH.currentUser?.uid ? info.crossUid : info.circleUid;
+    let tileType: TileType | undefined =
+      info.circleUid == AUTH.currentUser?.uid
+        ? "Circle"
+        : info.crossUid == AUTH.currentUser?.uid
+          ? "Cross"
+          : undefined;
+    if (tileType === undefined) {
+      throw new SiteError("USER_NOT_AUTHENTICATED");
     }
 
-    private constructor(tileType: TileType, opponentUid: string, gameRef: DatabaseReference) {
-        this.tileType = tileType;
-        this.gameRef = gameRef;
-        this.opponentUid = opponentUid;
-        // if our tileType is a circle, then its our turn
-        this.ourTurn = tileType == "Circle" ? true : false;
-
-        // runs when theres a new move
-        onChildAdded(child(gameRef, "moves"), (snapshot) => {
-            let data = snapshot.val() as DatabaseMove;
-            // if the user making this move is the opponent, the tile will be opposite of our one
-
-            if (data.userUid == opponentUid) {
-                this.ourTurn = true;
-            }
-
-            let tileType: TileType =
-                data.userUid == opponentUid
-                    ? this.tileType == "Circle"
-                        ? "Cross"
-                        : "Circle"
-                    : this.tileType;
-
-            this.board.change(data.position, tileType);
-            this.board.$updateGameState();
-
-            if (this.board.state.status != "playing") {
-                this.handleFinish()
-            }
-        });
-    }
-
-    private async handleFinish() {
-        throw "not implemented "
-    }
-
-    private async createMove(index: number) {
-        if (!this.ourTurn) return
-        // no need to set it locally, the listener will handle that
-        await push(child(this.gameRef, "moves"), {
-            position: index,
-            userUid: AUTH.currentUser?.uid,
-        } as DatabaseMove);
-
-        this.ourTurn = false;
-    }
-
-    static async joinGame(gameId: string): Promise<Game> {
-        let gameRef = ref(RDB, "games/" + gameId);
-        let info = (await get(gameRef)).val() as DatabaseGame;
-
-        let opponentUid = info.circleUid == AUTH.currentUser?.uid ? info.crossUid : info.circleUid;
-        let tileType: TileType | undefined =
-            info.circleUid == AUTH.currentUser?.uid
-                ? "Circle"
-                : info.crossUid == AUTH.currentUser?.uid
-                    ? "Cross"
-                    : undefined;
-        if (tileType === undefined) {
-            throw new SiteError("USER_NOT_AUTHENTICATED");
-        }
-
-        return new Game(tileType, opponentUid, gameRef);
-    }
+    return new Game(tileType, opponentUid, gameRef);
+  }
 }

@@ -1,23 +1,52 @@
 <script lang="ts">
-  let gameTiles = $state<{ owner: "cross" | "circle" | undefined }[]>(
-    new Array(9),
-  );
+  import { child, onValue } from "firebase/database";
+  import { AUTH } from "../firebase";
+  import { LOBBY } from "../firebase/lobby";
+  import { activeGame, Game } from "../firebase/game";
 
-  function handleClick(index: number) {}
+  async function handleClick(index: number) {
+    await $activeGame?.createMove(index);
+  }
+
+  let activeGameRefRef = $derived(
+    AUTH.currentUser
+      ? child($LOBBY.lobbyRef, `members/${AUTH.currentUser?.uid}/activeGame`)
+      : undefined,
+  );
+  let boardShape = $derived($activeGame?.boardShape);
+  $effect(() => {
+    if (activeGameRefRef === undefined) {
+      activeGame.set(undefined);
+      return;
+    }
+    return onValue(activeGameRefRef, async (snapshot) => {
+      if (snapshot.exists()) {
+        let gameId = snapshot.val() as string;
+
+        activeGame.set(await Game.joinGame(gameId));
+      }
+    });
+  });
 </script>
 
 <div class="container">
-  <div id="gameBoard">
-    {#each gameTiles.entries() as [idx, tile]}
-      <button onclick={() => handleClick(idx)} aria-label="Tile {idx}"
-        >{tile?.owner == "cross"
-          ? "X"
-          : tile?.owner == "circle"
-            ? "O"
-            : ""}</button
-      >
-    {/each}
-  </div>
+  {#if $activeGame}
+    <p>
+      {($activeGame.ourTurn ? "Our Turn" : "Their Turn") +
+        $activeGame.tileType ==
+      "Circle"
+        ? "(O)"
+        : "(X)"}
+    </p>
+    <div id="gameBoard">
+      {#each $boardShape?.entries() as [idx, tile]}
+        <button onclick={() => handleClick(idx)} aria-label="Tile {idx}"
+          >{tile == "Cross" ? "X" : tile == "Circle" ? "O" : ""}</button
+        >
+
+      {/each}
+    </div>
+  {/if}
 </div>
 
 <style>
