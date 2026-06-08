@@ -12,7 +12,7 @@ export default defineConfig({
   base: "/13-comp-database-assesment",
   build: {
     target: "es2015",
-    minify: "terser",
+    // minify: "terser",
     terserOptions: {
       compress: {
         passes: 2,
