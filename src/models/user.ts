@@ -1,5 +1,4 @@
 import type { DocumentReference } from "firebase/firestore";
-import type { GameMode, GameStyle, MultiplayerMode } from "./gameSettings";
 
 export type GameUser = {
   photoURL?: string;

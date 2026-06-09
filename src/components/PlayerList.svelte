@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { AUTH, currentUser } from "../firebase";
+  import { currentUser } from "../firebase";
   import { LOBBY } from "../firebase/lobby.svelte";
 
   let updatePlayer = (event: SubmitEvent) => {
@@ -18,12 +18,12 @@
     $currentUser.updateDisplay(formData.get("displayName") as string);
   };
 
-  let { members: membersOrig } = $LOBBY;
+  let m = $derived($LOBBY?.members);
+  let members = $derived($m ? Object.entries($m) : []);
   
-  let members = $derived(Object.entries($membersOrig));
-</script>
+  </script>
 
-{#if AUTH.currentUser?.uid === $LOBBY.owner.uid}
+{#if $LOBBY?.isOwner}
   <section>
     <p><strong>Code: </strong> {$LOBBY.lobbyCode}</p>
   </section>
@@ -39,6 +39,8 @@
             <input
               type="text"
               name="displayName"
+              maxlength="15"
+              minlength="5"
               value={participant.displayName}
             />
             <button type="submit">Submit</button>

@@ -9,11 +9,13 @@
   }
 
   let activeGameRefRef = $derived(
-    AUTH.currentUser
+    AUTH.currentUser && $LOBBY
       ? child($LOBBY.lobbyRef, `members/${AUTH.currentUser?.uid}/activeGame`)
       : undefined,
   );
-  let members = $derived($LOBBY.members);
+  let members = $derived($LOBBY?.members);
+
+  let winData = $derived($activeGame?.winData);
   let boardShape = $derived($activeGame?.boardShape);
   $effect(() => {
     if (activeGameRefRef === undefined) {
@@ -30,10 +32,25 @@
   });
 </script>
 
-<div class="container">
-  {#if $activeGame}
+{#if $LOBBY && $activeGame && $members}
+  <div class="container">
+    <div popover="manual" id="winPopover">
+      <h4>Game Won</h4>
+      {#if $winData == "draw"}
+        <p>Draw</p>
+      {:else if $winData !== undefined}
+        <p>
+          Winner: {$members[$winData.winnerUid].displayName}
+          Loser: {$members[$winData.loserUid].displayName}
+        </p>
+      {/if}
+      <p>Wait for a new game.</p>
+      <button>Leave Lobby</button>
+    </div>
     <p>
-      {($activeGame.ourTurn ? "Our Turn" : `${$members[$activeGame.opponentUid].displayName}'s Turn`) +
+      {($activeGame.ourTurn
+        ? "Our Turn"
+        : `${$members[$activeGame.opponentUid].displayName}'s Turn`) +
         ($activeGame.ourTurn
           ? $activeGame.tileType === "Circle"
             ? " (O)"
@@ -56,8 +73,8 @@
         >
       {/each}
     </div>
-  {/if}
-</div>
+  </div>
+{/if}
 
 <style>
   /* Game Board */

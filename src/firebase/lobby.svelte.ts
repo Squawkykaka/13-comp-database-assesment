@@ -43,10 +43,11 @@ export class Lobby {
   readonly currentMember: Readable<LobbyMember>;
   readonly lobbyCode: string;
   locked: boolean = $state(false);
+  isOwner: boolean;
   cleanup: (() => void)[] = [];
 
   async startGames() {
-    if (this.owner.uid !== AUTH.currentUser?.uid) throw "You are not the lobby owner";
+    if (!this.isOwner) throw "You are not the lobby owner";
     let gamesRef = ref(RDB, "games");
     let membersRef = child(this.lobbyRef, "members");
 
@@ -71,7 +72,7 @@ export class Lobby {
   }
 
   async updateSettings(next: LobbySettings) {
-    if (this.owner.uid !== AUTH.currentUser?.uid) {
+    if (!this.isOwner) {
       throw new SiteError("NOT_LOBBY_OWNER");
     }
 
@@ -90,9 +91,10 @@ export class Lobby {
     this.settings = writable(settings);
     this.lobbyRef = lobbyRef;
     this.lobbyCode = lobbyCode;
+    this.isOwner = owner.uid == AUTH.currentUser?.uid;
 
     let membersRef = child(this.lobbyRef, "members");
-    if (this.owner.uid !== AUTH.currentUser?.uid) {
+    if (!this.isOwner) {
       let settingsRef = child(this.lobbyRef, "settings");
 
       this.cleanup.push(
@@ -120,9 +122,10 @@ export class Lobby {
     });
 
     // delete the lobby and pincode when the game is over
-    if (owner.uid == AUTH.currentUser?.uid) {
+    if (this.isOwner) {
       onDisconnect(this.lobbyRef).remove();
     } else {
+      // remove the member from the lobby
       onDisconnect(child(membersRef, get(currentUser).info!.uid)).remove();
     }
     onDisconnect(ref(RDB, "pincodes/" + this.lobbyCode)).remove();
@@ -248,7 +251,19 @@ export class Lobby {
   }
 }
 
-export let LOBBY = writable<Lobby>();
+export let LOBBY = writable<Lobby | undefined>();
+let removeLobby = () => {};
+LOBBY.subscribe(update => {
+  removeLobby()
+  if (update) {
+    removeLobby = onValue(update.lobbyRef, snapshot => {
+      if (!snapshot.exists()) {
+        LOBBY.set(undefined)
+        removeLobby()
+      }
+    })
+  }
+})
 // let off = currentUser.subscribe(async (self) => {
 //   if (self.info) {
 //     if (REQUESTED_LOBBY.kind == "join") {

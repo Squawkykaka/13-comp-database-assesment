@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { writable } from "svelte/store";
   import { currentUser } from "../firebase";
   import { activeGame } from "../firebase/game.svelte";
   import { LOBBY } from "../firebase/lobby.svelte";
@@ -8,20 +9,28 @@
     MULTIPLAYER_MODES,
   } from "../models/gameSettings";
 
-  let isLobbyOwner = $derived($currentUser.auth?.uid == $LOBBY.owner.uid);
-  let settings = $derived($LOBBY?.settings);
+  let settings = $derived(
+    $LOBBY?.settings ??
+      writable({
+        gameMode: "Loading...",
+        multiplayerType: "Loading...",
+        gameStyle: "Loading...",
+      }),
+  );
 
   let error = $state("");
 
   let onclick = async () => {
     try {
-      await $LOBBY.startGames();
+      await $LOBBY?.startGames();
     } catch (e) {
       error = e as string;
     }
   };
 
-  let disabled = $derived(!isLobbyOwner || $activeGame !== undefined);
+  let disabled = $derived(
+    $LOBBY?.isOwner == false || $activeGame !== undefined,
+  );
 
   $inspect($activeGame);
 </script>
@@ -53,7 +62,7 @@
         </td>
       </tr>
       <tr>
-        <th scope="row">Game Mode</th>
+        <th scope="row">Game Style</th>
         <td>
           <select bind:value={$settings.gameStyle} {disabled}>
             {@render options(GAME_STYLES)}

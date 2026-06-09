@@ -21,6 +21,9 @@ fix incorrectly displayed code when joining from lobby list
 make it so when a lobby is deleted, users get sent to home screen
 make it so it displays when a lobby is locked, and allows you to unlock
 
+SOmehow artem joined when it was mac vs idriss
+The login flow was not at all clear to the teacher
+
 # lobby flow
 
 have a abstract class that has functions for setting and getting various values from the lobby
@@ -137,3 +140,8 @@ gameHistory:
     winner: ref
     loser: ref
 ```
+
+# 10/06
+Added max length and min length to name form
+
+need to get feedback from user to improve my layout

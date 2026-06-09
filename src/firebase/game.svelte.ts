@@ -12,8 +12,14 @@ import {
 import { Board, type TileType } from "../game/board";
 import { AUTH, RDB } from ".";
 import { SiteError } from "../models/error";
-import { writable, type Readable, get as getStore } from "svelte/store";
+import {
+  writable,
+  type Readable,
+  get as getStore,
+  derived,
+} from "svelte/store";
 import { LOBBY } from "./lobby.svelte";
+import type { LobbyMember } from "../models/user";
 
 // the host when starting the game splits members into games, setting the `activeGame` setting in there members list to the game id
 // the host chooses what member is circle or cross
@@ -62,6 +68,8 @@ export class Game {
   ourTurn: boolean;
   gameRef: DatabaseReference;
   board = $state(new Board());
+
+  winData = writable<{ winnerUid: string; loserUid: string } | "draw">();
 
   private _boardShapeStore = writable<
     ({ type: TileType; win: boolean } | null)[]
@@ -135,11 +143,16 @@ export class Game {
     const lobbyInstance = getStore(LOBBY);
 
     if (!currentUid || !lobbyInstance) return;
+    document.getElementById("winPopover")!.showPopover();
 
     // Check if there's a definitive winner (ignore draws)
     if (status === "won") {
       const weWon = this.board.state.data.winner == this.tileType;
 
+      this.winData.set({
+        winnerUid: weWon ? AUTH.currentUser?.uid! : this.opponentUid,
+        loserUid: weWon ? this.opponentUid : AUTH.currentUser?.uid!,
+      });
       const memberScoreRef = child(
         lobbyInstance.lobbyRef,
         `members/${currentUid}`,
