@@ -154,4 +154,12 @@ export class Board {
       return null;
     }
   }
+
+  checkMoveValid(position: number) {
+    let moveInt = 1 << position;
+    // we need to merge the two streams into one integar as a move cannot overlay on top of multiple
+    let mergedSides = this.$circleList | this.$crossList;
+
+    return (moveInt & mergedSides) === 0;
+  }
 }

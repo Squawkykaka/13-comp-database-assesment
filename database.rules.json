@@ -9,19 +9,18 @@
         ".read": true,
 
         // Allows creating the lobby itself if it doesn't exist yet
-        ".write": "(!data.exists() && newData.exists()) || (!newData.exists() && auth.uid === data.child('owner').val())",
+        ".write": "!data.exists() || (!newData.exists() && auth.uid === data.child('owner').val())",
 
         "members": {
           "$uid": {
             // Anyone can read member info, but a user can only write to their own UID slot
             ".read": true,
-            ".write": "(data.parent().child('banned').val() !== true && $uid === auth.uid && (data.parent().parent().child('locked').val() === true ? data.exists() : true)) || auth.uid === data.parent().parent().child('owner').val()",
+            ".write": "$uid === auth.uid && (data.parent().parent().child('locked').val() !== true || data.exists())",
             ".validate": "newData.hasChildren(['displayName', 'quote'])",
             "displayName": { ".validate": true },
             "losses": { ".validate": true },
             "quote": { ".validate": true },
             "wins": { ".validate": true },
-            "banned": { ".validate": "newData.isBoolean()" },
             "activeGame": {
               ".validate": "newData.isString()",
               ".write": "data.parent().parent().parent().child('owner').val() === auth.uid"
@@ -38,13 +37,13 @@
         },
 
         "settings": {
-          // Only the user whose UID matches the 'owner' string value can modify settings
+          ".validate": true,
           ".write": "data.parent().child('owner').val() === auth.uid"
         },
 
         "locked": {
-          ".write": "data.parent().child('owner').val() === auth.uid",
-          ".validate": "newData.isBoolean()"
+          ".validate": "newData.isBoolean()",
+          ".write": "data.parent().child('owner').val() === auth.uid"
         },
 
         // Prevents any keys other than members, owner, or settings from being created
@@ -65,7 +64,8 @@
     "games": {
       "$uid": {
         ".read": true,
-        ".write": "!data.exists() || (auth.uid === data.child('circleUid').val() || auth.uid === data.child('crossUid').val())"
+        ".write": "!data.exists() || (auth.uid === data.child('circleUid').val() || auth.uid === data.child('crossUid').val())",
+        ".validate": "newData.child('circleUid').isString() && newData.child('crossUid').isString()"
       }
     }
   }

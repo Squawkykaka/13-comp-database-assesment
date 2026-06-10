@@ -44,7 +44,7 @@ export class Lobby {
   readonly lobbyCode: string;
   locked: boolean = $state(false);
   isOwner: boolean;
-  cleanup: (() => void)[] = [];
+  private cleanup: (() => void)[] = [];
 
   async startGames() {
     if (!this.isOwner) throw "You are not the lobby owner";
@@ -258,6 +258,7 @@ LOBBY.subscribe(update => {
   if (update) {
     removeLobby = onValue(update.lobbyRef, snapshot => {
       if (!snapshot.exists()) {
+        update.destroy()
         LOBBY.set(undefined)
         removeLobby()
       }

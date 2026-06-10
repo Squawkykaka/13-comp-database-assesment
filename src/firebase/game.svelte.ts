@@ -173,7 +173,7 @@ export class Game {
   }
 
   async createMove(index: number) {
-    if (!this.ourTurn || this.board.state.status !== "playing") return;
+    if (!this.ourTurn || this.board.state.status !== "playing" || !this.board.checkMoveValid(index)) return;
     // no need to set it locally, the listener will handle that
     await push(child(this.gameRef, "moves"), {
       position: index,

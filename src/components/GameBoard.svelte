@@ -35,10 +35,10 @@
 {#if $LOBBY && $activeGame && $members}
   <div class="container">
     <div popover="manual" id="winPopover">
-      <h4>Game Won</h4>
       {#if $winData == "draw"}
-        <p>Draw</p>
+      <p>Draw</p>
       {:else if $winData !== undefined}
+        <h4>Game {$winData.winnerUid == AUTH.currentUser?.uid ? "Won" : "Lost"}</h4>
         <p>
           Winner: {$members[$winData.winnerUid].displayName}
           Loser: {$members[$winData.loserUid].displayName}

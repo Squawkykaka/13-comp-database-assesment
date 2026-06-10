@@ -21,6 +21,10 @@ fix incorrectly displayed code when joining from lobby list
 make it so when a lobby is deleted, users get sent to home screen
 make it so it displays when a lobby is locked, and allows you to unlock
 
+need to get feedback from user to improve my layout
+the banning system currently does not stop people from playing in games
+games should be moved under lobbies, and player info should be moved globally along with the removal of firestore
+
 SOmehow artem joined when it was mac vs idriss
 The login flow was not at all clear to the teacher
 
@@ -144,4 +148,5 @@ gameHistory:
 # 10/06
 Added max length and min length to name form
 
-need to get feedback from user to improve my layout
+cleaned up the firebase rule for members, instead of ternary `if locked then data.exists() else true`, this logic is same as the implies operator
+`locked -> data.exists()`, since this operator doesnt exist in javascript `!locked || data.exists()` works instead 
