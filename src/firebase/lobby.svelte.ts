@@ -1,5 +1,4 @@
-import { doc, getDoc } from "firebase/firestore";
-import { AUTH, currentUser, RDB, userCollection } from ".";
+import { AUTH, currentUser, RDB, userRef } from ".";
 import type { GameUser, LobbyMember } from "../models/user";
 import { derived, get, writable, type Readable, type Writable } from "svelte/store";
 import { SiteError } from "../models/error";
@@ -20,7 +19,6 @@ import {
   onDisconnect,
 } from "firebase/database";
 import type { LobbySettings } from "../models/gameSettings";
-import { activeGame } from "./game.svelte";
 
 function makeid(length: number) {
   let result = "";
@@ -113,7 +111,6 @@ export class Lobby {
           losses: 0,
           wins: 0,
           quote: currentUser.info.quote,
-          user: currentUser.info.dbRef,
           uid: currentUser.info.uid,
         };
       } else {
@@ -135,8 +132,8 @@ export class Lobby {
         old[data.key!] = {
           displayName: data.val().displayName,
           quote: data.val().quote,
-          losses: data.val().losses,
-          wins: data.val().wins,
+          losses: data.val().losses ?? 0,
+          wins: data.val().wins ?? 0,
           uid: data.key!,
         };
         return old;
@@ -220,7 +217,7 @@ export class Lobby {
 
     if (snapshot.exists()) {
       let data = snapshot.val();
-      let userData = (await getDoc(doc(userCollection, data.owner))).data() as any;
+      let userData = (await getRef(child(userRef, data.owner))).val();
 
       let membersData = (await getRef(child(lobbyRef, "members"))).val() ?? {};
       for (const id of Object.keys(membersData)) {
@@ -234,7 +231,6 @@ export class Lobby {
           joinDate: userData.joinDate,
           quote: userData.quote,
           photoURL: userData.photoURL === null ? undefined : userData.photoURL,
-          dbRef: data.owner,
           uid: data.owner,
         },
         settings: data.settings,

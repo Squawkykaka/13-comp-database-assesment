@@ -67,6 +67,10 @@
         ".write": "!data.exists() || (auth.uid === data.child('circleUid').val() || auth.uid === data.child('crossUid').val())",
         ".validate": "newData.child('circleUid').isString() && newData.child('crossUid').isString()"
       }
+    },
+    "users": {
+      ".write": true,
+      ".read": true
     }
   }
 }

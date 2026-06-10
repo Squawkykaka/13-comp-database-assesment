@@ -17,8 +17,8 @@ a button to start the game is visible and the lobby code is shown in multiplayer
 
 # TODO
 
-fix incorrectly displayed code when joining from lobby list
-make it so when a lobby is deleted, users get sent to home screen
+- [x] fix incorrectly displayed code when joining from lobby list
+- [x] make it so when a lobby is deleted, users get sent to home screen
 make it so it displays when a lobby is locked, and allows you to unlock
 
 need to get feedback from user to improve my layout

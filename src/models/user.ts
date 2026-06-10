@@ -1,12 +1,9 @@
-import type { DocumentReference } from "firebase/firestore";
-
 export type GameUser = {
   photoURL?: string;
   displayName: string;
   joinDate: Date;
   quote: string;
-  readonly uid: string;
-  readonly dbRef: DocumentReference<GameUser>;
+  readonly uid: string,
 };
 
 export type LobbyMember = {
