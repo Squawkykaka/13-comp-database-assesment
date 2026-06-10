@@ -17,6 +17,7 @@ import {
   type DatabaseReference,
   child,
   onDisconnect,
+  remove,
 } from "firebase/database";
 import type { LobbySettings } from "../models/types";
 
@@ -161,6 +162,16 @@ export class Lobby {
         });
       }),
     );
+  }
+
+  async leave(): Promise<void> {
+    this.destroy();
+    if (this.isOwner) {
+      await remove(this.lobbyRef);
+    } else {
+      await remove(child(this.lobbyRef, `members/${AUTH.currentUser?.uid}`))
+    }
+    LOBBY.set(undefined)
   }
 
   static async create(settings: LobbySettings): Promise<Lobby> {

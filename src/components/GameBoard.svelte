@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { child, onValue } from "firebase/database";
+  import { child, onValue, remove } from "firebase/database";
   import { AUTH } from "../firebase";
   import { LOBBY } from "../firebase/lobby.svelte";
   import { activeGame, Game } from "../firebase/game.svelte";
@@ -55,7 +55,7 @@
         </table>
       {/if}
       <p>Wait for a new game.</p>
-      <button>Leave Lobby</button>
+      <button onclick={() => $LOBBY.leave()}>Leave Lobby</button>
     </div>
     <p>
       {($activeGame.ourTurn
