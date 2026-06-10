@@ -74,7 +74,7 @@
         ".write": "$uid === auth.uid",
         ".validate": "newData.hasChildren(['displayName', 'quote', 'joinDate'])",
         "displayName": {
-          ".validate": "newData.isString() && newData.val().length >= 5 && newData.val().length <= 15"
+          ".validate": "newData.isString()"
         },
         "quote": {
           ".validate": "newData.isString()"

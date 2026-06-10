@@ -39,10 +39,20 @@
       <p>Draw</p>
       {:else if $winData !== undefined}
         <h4>Game {$winData.winnerUid == AUTH.currentUser?.uid ? "Won" : "Lost"}</h4>
-        <p>
-          Winner: {$members[$winData.winnerUid].displayName}
-          Loser: {$members[$winData.loserUid].displayName}
-        </p>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Winner</th>
+              <th scope="col">Loser</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{$members[$winData.winnerUid].displayName}</td>
+              <td>{$members[$winData.loserUid].displayName}</td>
+            </tr>
+          </tbody>
+        </table>
       {/if}
       <p>Wait for a new game.</p>
       <button>Leave Lobby</button>
