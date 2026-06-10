@@ -1,13 +1,12 @@
 <script lang="ts">
   import { writable } from "svelte/store";
-  import { currentUser } from "../firebase";
   import { activeGame } from "../firebase/game.svelte";
   import { LOBBY } from "../firebase/lobby.svelte";
   import {
     GAME_MODES,
     GAME_STYLES,
     MULTIPLAYER_MODES,
-  } from "../models/gameSettings";
+  } from "../models/types";
 
   let settings = $derived(
     $LOBBY?.settings ??

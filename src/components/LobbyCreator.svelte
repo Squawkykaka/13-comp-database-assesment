@@ -5,7 +5,7 @@
     GAME_STYLES,
     MULTIPLAYER_MODES,
     type LobbySettings,
-  } from "../models/gameSettings";
+  } from "../models/types";
 
   function renderOptions(): string {
     function mapStuff(

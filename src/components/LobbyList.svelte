@@ -6,10 +6,10 @@
     ref,
   } from "firebase/database";
   import { RDB } from "../firebase";
-  import type { LobbyMember } from "../models/user";
+  import type { LobbyMember } from "../models/types";
   import { LOBBY, Lobby } from "../firebase/lobby.svelte";
   import { writable } from "svelte/store";
-  import type { LobbySettings } from "../models/gameSettings";
+  import type { LobbySettings } from "../models/types";
 
   type Lobby = {
     owner: string;

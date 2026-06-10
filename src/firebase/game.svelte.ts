@@ -16,10 +16,8 @@ import {
   writable,
   type Readable,
   get as getStore,
-  derived,
 } from "svelte/store";
 import { LOBBY } from "./lobby.svelte";
-import type { LobbyMember } from "../models/user";
 
 // the host when starting the game splits members into games, setting the `activeGame` setting in there members list to the game id
 // the host chooses what member is circle or cross

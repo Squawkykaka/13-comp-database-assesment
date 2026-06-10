@@ -1,5 +1,5 @@
 import { AUTH, currentUser, RDB, userRef } from ".";
-import type { GameUser, LobbyMember } from "../models/user";
+import type { GameUser, LobbyMember } from "../models/types";
 import { derived, get, writable, type Readable, type Writable } from "svelte/store";
 import { SiteError } from "../models/error";
 
@@ -18,7 +18,7 @@ import {
   child,
   onDisconnect,
 } from "firebase/database";
-import type { LobbySettings } from "../models/gameSettings";
+import type { LobbySettings } from "../models/types";
 
 function makeid(length: number) {
   let result = "";
