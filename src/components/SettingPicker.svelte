@@ -60,14 +60,6 @@
           </select>
         </td>
       </tr>
-      <tr>
-        <th scope="row">Game Style</th>
-        <td>
-          <select bind:value={$settings.gameStyle} {disabled}>
-            {@render options(GAME_STYLES)}
-          </select>
-        </td>
-      </tr>
     </tbody>
   </table>
 </section>

@@ -25,6 +25,10 @@ export const MULTIPLAYER_MODES = {
   // },
 };
 export const GAME_STYLES = {
+  tournament: {
+    display: "Tournament",
+    description: "Play vs multiple people in a showdown style match to see who is the greatest at tictactoe."
+  },
   onevone: {
     display: "One v One",
     description: "Play against one person to see who gets the highest score",

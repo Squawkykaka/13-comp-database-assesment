@@ -156,6 +156,7 @@ export class Lobby {
       }),
       this.currentMember.subscribe((user) => {
         let userRef = child(membersRef, user.uid);
+        
         update(userRef, {
           displayName: user.displayName,
           quote: user.quote,
@@ -207,11 +208,21 @@ export class Lobby {
     let lobbysRef = ref(RDB, "lobbies");
     let lobby = push(lobbysRef);
     let code = makeid(5);
+
+    let dbLobby: any = {
+      owner: owner.uid,
+      settings,
+      members: {
+        [owner.uid]: {
+          displayName: owner.displayName,
+          quote: owner.quote
+        }
+      },
+    }
+    if (settings.gameStyle == "onevone") { dbLobby.locked = true }
+
     await Promise.all([
-      set(lobby, {
-        owner: owner.uid,
-        settings,
-      }),
+      set(lobby, dbLobby),
       set(ref(RDB, "pincodes/" + code), lobby.key),
     ]);
     return { code, lobbyRef: lobby };
@@ -234,6 +245,7 @@ export class Lobby {
       for (const id of Object.keys(membersData)) {
         membersData[id].uid = id;
       }
+      
       console.log(membersData);
 
       return {

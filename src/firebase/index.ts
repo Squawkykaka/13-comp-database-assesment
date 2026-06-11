@@ -10,7 +10,6 @@ import {
   type User,
 } from "firebase/auth";
 import { derived, writable } from "svelte/store";
-import type { GameUser } from "../models/user";
 import {
   child,
   connectDatabaseEmulator,
@@ -20,6 +19,7 @@ import {
   ref,
   set,
 } from "firebase/database";
+import type { GameUser } from "../models/types";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBjjSwm8ARN8jb-Z23XXMEymlCgLzv7qOI",
