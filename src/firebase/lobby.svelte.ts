@@ -1,6 +1,12 @@
 import { AUTH, currentUser, RDB, userRef } from ".";
 import type { GameUser, LobbyMember } from "../models/types";
-import { derived, get, writable, type Readable, type Writable } from "svelte/store";
+import {
+  derived,
+  get,
+  writable,
+  type Readable,
+  type Writable,
+} from "svelte/store";
 import { SiteError } from "../models/error";
 
 import {
@@ -20,6 +26,7 @@ import {
   remove,
 } from "firebase/database";
 import type { LobbySettings } from "../models/types";
+import { activeGame, Game } from "./game.svelte";
 
 function makeid(length: number) {
   let result = "";
@@ -51,7 +58,8 @@ export class Lobby {
     let membersRef = child(this.lobbyRef, "members");
 
     let members = Object.entries(get(this.members));
-    if (members.length % 2 !== 0) throw "There is an uneven amount of players in the lobby";
+    if (members.length % 2 !== 0)
+      throw "There is an uneven amount of players in the lobby";
     set(child(this.lobbyRef, "locked"), true);
 
     for (let i = 0; i < members.length; i += 2) {
@@ -156,12 +164,20 @@ export class Lobby {
       }),
       this.currentMember.subscribe((user) => {
         let userRef = child(membersRef, user.uid);
-        
+
         update(userRef, {
           displayName: user.displayName,
           quote: user.quote,
         });
       }),
+      // join a lobby if you are joined to a lobby,
+      onValue(child(membersRef, `${AUTH.currentUser?.uid}/activeGame`), async snapshot => {
+        if (snapshot.exists()) {
+          activeGame.set(await Game.joinGame(snapshot.val() as string))
+        } else {
+          activeGame.set(undefined)
+        }
+      })
     );
   }
 
@@ -170,9 +186,9 @@ export class Lobby {
     if (this.isOwner) {
       await remove(this.lobbyRef);
     } else {
-      await remove(child(this.lobbyRef, `members/${AUTH.currentUser?.uid}`))
+      await remove(child(this.lobbyRef, `members/${AUTH.currentUser?.uid}`));
     }
-    LOBBY.set(undefined)
+    LOBBY.set(undefined);
   }
 
   static async create(settings: LobbySettings): Promise<Lobby> {
@@ -191,7 +207,8 @@ export class Lobby {
   static async joinPincode(code: string): Promise<Lobby> {
     let lobbyId = (await getRef(ref(RDB, "pincodes/" + code))).val();
 
-    const { owner, settings, reference, members } = await Lobby.joinLobby(lobbyId);
+    const { owner, settings, reference, members } =
+      await Lobby.joinLobby(lobbyId);
 
     return new Lobby(owner, settings, reference, code, members);
   }
@@ -215,11 +232,13 @@ export class Lobby {
       members: {
         [owner.uid]: {
           displayName: owner.displayName,
-          quote: owner.quote
-        }
+          quote: owner.quote,
+        },
       },
+    };
+    if (settings.gameStyle == "onevone") {
+      dbLobby.locked = true;
     }
-    if (settings.gameStyle == "onevone") { dbLobby.locked = true }
 
     await Promise.all([
       set(lobby, dbLobby),
@@ -245,7 +264,7 @@ export class Lobby {
       for (const id of Object.keys(membersData)) {
         membersData[id].uid = id;
       }
-      
+
       console.log(membersData);
 
       return {
@@ -272,25 +291,15 @@ export class Lobby {
 
 export let LOBBY = writable<Lobby | undefined>();
 let removeLobby = () => {};
-LOBBY.subscribe(update => {
-  removeLobby()
+LOBBY.subscribe((update) => {
+  removeLobby();
   if (update) {
-    removeLobby = onValue(update.lobbyRef, snapshot => {
+    removeLobby = onValue(update.lobbyRef, (snapshot) => {
       if (!snapshot.exists()) {
-        update.destroy()
-        LOBBY.set(undefined)
-        removeLobby()
+        update.destroy();
+        LOBBY.set(undefined);
+        removeLobby();
       }
-    })
+    });
   }
-})
-// let off = currentUser.subscribe(async (self) => {
-//   if (self.info) {
-//     if (REQUESTED_LOBBY.kind == "join") {
-//       LOBBY.set(await Lobby.join(REQUESTED_LOBBY.lobbyCode));
-//     } else {
-//       console.log("Creating lobby");
-//     }
-//     off();
-//   }
-// });
+});

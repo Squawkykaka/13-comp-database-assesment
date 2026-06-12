@@ -19,6 +19,12 @@ a button to start the game is visible and the lobby code is shown in multiplayer
 
 - [x] fix incorrectly displayed code when joining from lobby list
 - [x] make it so when a lobby is deleted, users get sent to home screen
+- [ ] fix the activeGame not being reset when manually leaving  lobby
+- [ ] change the scoring color based on if you won
+- [ ] make the border around the creation options
+  - [ ] make the first option selected
+- [ ] name the tournament champtionship
+- [ ] make it so after you finish you can click `ready` then when everyone is ready go onto next round
 make it so it displays when a lobby is locked, and allows you to unlock
 
 need to get feedback from user to improve my layout

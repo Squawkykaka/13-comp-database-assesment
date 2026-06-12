@@ -1,35 +1,16 @@
 <script lang="ts">
-  import { child, onValue, remove } from "firebase/database";
   import { AUTH } from "../firebase";
   import { LOBBY } from "../firebase/lobby.svelte";
-  import { activeGame, Game } from "../firebase/game.svelte";
+  import { activeGame } from "../firebase/game.svelte";
 
   async function handleClick(index: number) {
     await $activeGame?.createMove(index);
   }
 
-  let activeGameRefRef = $derived(
-    AUTH.currentUser && $LOBBY
-      ? child($LOBBY.lobbyRef, `members/${AUTH.currentUser?.uid}/activeGame`)
-      : undefined,
-  );
   let members = $derived($LOBBY?.members);
 
   let winData = $derived($activeGame?.winData);
   let boardShape = $derived($activeGame?.boardShape);
-  $effect(() => {
-    if (activeGameRefRef === undefined) {
-      activeGame.set(undefined);
-      return;
-    }
-    return onValue(activeGameRefRef, async (snapshot) => {
-      if (snapshot.exists()) {
-        let gameId = snapshot.val() as string;
-
-        activeGame.set(await Game.joinGame(gameId));
-      }
-    });
-  });
 </script>
 
 {#if $LOBBY && $activeGame && $members}
@@ -48,8 +29,8 @@
           </thead>
           <tbody>
             <tr>
-              <td>{$members[$winData.winnerUid].displayName}</td>
-              <td>{$members[$winData.loserUid].displayName}</td>
+              <td>{$members[$winData.winnerUid]?.displayName}</td>
+              <td>{$members[$winData.loserUid]?.displayName}</td>
             </tr>
           </tbody>
         </table>

@@ -69,23 +69,25 @@
       }
     },
     "users": {
-      "$uid": {
-        ".read": true,
-        ".write": "$uid === auth.uid",
-        ".validate": "newData.hasChildren(['displayName', 'quote', 'joinDate'])",
-        "displayName": {
-          ".validate": "newData.isString()"
-        },
-        "quote": {
-          ".validate": "newData.isString()"
-        },
-        "joinDate": {
-          ".validate": "newData.isNumber()"
-        },
-        "$other": {
-          ".validate": false
-        }
-      }
+      ".write": true,
+      ".read": true,
+//      "$uid": {
+//        ".read": true,
+//        ".write": "$uid === auth.uid",
+//        ".validate": "newData.hasChildren(['displayName', 'quote', 'joinDate'])",
+//        "displayName": {
+//          ".validate": "newData.isString()"
+//        },
+//        "quote": {
+//          ".validate": "newData.isString()"
+//        },
+//        "joinDate": {
+//          ".validate": "newData.isNumber()"
+//        },
+//        "$other": {
+//          ".validate": false
+//        }
+//      }
     }
   }
 }

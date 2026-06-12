@@ -12,11 +12,7 @@ import {
 import { Board, type TileType } from "../game/board";
 import { AUTH, RDB } from ".";
 import { SiteError } from "../models/error";
-import {
-  writable,
-  type Readable,
-  get as getStore,
-} from "svelte/store";
+import { writable, type Readable, get as getStore } from "svelte/store";
 import { LOBBY } from "./lobby.svelte";
 
 // the host when starting the game splits members into games, setting the `activeGame` setting in there members list to the game id
@@ -41,7 +37,6 @@ import { LOBBY } from "./lobby.svelte";
 // when theres enough players for another round without the same users the host starts a new game
 
 // after 15 minutes, the player with the highest score is declared the winner (this is for onevone mode)
-//
 
 export const activeGame = writable<Game | undefined>();
 
@@ -73,6 +68,8 @@ export class Game {
     ({ type: TileType; win: boolean } | null)[]
   >(Array(9).fill(null));
 
+  private _subscriptions: (() => void)[] = [];
+
   get boardShape(): Readable<({ type: TileType; win: boolean } | null)[]> {
     return { subscribe: this._boardShapeStore.subscribe };
   }
@@ -94,7 +91,6 @@ export class Game {
     this.gameRef = gameRef;
     this.opponentUid = opponentUid;
     this.ourTurn = $state(tileType == "Circle" ? true : false);
-    let _subscriptions: (() => void)[] = [];
 
     onDisconnect(this.gameRef).remove();
 
@@ -124,15 +120,22 @@ export class Game {
         this.handleFinish();
       }
     });
-    onValue(gameRef, (snapshot) => {
-      if (!snapshot.exists()) {
-        console.log("yerted");
 
-        _subscriptions.forEach((unsub) => unsub());
-        activeGame.set(undefined);
-      }
-    });
-    _subscriptions.push(moveUnsubscribe);
+    // so these get destoryed when the game is over
+    this._subscriptions.push(
+      onValue(gameRef, (snapshot) => {
+        if (!snapshot.exists()) {
+          console.log("yerted");
+
+          this.destroy();
+        }
+      }),
+      moveUnsubscribe,
+    );
+  }
+  destroy() {
+    this._subscriptions.forEach((unsub) => unsub());
+    activeGame.set(undefined);
   }
 
   private async handleFinish() {
@@ -171,7 +174,12 @@ export class Game {
   }
 
   async createMove(index: number) {
-    if (!this.ourTurn || this.board.state.status !== "playing" || !this.board.checkMoveValid(index)) return;
+    if (
+      !this.ourTurn ||
+      this.board.state.status !== "playing" ||
+      !this.board.checkMoveValid(index)
+    )
+      return;
     // no need to set it locally, the listener will handle that
     await push(child(this.gameRef, "moves"), {
       position: index,
