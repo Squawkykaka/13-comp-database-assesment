@@ -171,13 +171,16 @@ export class Lobby {
         });
       }),
       // join a lobby if you are joined to a lobby,
-      onValue(child(membersRef, `${AUTH.currentUser?.uid}/activeGame`), async snapshot => {
-        if (snapshot.exists()) {
-          activeGame.set(await Game.joinGame(snapshot.val() as string))
-        } else {
-          activeGame.set(undefined)
-        }
-      })
+      onValue(
+        child(membersRef, `${AUTH.currentUser?.uid}/activeGame`),
+        async (snapshot) => {
+          if (snapshot.exists()) {
+            activeGame.set(await Game.joinGame(snapshot.val() as string));
+          } else {
+            activeGame.set(undefined);
+          }
+        },
+      ),
     );
   }
 
@@ -294,10 +297,13 @@ let removeLobby = () => {};
 LOBBY.subscribe((update) => {
   removeLobby();
   if (update) {
-    removeLobby = onValue(update.lobbyRef, (snapshot) => {
+    removeLobby = onValue(update.lobbyRef, async (snapshot) => {
       if (!snapshot.exists()) {
         update.destroy();
         LOBBY.set(undefined);
+        await remove(
+          child(update.lobbyRef, `members/${AUTH.currentUser?.uid}/activeGame`),
+        );
         removeLobby();
       }
     });
