@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { currentUser } from "../firebase";
-  import { LOBBY } from "../firebase/lobby.svelte";
+  import { AUTH, currentUser } from "../firebase";
+  import { Lobby } from "../firebase/lobby.svelte";
+  let { lobby }: { lobby: Lobby } = $props()
 
   let updatePlayer = (event: SubmitEvent) => {
     event.preventDefault();
@@ -18,16 +19,12 @@
     $currentUser.updateDisplay(formData.get("displayName") as string);
   };
 
-  let m = $derived($LOBBY?.members);
-  let members = $derived($m ? Object.entries($m) : []);
+  let m = $derived(lobby.members);
+  // sort with the current user on top, then by wins
+  let members = $derived($m ? Object.entries($m).sort((a,b ) => a[0] == AUTH.currentUser?.uid ? 1 : a[1].wins - b[1].wins) : []);
   
   </script>
 
-{#if $LOBBY?.isOwner}
-  <section>
-    <p><strong>Code: </strong> {$LOBBY.lobbyCode}</p>
-  </section>
-{/if}
 <div>
   <h3>Players: {members.length}</h3>
   <ul>
@@ -42,7 +39,7 @@
               maxlength="15"
               minlength="5"
               value={participant.displayName}
-            />
+            />;
             <button type="submit">Submit</button>
           </form>
         {:else}

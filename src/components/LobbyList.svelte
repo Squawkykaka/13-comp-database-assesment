@@ -41,8 +41,6 @@
       return old;
     });
   });
-
-  $inspect(lobbies);
 </script>
 
 <div>

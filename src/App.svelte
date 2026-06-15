@@ -1,5 +1,5 @@
 <script>
-  import GameBoard from "./components/GameBoard.svelte";
+  import Game from "./components/Game.svelte";
   import LobbyCreator from "./components/LobbyCreator.svelte";
   import LobbyList from "./components/LobbyList.svelte";
   import PlayerList from "./components/PlayerList.svelte";
@@ -14,13 +14,18 @@
 {:else if $LOBBY}
   <div class="container">
     <p hidden={!$LOBBY.locked}>Lobby Locked</p>
-    <section class="settings {$LOBBY.locked ? "locked" : ""}">
-      <PlayerList />
+    <section class="settings {$LOBBY.locked ? 'locked' : ''}">
+      {#if $LOBBY?.isOwner}
+        <section>
+          <p><strong>Code: </strong> {$LOBBY.lobbyCode}</p>
+        </section>
+      {/if}
+      <PlayerList lobby={$LOBBY}/>
       <SettingPicker />
     </section>
 
     <section class="board-area">
-      <GameBoard />
+      <Game />
     </section>
   </div>
 {:else}

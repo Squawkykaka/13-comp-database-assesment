@@ -1,71 +1,29 @@
 <script lang="ts">
-  import { AUTH } from "../firebase";
-  import { LOBBY } from "../firebase/lobby.svelte";
-  import { activeGame } from "../firebase/game.svelte";
+  import type { Game } from "../firebase/game.svelte";
+
+  let { game }: { game: Game } = $props();
 
   async function handleClick(index: number) {
-    await $activeGame?.createMove(index);
+    await game.createMove(index);
   }
-
-  let members = $derived($LOBBY?.members);
-
-  let winData = $derived($activeGame?.winData);
-  let boardShape = $derived($activeGame?.boardShape);
+  let boardShape = $derived(game.boardShape);
 </script>
 
-{#if $LOBBY && $activeGame && $members}
-  <div class="container">
-    <div popover="manual" id="winPopover">
-      {#if $winData == "draw"}
-      <p>Draw</p>
-      {:else if $winData !== undefined}
-        <h4>Game {$winData.winnerUid == AUTH.currentUser?.uid ? "Won" : "Lost"}</h4>
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Winner</th>
-              <th scope="col">Loser</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>{$members[$winData.winnerUid]?.displayName}</td>
-              <td>{$members[$winData.loserUid]?.displayName}</td>
-            </tr>
-          </tbody>
-        </table>
+<div id="gameBoard">
+  {#each $boardShape?.entries() as [idx, tile]}
+    <button
+      onclick={() => handleClick(idx)}
+      aria-label="Tile {idx}"
+      class={tile?.win ? `winner-${tile.type}` : ""}
+    >
+      {#if tile?.type == "Circle"}
+        O
+      {:else if tile?.type == "Cross"}
+        X
       {/if}
-      <p>Wait for a new game.</p>
-      <button onclick={() => $LOBBY.leave()}>Leave Lobby</button>
-    </div>
-    <p>
-      {($activeGame.ourTurn
-        ? "Our Turn"
-        : `${$members[$activeGame.opponentUid].displayName}'s Turn`) +
-        ($activeGame.ourTurn
-          ? $activeGame.tileType === "Circle"
-            ? " (O)"
-            : " (X)"
-          : $activeGame.tileType === "Circle"
-            ? " (X)"
-            : " (O)")}
-    </p>
-    <div id="gameBoard">
-      {#each $boardShape?.entries() as [idx, tile]}
-        <button
-          onclick={() => handleClick(idx)}
-          aria-label="Tile {idx}"
-          class={tile?.win ? `winner-${tile.type}` : ""}
-          >{tile?.type == "Cross"
-            ? "X"
-            : tile?.type == "Circle"
-              ? "O"
-              : ""}</button
-        >
-      {/each}
-    </div>
-  </div>
-{/if}
+    </button>
+  {/each}
+</div>
 
 <style>
   /* Game Board */
@@ -84,7 +42,7 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
-    gap: 10px;
+    gap: 25px;
     background: black;
 
     > button {

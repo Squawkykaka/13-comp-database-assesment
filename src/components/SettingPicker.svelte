@@ -4,7 +4,6 @@
   import { LOBBY } from "../firebase/lobby.svelte";
   import {
     GAME_MODES,
-    GAME_STYLES,
     MULTIPLAYER_MODES,
   } from "../models/types";
 
