@@ -12,7 +12,7 @@ a button to start the game is visible and the lobby code is shown in multiplayer
 - [ ] add setting for 1v1 where you can choose a score goal to win
 - [ ] add max users in lobby setting
 - [ ] maybe have preset games, like local original 1v1 for ease of use
-- [ ] add code enter to the top of the screen
+- [x] add code enter to the top of the screen
 - [ ] make it so you can only change the next and previous elements in the signup, not all
 
 # TODO
@@ -24,6 +24,7 @@ a button to start the game is visible and the lobby code is shown in multiplayer
 - [ ] make the border around the creation options
   - [ ] make the first option selected
 - [ ] name the tournament champtionship
+- [x] players ready up rather than owner starting the lobby
 - [ ] make it so after you finish you can click `ready` then when everyone is ready go onto next round
 make it so it displays when a lobby is locked, and allows you to unlock
 

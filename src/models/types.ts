@@ -18,17 +18,17 @@ export const MULTIPLAYER_MODES = {
     display: "Public",
     description: "Create a online game that people can join from anywhere",
   },
-  // private: {
-  //   display: "Private",
-  //   description:
-  //     "Create a private game, that only people you send the code to can join",
-  // },
+  private: {
+    display: "Private",
+    description:
+      "Create a private game, that only people you send the code to can join",
+  },
 };
 export const GAME_STYLES = {
-  tournament: {
-    display: "Tournament",
-    description: "Play vs multiple people in a showdown style match to see who is the greatest at tictactoe."
-  },
+  // tournament: {
+  //   display: "Tournament",
+  //   description: "Play vs multiple people in a showdown style match to see who is the greatest at tictactoe."
+  // },
   onevone: {
     display: "One v One",
     description: "Play against one person to see who gets the highest score",

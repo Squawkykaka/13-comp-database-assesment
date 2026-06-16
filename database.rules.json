@@ -47,6 +47,14 @@
           ".write": "data.parent().child('owner').val() === auth.uid"
         },
 
+        "games": {
+          "$uid": {
+            ".read": true,
+            ".write": "!data.exists() || (auth.uid === data.child('circleUid').val() || auth.uid === data.child('crossUid').val())",
+            ".validate": "newData.child('circleUid').isString() && newData.child('crossUid').isString()"
+          }
+        },
+
         // Prevents any keys other than members, owner, or settings from being created
         "$other": {
           ".validate": false
@@ -60,13 +68,6 @@
 
         // Dynamically picks newData (creation) or data (deletion) to do a single owner check
         ".write": "root.child('lobbies/' + (newData.exists() ? newData.val() : data.val()) + '/owner').val() === auth.uid"
-      }
-    },
-    "games": {
-      "$uid": {
-        ".read": true,
-        ".write": "!data.exists() || (auth.uid === data.child('circleUid').val() || auth.uid === data.child('crossUid').val())",
-        ".validate": "newData.child('circleUid').isString() && newData.child('crossUid').isString()"
       }
     },
     "users": {

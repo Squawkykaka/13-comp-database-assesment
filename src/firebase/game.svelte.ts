@@ -135,7 +135,6 @@ export class Game {
   }
   destroy() {
     this._subscriptions.forEach((unsub) => unsub());
-    activeGame.set(undefined);
   }
 
   private async handleFinish() {
@@ -189,8 +188,7 @@ export class Game {
     this.ourTurn = false;
   }
 
-  static async joinGame(gameId: string): Promise<Game> {
-    let gameRef = ref(RDB, "games/" + gameId);
+  static async joinGame(gameRef: DatabaseReference): Promise<Game> {
     let info = (await get(gameRef)).val() as DatabaseGame;
 
     let opponentUid =

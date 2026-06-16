@@ -43,7 +43,7 @@ function makeid(length: number) {
 export class Lobby {
   readonly members = writable<{ [x: string]: LobbyMember }>({});
   readonly settings: Writable<LobbySettings>; // initialized in constructor
-  readonly owner: GameUser;
+  readonly owner: string;
   readonly lobbyRef: DatabaseReference;
   // stores the current lobby member, this is different from the global user
   readonly lobbyCode: string;
@@ -53,7 +53,7 @@ export class Lobby {
 
   private async startGames() {
     if (!this.isOwner) throw "You are not the lobby owner";
-    let gamesRef = ref(RDB, "games");
+    let gamesRef = child(this.lobbyRef, "games");
     let membersRef = child(this.lobbyRef, "members");
 
     let members = Object.entries(get(this.members));
@@ -93,7 +93,7 @@ export class Lobby {
   }
 
   private constructor(
-    owner: GameUser,
+    owner: string,
     settings: LobbySettings,
     lobbyRef: DatabaseReference,
     lobbyCode: string,
@@ -104,7 +104,7 @@ export class Lobby {
     this.settings = writable(settings);
     this.lobbyRef = lobbyRef;
     this.lobbyCode = lobbyCode;
-    this.isOwner = owner.uid == AUTH.currentUser?.uid;
+    this.isOwner = owner == AUTH.currentUser?.uid;
 
     let membersRef = child(this.lobbyRef, "members");
 
@@ -121,7 +121,7 @@ export class Lobby {
 
         if (allReady) {
           this.startGames();
-          gameStartUnsubscribe()
+          gameStartUnsubscribe();
         }
       });
     } else {
@@ -172,7 +172,9 @@ export class Lobby {
         child(membersRef, `${AUTH.currentUser?.uid}/activeGame`),
         async (snapshot) => {
           if (snapshot.exists()) {
-            activeGame.set(await Game.joinGame(snapshot.val() as string));
+            activeGame.set(
+              await Game.joinGame(child(lobbyRef, `games/${snapshot.val()}`)),
+            );
           } else {
             activeGame.set(undefined);
           }
@@ -207,7 +209,7 @@ export class Lobby {
     }
 
     let { code, lobbyRef } = await Lobby.createLobby(info, settings);
-    const lobby = new Lobby(info, settings, lobbyRef, code, {});
+    const lobby = new Lobby(info.uid, settings, lobbyRef, code, {});
 
     return lobby;
   }
@@ -215,15 +217,13 @@ export class Lobby {
   static async joinPincode(code: string): Promise<Lobby> {
     let lobbyId = (await getRef(ref(RDB, "pincodes/" + code))).val();
 
-    const { owner, settings, reference, members } =
-      await Lobby.joinLobby(lobbyId);
-
-    return new Lobby(owner, settings, reference, code, members);
+    return Lobby.join(lobbyId);
   }
   static async join(code: string): Promise<Lobby> {
-    const { owner, settings, reference, members } = await Lobby.joinLobby(code);
+    const { ownerUid, settings, reference, members } =
+      await Lobby.joinLobby(code);
 
-    return new Lobby(owner, settings, reference, code, members);
+    return new Lobby(ownerUid, settings, reference, code, members);
   }
 
   private static async createLobby(
@@ -244,7 +244,7 @@ export class Lobby {
         },
       },
     };
-    if (settings.gameStyle == "onevone") {
+    if (settings.multiplayerType == "private") {
       dbLobby.locked = true;
     }
 
@@ -256,7 +256,7 @@ export class Lobby {
   }
 
   private static async joinLobby(lobbyId: string): Promise<{
-    owner: GameUser;
+    ownerUid: string;
     settings: LobbySettings;
     reference: DatabaseReference;
     members: { [x: string]: LobbyMember };
@@ -266,26 +266,17 @@ export class Lobby {
 
     if (snapshot.exists()) {
       let data = snapshot.val();
-      let userData = (await getRef(child(userRef, data.owner))).val();
 
-      let membersData = (await getRef(child(lobbyRef, "members"))).val() ?? {};
-      for (const id of Object.keys(membersData)) {
-        membersData[id].uid = id;
-      }
+      // // if the lobby is locked, this happens when the game is private or already playing
+      // if (data.locked === true) {
 
-      console.log(membersData);
+      // }
 
       return {
-        owner: {
-          displayName: userData.displayName,
-          joinDate: userData.joinDate,
-          quote: userData.quote,
-          photoURL: userData.photoURL === null ? undefined : userData.photoURL,
-          uid: data.owner,
-        },
+        ownerUid: data.owner,
         settings: data.settings,
         reference: lobbyRef,
-        members: membersData,
+        members: {},
       };
     } else {
       throw new SiteError("LOBBY_NONEXISTENT");
