@@ -63,6 +63,8 @@
 
     > div {
       height: 80%;
+      aspect-ratio: 1;
+          max-width: 80%;
     }
   }
 </style>

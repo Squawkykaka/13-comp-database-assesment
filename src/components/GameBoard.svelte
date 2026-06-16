@@ -14,7 +14,11 @@
     <button
       onclick={() => handleClick(idx)}
       aria-label="Tile {idx}"
-      class={tile?.win ? `winner-${tile.type}` : ""}
+      class={tile?.win
+        ? tile.type === game.tileType
+          ? "winner"
+          : "loser"
+        : ""}
     >
       {#if tile?.type == "Circle"}
         O
@@ -27,10 +31,10 @@
 
 <style>
   /* Game Board */
-  :global(.winner-Circle) {
+  .loser {
     background-color: red !important;
   }
-  :global(.winner-Cross) {
+  .winner {
     background-color: green !important;
   }
   .gameBoard {
