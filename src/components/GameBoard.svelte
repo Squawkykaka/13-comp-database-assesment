@@ -9,7 +9,7 @@
   let boardShape = $derived(game.boardShape);
 </script>
 
-<div id="gameBoard">
+<div class="gameBoard">
   {#each $boardShape?.entries() as [idx, tile]}
     <button
       onclick={() => handleClick(idx)}
@@ -33,12 +33,9 @@
   :global(.winner-Cross) {
     background-color: green !important;
   }
-  .container {
-    height: 700px;
+  .gameBoard {
+    height: 100%;
     aspect-ratio: 1/1;
-  }
-  #gameBoard {
-    flex: 0;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: repeat(3, 1fr);
@@ -46,9 +43,6 @@
     background: black;
 
     > button {
-      flex: 0;
-      min-width: 200px;
-      max-width: 1/5;
       aspect-ratio: 1/1;
       border: 0;
       background-color: white;

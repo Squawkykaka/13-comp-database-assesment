@@ -13,20 +13,18 @@
   <SignIn></SignIn>
 {:else if $LOBBY}
   <div class="container">
-    <p hidden={!$LOBBY.locked}>Lobby Locked</p>
     <section class="settings {$LOBBY.locked ? 'locked' : ''}">
+      <p hidden={!$LOBBY.locked}>Lobby Locked</p>
       {#if $LOBBY?.isOwner}
         <section>
           <p><strong>Code: </strong> {$LOBBY.lobbyCode}</p>
         </section>
       {/if}
-      <PlayerList lobby={$LOBBY}/>
+      <PlayerList lobby={$LOBBY} />
       <SettingPicker />
     </section>
 
-    <section class="board-area">
-      <Game />
-    </section>
+    <Game />
   </div>
 {:else}
   <h2>Join or Create a lobby</h2>
@@ -38,7 +36,7 @@
   .container {
     display: grid;
     grid-template-columns: 1fr 3fr;
-    width: 100%;
+    height: 100vh;
   }
 
   .locked {
@@ -47,11 +45,5 @@
 
   .settings {
     grid-column: 1;
-  }
-
-  .board-area {
-    /* grid-column: 2; */
-    display: flex;
-    justify-content: center;
   }
 </style>

@@ -9,34 +9,60 @@
   let winData = $derived($activeGame?.winData);
 </script>
 
-{#if $winData}
-  <div popover="manual" id="winPopover">
-    {#if $winData == "draw"}
-      <p>Draw</p>
-    {:else}
-      <h4>
-        Game {$winData.winnerUid == AUTH.currentUser?.uid ? "Won" : "Lost"}
-      </h4>
-      <table>
-        <thead>
-          <tr>
-            <th scope="col">Winner</th>
-            <th scope="col">Loser</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{$members[$winData.winnerUid]?.displayName}</td>
-            <td>{$members[$winData.loserUid]?.displayName}</td>
-          </tr>
-        </tbody>
-      </table>
-    {/if}
-    <p>Wait for a new game.</p>
-    <button onclick={() => $LOBBY?.leave()}>Leave Lobby</button>
-  </div>
-{/if}
+<div popover="manual" id="winPopover">
+  {#if $winData == "draw"}
+    <p>Draw</p>
+  {:else if $winData !== undefined}
+    <h4>
+      Game {$winData.winnerUid == AUTH.currentUser?.uid ? "Won" : "Lost"}
+    </h4>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">Winner</th>
+          <th scope="col">Loser</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{$members[$winData.winnerUid]?.displayName}</td>
+          <td>{$members[$winData.loserUid]?.displayName}</td>
+        </tr>
+      </tbody>
+    </table>
+  {/if}
+  <p>Wait for a new game.</p>
+  <button onclick={() => $LOBBY?.leave()}>Leave Lobby</button>
+</div>
 
 {#if $activeGame}
-  <GameBoard game={$activeGame}></GameBoard>
+  <section class="game">
+    <div class="game-ui">
+      <h3>Stuff Thing Here</h3>
+    </div>
+
+    <div class="game-board">
+      <div>
+        <GameBoard game={$activeGame}></GameBoard>
+      </div>
+    </div>
+  </section>
 {/if}
+
+<style>
+  .game {
+    position: relative;
+  }
+
+  .game-board {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    > div {
+      height: 80%;
+    }
+  }
+</style>
