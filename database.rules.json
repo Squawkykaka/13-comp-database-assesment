@@ -21,6 +21,7 @@
             "losses": { ".validate": true },
             "quote": { ".validate": true },
             "wins": { ".validate": true },
+            "ready": { ".validate": "newData.isBoolean()" },
             "activeGame": {
               ".validate": "newData.isString()",
               ".write": "data.parent().parent().parent().child('owner').val() === auth.uid"
@@ -70,24 +71,24 @@
     },
     "users": {
       ".write": true,
-      ".read": true,
-//      "$uid": {
-//        ".read": true,
-//        ".write": "$uid === auth.uid",
-//        ".validate": "newData.hasChildren(['displayName', 'quote', 'joinDate'])",
-//        "displayName": {
-//          ".validate": "newData.isString()"
-//        },
-//        "quote": {
-//          ".validate": "newData.isString()"
-//        },
-//        "joinDate": {
-//          ".validate": "newData.isNumber()"
-//        },
-//        "$other": {
-//          ".validate": false
-//        }
-//      }
+      ".read": true
+      //      "$uid": {
+      //        ".read": true,
+      //        ".write": "$uid === auth.uid",
+      //        ".validate": "newData.hasChildren(['displayName', 'quote', 'joinDate'])",
+      //        "displayName": {
+      //          ".validate": "newData.isString()"
+      //        },
+      //        "quote": {
+      //          ".validate": "newData.isString()"
+      //        },
+      //        "joinDate": {
+      //          ".validate": "newData.isNumber()"
+      //        },
+      //        "$other": {
+      //          ".validate": false
+      //        }
+      //      }
     }
   }
 }

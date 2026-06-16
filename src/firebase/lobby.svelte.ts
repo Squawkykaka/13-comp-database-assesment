@@ -46,13 +46,12 @@ export class Lobby {
   readonly owner: GameUser;
   readonly lobbyRef: DatabaseReference;
   // stores the current lobby member, this is different from the global user
-  readonly currentMember: Readable<LobbyMember>;
   readonly lobbyCode: string;
   locked: boolean = $state(false);
   isOwner: boolean;
   private cleanup: (() => void)[] = [];
 
-  async startGames() {
+  private async startGames() {
     if (!this.isOwner) throw "You are not the lobby owner";
     let gamesRef = ref(RDB, "games");
     let membersRef = child(this.lobbyRef, "members");
@@ -78,6 +77,13 @@ export class Lobby {
     }
   }
 
+  set ready(readyStatus: boolean) {
+    set(
+      child(this.lobbyRef, `members/${AUTH.currentUser?.uid}/ready`),
+      readyStatus,
+    );
+  }
+
   async updateSettings(next: LobbySettings) {
     if (!this.isOwner) {
       throw new SiteError("NOT_LOBBY_OWNER");
@@ -101,9 +107,29 @@ export class Lobby {
     this.isOwner = owner.uid == AUTH.currentUser?.uid;
 
     let membersRef = child(this.lobbyRef, "members");
-    if (!this.isOwner) {
-      let settingsRef = child(this.lobbyRef, "settings");
 
+    // delete the lobby and pincode when the game is over
+    if (this.isOwner) {
+      onDisconnect(this.lobbyRef).remove();
+
+      // start the games if everyone in the lobby is ready
+      let gameStartUnsubscribe = this.members.subscribe((members) => {
+        let membersList = Object.values(members);
+
+        if (membersList.length < 2 && membersList.length % 2 == 0) return;
+        const allReady = membersList.every((member) => member.ready);
+
+        if (allReady) {
+          this.startGames();
+          gameStartUnsubscribe()
+        }
+      });
+    } else {
+      // remove the member from the lobby
+      onDisconnect(child(membersRef, get(currentUser).info!.uid)).remove();
+
+      // listen to the updated settings
+      let settingsRef = child(this.lobbyRef, "settings");
       this.cleanup.push(
         onValue(settingsRef, (snapshot) => {
           if (snapshot.exists()) {
@@ -111,28 +137,6 @@ export class Lobby {
           }
         }),
       );
-    }
-
-    this.currentMember = derived(currentUser, (currentUser) => {
-      if (currentUser.info) {
-        return {
-          displayName: currentUser.info.displayName,
-          losses: 0,
-          wins: 0,
-          quote: currentUser.info.quote,
-          uid: currentUser.info.uid,
-        };
-      } else {
-        throw new SiteError("USER_NOT_AUTHENTICATED");
-      }
-    });
-
-    // delete the lobby and pincode when the game is over
-    if (this.isOwner) {
-      onDisconnect(this.lobbyRef).remove();
-    } else {
-      // remove the member from the lobby
-      onDisconnect(child(membersRef, get(currentUser).info!.uid)).remove();
     }
     onDisconnect(ref(RDB, "pincodes/" + this.lobbyCode)).remove();
 
@@ -143,6 +147,7 @@ export class Lobby {
           quote: data.val().quote,
           losses: data.val().losses ?? 0,
           wins: data.val().wins ?? 0,
+          ready: data.val().ready ?? false,
           uid: data.key!,
         };
         return old;
@@ -162,14 +167,6 @@ export class Lobby {
         let data = snapshot.val() as boolean;
         this.locked = data;
       }),
-      this.currentMember.subscribe((user) => {
-        let userRef = child(membersRef, user.uid);
-
-        update(userRef, {
-          displayName: user.displayName,
-          quote: user.quote,
-        });
-      }),
       // join a lobby if you are joined to a lobby,
       onValue(
         child(membersRef, `${AUTH.currentUser?.uid}/activeGame`),
@@ -181,6 +178,14 @@ export class Lobby {
           }
         },
       ),
+      currentUser.subscribe(async (user) => {
+        if (user.info) {
+          await update(child(membersRef, user.info.uid), {
+            displayName: user.info.displayName,
+            quote: user.info.quote,
+          });
+        }
+      }),
     );
   }
 

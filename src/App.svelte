@@ -5,8 +5,14 @@
   import PlayerList from "./components/PlayerList.svelte";
   import SettingPicker from "./components/SettingPicker.svelte";
   import SignIn from "./components/SignIn.svelte";
-  import { currentUser } from "./firebase";
+  import { AUTH, currentUser } from "./firebase";
+  import { activeGame } from "./firebase/game.svelte";
   import { LOBBY } from "./firebase/lobby.svelte";
+
+  let members = $derived($LOBBY?.members);
+  let readyStatus = $derived(
+    AUTH.currentUser ? $members?.[AUTH.currentUser.uid]?.ready : false,
+  );
 </script>
 
 {#if $currentUser.auth === undefined}
@@ -22,6 +28,13 @@
       {/if}
       <PlayerList lobby={$LOBBY} />
       <SettingPicker />
+      <button onclick={() => ($LOBBY.ready = !readyStatus) } hidden={$activeGame !== undefined}
+        >{AUTH.currentUser
+          ? readyStatus
+            ? "Unready"
+            : "Ready Up"
+          : "Loading..."}</button
+      >
     </section>
 
     <Game />

@@ -43,29 +43,26 @@
   });
 </script>
 
-<div>
-  <ul>
-    {#each Object.entries($lobbies) as [id, information]}
-      <p>
-        Owner: {information?.members?.[information.owner]?.displayName ??
-          "Loading..."}
-      </p>
+<ul>
+  {#each Object.entries($lobbies) as [id, information]}
+    <p>
+      Owner: {information?.members?.[information.owner]?.displayName ??
+        "Loading..."}
+    </p>
 
-      <em>
-        {information.settings?.description
-          ? information.settings.description
-          : "No description"}
-      </em>
+    <em>
+      {information.settings?.description
+        ? information.settings.description
+        : "No description"}
+    </em>
 
-      <p>Members: {Object.entries(information.members ?? {}).length}</p>
+    <p>Members: {Object.entries(information.members ?? {}).length}</p>
 
-      <em>
-        {information.settings?.gameMode ?? "Default"} -- {information.settings
-          ?.gameStyle ?? "Default"}
-      </em>
+    <em>
+      {information.settings?.gameMode ?? "Default"} -- {information.settings
+        ?.gameStyle ?? "Default"}
+    </em>
 
-      <button onclick={async () => LOBBY.set(await Lobby.join(id))}>Join</button
-      >
-    {/each}
-  </ul>
-</div>
+    <button onclick={async () => LOBBY.set(await Lobby.join(id))}>Join</button>
+  {/each}
+</ul>

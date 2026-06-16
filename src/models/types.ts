@@ -71,6 +71,7 @@ export type LobbyMember = {
   quote: string;
   losses: number;
   wins: number;
+  ready: boolean
   readonly uid: string;
 };
 

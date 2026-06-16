@@ -16,16 +16,6 @@
       }),
   );
 
-  let error = $state("");
-
-  let onclick = async () => {
-    try {
-      await $LOBBY?.startGames();
-    } catch (e) {
-      error = e as string;
-    }
-  };
-
   let disabled = $derived(
     $LOBBY?.isOwner == false || $activeGame !== undefined,
   );
@@ -62,6 +52,3 @@
     </tbody>
   </table>
 </section>
-
-<button {onclick} hidden={disabled}>Start Game</button>
-<p>{error}</p>

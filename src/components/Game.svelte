@@ -4,8 +4,12 @@
   import { activeGame } from "../firebase/game.svelte";
   import { LOBBY } from "../firebase/lobby.svelte";
   import GameBoard from "./GameBoard.svelte";
+  import type { LobbyMember } from "../models/types";
 
-  let members = $derived($LOBBY?.members ?? writable<{ [t: string]: any }>({}));
+  let members = $derived(
+    $LOBBY?.members ?? writable<{ [t: string]: LobbyMember }>({}),
+  );
+  let currentMember = $state($members[AUTH.currentUser?.uid ?? ""]);
   let winData = $derived($activeGame?.winData);
 </script>
 
@@ -38,7 +42,12 @@
 {#if $activeGame}
   <section class="game">
     <div class="game-ui">
-      <h3>Stuff Thing Here</h3>
+      <h3>
+        {($activeGame.ourTurn
+          ? currentMember
+          : $members[$activeGame.opponentUid]
+        ).displayName}'s Turn
+      </h3>
     </div>
 
     <div class="game-board">
@@ -64,7 +73,7 @@
     > div {
       height: 80%;
       aspect-ratio: 1;
-          max-width: 80%;
+      max-width: 80%;
     }
   }
 </style>
