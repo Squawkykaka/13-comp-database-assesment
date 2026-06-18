@@ -119,6 +119,19 @@ export class Game {
         moveUnsubscribe();
         this.handleFinish();
       }
+
+      // if vs the ai, make a move for it
+      if (opponentUid === "clanker" && data.userUid !== "clanker") {
+        let robotMove = 0;
+        // get a valid move
+        while (!this.board.checkMoveValid(robotMove)) {
+          robotMove = Math.floor(Math.random() * 10);
+        }
+        push(child(this.gameRef, "moves"), {
+          position: robotMove,
+          userUid: "clanker",
+        } as DatabaseMove);
+      }
     });
 
     // so these get destoryed when the game is over

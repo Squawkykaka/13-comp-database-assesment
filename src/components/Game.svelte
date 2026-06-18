@@ -10,6 +10,7 @@
     $LOBBY?.members ?? writable<{ [t: string]: LobbyMember }>({}),
   );
   let currentMember = $state($members[AUTH.currentUser?.uid ?? ""]);
+  
   let winData = $derived($activeGame?.winData);
 </script>
 
