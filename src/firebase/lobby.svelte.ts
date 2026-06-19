@@ -1,10 +1,8 @@
-import { AUTH, currentUser, RDB, userRef } from ".";
+import { AUTH, currentUser, RDB } from ".";
 import type { GameUser, LobbyMember } from "../models/types";
 import {
-  derived,
   get,
   writable,
-  type Readable,
   type Writable,
 } from "svelte/store";
 import { SiteError } from "../models/error";

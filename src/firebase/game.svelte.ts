@@ -5,12 +5,11 @@ import {
   onDisconnect,
   onValue,
   push,
-  ref,
   runTransaction,
   type DatabaseReference,
 } from "firebase/database";
 import { Board, type TileType } from "../game/board";
-import { AUTH, RDB } from ".";
+import { AUTH } from ".";
 import { SiteError } from "../models/error";
 import { writable, type Readable, get as getStore } from "svelte/store";
 import { LOBBY } from "./lobby.svelte";
@@ -155,7 +154,7 @@ export class Game {
     const currentUid = AUTH.currentUser?.uid;
     const lobbyInstance = getStore(LOBBY);
 
-    if (!currentUid || !lobbyInstance) return;
+    if (!currentUid || !lobbyInstance || !AUTH.currentUser) return;
     document.getElementById("winPopover")!.showPopover();
 
     // Check if there's a definitive winner (ignore draws)
@@ -163,8 +162,8 @@ export class Game {
       const weWon = this.board.state.data.winner == this.tileType;
 
       this.winData.set({
-        winnerUid: weWon ? AUTH.currentUser?.uid! : this.opponentUid,
-        loserUid: weWon ? this.opponentUid : AUTH.currentUser?.uid!,
+        winnerUid: weWon ? AUTH.currentUser.uid : this.opponentUid,
+        loserUid: weWon ? this.opponentUid : AUTH.currentUser.uid,
       });
       const memberScoreRef = child(
         lobbyInstance.lobbyRef,

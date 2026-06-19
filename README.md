@@ -2,7 +2,44 @@ Lobby creation flow
 user clicks the game type they want to use
 Original, Ultimate, etc
 
+# new design idea
+When you get to the site you will get to a page with a blank tic-tac-toe board
+A circle will appear on a tile that will transform into the text `Sign in` clicking it will popup the google login, then when you login the sign in transforms into a tick, or a cross if it fails will shake and make a red line showing the error. new tiles get drawn for `Join Lobby`, `Create Lobby` and `Sign Out`.
+
+clicking on one will make the computer run moves completing the pattern and then the page navigates to the new link. 
+Signing out will undraw all the tiles and go back to login, being red as you lost
+
+Completing a line also flashes a animation over those tiles and makes an animation on the tiles,
+
+You can also click randomly around the login section and draw tiles with it uncovering features, like if your an admin you can find a admin section.
+
+clicking join lobby draws a line where you enter your lobby code.
+The creation screen removes the tiles, and puts a text on the background with the various modes, allowing you to select the options.
+
+signing up without previously having an account will allow you to enter various opitons through the tic-tac-ui
+
+## needed information ingame
+- The board, and game moves
+- who you are fighting
+- whos turn it is
+  - could be done with a list of moves?
+- the ready button (before game start)
+
+## accesable information
+- the people in the lobby
+  - wins, losses etc
+- the lobby settings
+
+## features
+- standardises border size
+  - 35 pixels
+  - keeps consistent look
+
+
+# old stuff
 each of these has a small settings button if you want to change certain rules.
+
+
 
 then the screen moves down to the next section, where they choose if its multiplayer or local, screen then moves down
 if its the local type it shows options to put in username for both players
