@@ -5,6 +5,7 @@
   import PlayerList from "./components/PlayerList.svelte";
   import SettingPicker from "./components/SettingPicker.svelte";
   import SignIn from "./components/SignIn.svelte";
+  import Tile from "./components/Tile.svelte";
   import { AUTH, currentUser } from "./firebase";
   import { activeGame } from "./firebase/game.svelte";
   import { LOBBY } from "./firebase/lobby.svelte";
@@ -28,7 +29,9 @@
       {/if}
       <PlayerList lobby={$LOBBY} />
       <SettingPicker />
-      <button onclick={() => ($LOBBY.ready = !readyStatus) } hidden={$activeGame !== undefined}
+      <button
+        onclick={() => ($LOBBY.ready = !readyStatus)}
+        hidden={$activeGame !== undefined}
         >{AUTH.currentUser
           ? readyStatus
             ? "Unready"

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Game } from "../firebase/game.svelte";
+  import Tile from "./Tile.svelte";
 
   let { game }: { game: Game } = $props();
 
@@ -11,32 +12,19 @@
 
 <div class="gameBoard">
   {#each $boardShape?.entries() as [idx, tile]}
-    <button
+    <Tile
+      tile={tile?.type}
       onclick={() => handleClick(idx)}
-      aria-label="Tile {idx}"
-      class={tile?.win
+      status={tile?.win
         ? tile.type === game.tileType
-          ? "winner"
-          : "loser"
-        : ""}
-    >
-      {#if tile?.type == "Circle"}
-        O
-      {:else if tile?.type == "Cross"}
-        X
-      {/if}
-    </button>
+          ? "win"
+          : "loss"
+        : undefined}
+    />
   {/each}
 </div>
 
 <style>
-  /* Game Board */
-  .loser {
-    background-color: red !important;
-  }
-  .winner {
-    background-color: green !important;
-  }
   .gameBoard {
     height: 100%;
     aspect-ratio: 1/1;
@@ -45,24 +33,5 @@
     grid-template-rows: repeat(3, 1fr);
     gap: 25px;
     background: black;
-
-    > button {
-      aspect-ratio: 1/1;
-      border: 0;
-      background-color: white;
-
-      font-size: 140px;
-      letter-spacing: 0;
-    }
-    > button:hover {
-      background-color: gainsboro;
-    }
-    > button:active {
-      background-color: gainsboro;
-      filter: brightness(85%);
-    }
-    > button:disabled {
-      background-color: brown;
-    }
   }
 </style>

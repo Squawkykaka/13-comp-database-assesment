@@ -10,7 +10,7 @@
     $LOBBY?.members ?? writable<{ [t: string]: LobbyMember }>({}),
   );
   let currentMember = $state($members[AUTH.currentUser?.uid ?? ""]);
-  
+
   let winData = $derived($activeGame?.winData);
 </script>
 
@@ -70,11 +70,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-
-    > div {
-      height: 80%;
-      aspect-ratio: 1;
-      max-width: 80%;
-    }
+  }
+  .game-board div {
+    height: 80%;
+    aspect-ratio: 1 / 1;
   }
 </style>

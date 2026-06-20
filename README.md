@@ -63,6 +63,7 @@ a button to start the game is visible and the lobby code is shown in multiplayer
 - [ ] name the tournament champtionship
 - [x] players ready up rather than owner starting the lobby
 - [ ] make it so after you finish you can click `ready` then when everyone is ready go onto next round
+- [ ] BUG: if the host readys up before anyone else has joined the game can never be started
 make it so it displays when a lobby is locked, and allows you to unlock
 
 need to get feedback from user to improve my layout

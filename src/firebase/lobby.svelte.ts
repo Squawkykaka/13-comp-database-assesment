@@ -1,10 +1,6 @@
 import { AUTH, currentUser, RDB } from ".";
 import type { GameUser, LobbyMember } from "../models/types";
-import {
-  get,
-  writable,
-  type Writable,
-} from "svelte/store";
+import { get, writable, type Writable } from "svelte/store";
 import { SiteError } from "../models/error";
 
 import {
@@ -49,7 +45,7 @@ export class Lobby {
   gamesStarted = $state(false);
   isOwner: boolean;
   private cleanup: (() => void)[] = [];
-  fillBots: boolean;
+  fillBots: boolean = false;
 
   private async startGames() {
     if (this.gamesStarted) return;
@@ -60,7 +56,13 @@ export class Lobby {
 
     let members = Object.keys(get(this.members)).sort(() => Math.random());
     // if (members.length > 0) throw "no one in lobby";
-    if (members.length % 2 !== 0) {members.push("clanker")}
+    if (members.length % 2 !== 0) {
+      if (this.fillBots) {
+        members.push("clanker");
+      } else {
+        return;
+      }
+    }
     set(child(this.lobbyRef, "locked"), true);
 
     for (let i = 0; i < members.length; i += 2) {
@@ -122,7 +124,11 @@ export class Lobby {
       let gameStartUnsubscribe = this.members.subscribe((members) => {
         let membersList = Object.values(members);
 
-        if (fillBots || (membersList.length == 0 && membersList.length % 2 == 0)) return;
+        if (
+          fillBots ||
+          (membersList.length == 0 && membersList.length % 2 == 0)
+        )
+          return;
         const allReady = membersList.every((member) => member.ready);
 
         if (allReady) {
