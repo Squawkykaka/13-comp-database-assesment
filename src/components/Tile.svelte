@@ -10,10 +10,22 @@
     status?: "win" | "loss";
   };
 
-  let { tile, status, message, ...extra }: Props = $props();
+  let {
+    tile,
+    status,
+    message,
+    class: className = "",
+    ...extra
+  }: Props = $props();
 </script>
 
-<button class={status ?? ""} {...extra}>
+<button
+  class:win={status === "win"}
+  class:loss={status === "loss"}
+  class={className}
+  disabled={tile !== undefined}
+  {...extra}
+>
   {#if tile == "Circle"}
     <img src={Circle} alt="Circle tile" width="100%" />
   {:else if tile == "Cross"}
@@ -30,8 +42,6 @@
     font-size: 2rem;
     text-align: center;
     font-weight: bolder;
-    width: 100%;
-    aspect-ratio: 1;
     padding: 0;
 
     img {
@@ -41,10 +51,11 @@
     }
   }
 
-  button:hover {
+  button:not(:disabled):hover {
     filter: brightness(85%);
   }
-  button:active {
+
+  button:not(:disabled):active {
     filter: brightness(75%);
   }
 

@@ -10,36 +10,9 @@ body {
   margin: 0;
 }
 
-input:invalid {
+/* input:invalid {
   background-color: red;
 }
 input:valid {
   background-color: green;
-}
-
-form > div {
-  /* height: calc(100vh - 100px); */
-  width: 100%;
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-
-  label {
-    width: 40%;
-    height: 50%;
-  }
-}
-
-input[type="radio"] {
-  display: none;
-}
-input[type="radio"]:disabled + label > div {
-  background-color: purple;
-}
-input[type="radio"]:checked + label > div {
-  background-color: blue;
-}
-form label:hover {
-  color: red;
-  cursor: pointer;
-}
+} */

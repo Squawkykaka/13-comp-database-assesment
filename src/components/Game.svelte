@@ -3,8 +3,9 @@
   import { AUTH } from "../firebase";
   import { activeGame } from "../firebase/game.svelte";
   import { LOBBY } from "../firebase/lobby.svelte";
-  import GameBoard from "./GameBoard.svelte";
   import type { LobbyMember } from "../models/types";
+  import Tile from "./Tile.svelte";
+  import Board from "./Board.svelte";
 
   let members = $derived(
     $LOBBY?.members ?? writable<{ [t: string]: LobbyMember }>({}),
@@ -12,6 +13,11 @@
   let currentMember = $state($members[AUTH.currentUser?.uid ?? ""]);
 
   let winData = $derived($activeGame?.winData);
+
+  async function handleClick(index: number) {
+    await $activeGame.createMove(index);
+  }
+  let boardShape = $derived($activeGame.boardShape);
 </script>
 
 <div popover="manual" id="winPopover">
@@ -52,9 +58,19 @@
     </div>
 
     <div class="game-board">
-      <div>
-        <GameBoard game={$activeGame}></GameBoard>
-      </div>
+      <Board>
+        {#each $boardShape?.entries() as [idx, tile]}
+          <Tile
+            tile={tile?.type}
+            onclick={() => handleClick(idx)}
+            status={tile?.win
+              ? tile.type === $activeGame.tileType
+                ? "win"
+                : "loss"
+              : undefined}
+          />
+        {/each}
+      </Board>
     </div>
   </section>
 {/if}
@@ -65,14 +81,8 @@
   }
 
   .game-board {
-    position: absolute;
+    height: 70%;
+    aspect-ratio: 1;
     inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .game-board div {
-    height: 80%;
-    aspect-ratio: 1 / 1;
   }
 </style>

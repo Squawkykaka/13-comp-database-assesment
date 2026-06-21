@@ -1,6 +1,31 @@
 <script>
   import { signInGoogle } from "../firebase";
-
+  import Board from "./Board.svelte";
+  import Tile from "./Tile.svelte";
 </script>
 
-<button onclick={signInGoogle}>Sign in with Google</button>
+<div class="container">
+  <Board>
+    <Tile message="Sign In" onclick={signInGoogle} />
+    <Tile tile="Circle" />
+    <Tile />
+    <Tile />
+    <Tile tile="Cross" />
+    <Tile />
+    <Tile />
+    <Tile tile="Circle" />
+    <Tile tile="Cross" />
+  </Board>
+</div>
+
+<style>
+  .container {
+    width: min(70vh, 90vw);
+    aspect-ratio: 1;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>
