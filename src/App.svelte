@@ -44,6 +44,9 @@
     <Game />
   </div>
 {:else}
+  <!-- <h2>Join or Create a lobby</h2> -->
+  <LobbyCreator></LobbyCreator>
+  <!-- <LobbyList></LobbyList> -->
   <MainMenu />
 {/if}
 

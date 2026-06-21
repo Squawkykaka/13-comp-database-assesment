@@ -52,22 +52,7 @@
     ) as LobbySettings;
     LOBBY.set(await Lobby.create(createForm));
   }
-  async function joinLobby(event: SubmitEvent) {
-    event.preventDefault();
-    let joinForm = new FormData(event.target as HTMLFormElement).get(
-      "lobbyCode",
-    );
-    console.log(joinForm);
-
-    LOBBY.set(await Lobby.joinPincode(joinForm as string));
-  }
 </script>
-
-<form autocomplete="off" onsubmit={joinLobby}>
-  <label for="lobbyCode">Code</label>
-  <input type="text" name="lobbyCode" required pattern="[a-z]{'{5}'}" />
-  <button type="submit">Join Lobby</button>
-</form>
 
 <form autocomplete="off" onsubmit={createLobby}>
   {@html renderOptions()}

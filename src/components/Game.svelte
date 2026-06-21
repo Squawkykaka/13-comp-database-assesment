@@ -52,7 +52,7 @@
       <h3>
         {($activeGame.ourTurn
           ? currentMember
-          : $members[$activeGame.opponentUid]
+          : ($members[$activeGame.opponentUid] ?? { displayName: "Loading..." })
         ).displayName}'s Turn
       </h3>
     </div>

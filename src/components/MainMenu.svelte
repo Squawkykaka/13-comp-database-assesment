@@ -1,16 +1,26 @@
-<script>
+<script lang="ts">
   import { signOut } from "firebase/auth";
   import Board from "./Board.svelte";
   import Tile from "./Tile.svelte";
   import { AUTH } from "../firebase";
+  import { Lobby, LOBBY } from "../firebase/lobby.svelte";
 
   let joinPressed = $state(false);
+
+  let joinSubmit = async (event: SubmitEvent) => {
+    event.preventDefault();
+    let data = Object.fromEntries(
+      new FormData(event.target as HTMLFormElement),
+    );
+    let code = data.code as string;
+    LOBBY.set(await Lobby.joinPincode(code));
+  };
 </script>
 
 <div class="container">
   <Board>
     {#if joinPressed}
-      <form id="join-form" class="joinInput">
+      <form id="join-form" class="joinInput" onsubmit={joinSubmit}>
         <input
           type="text"
           name="code"
