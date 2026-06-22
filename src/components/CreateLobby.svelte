@@ -4,9 +4,9 @@
   import Board from "./Board.svelte";
   import Tile from "./Tile.svelte";
 
-  let gameMode = $state<GameMode>();
+  let gameMode = $state<GameMode>("original");
   let multiplayerType = $state<MultiplayerMode>();
-  let gameStyle = $state<GameStyle>();
+  let gameStyle = $state<GameStyle>("onevone");
 
   $effect(() => {
     if (gameMode && multiplayerType && gameStyle) {
@@ -24,11 +24,11 @@
 
 <Board>
   <Tile tile="Cross" />
-  <Tile disabled={gameMode == undefined} />
+  <Tile disabled />
   <Tile
     message="Original"
     onclick={() => (gameMode = "original")}
-    tile={gameMode ? "Cross" : undefined}
+    tile={gameMode == "original" ? "Cross" : undefined}
   />
   <Tile disabled />
   <Tile
@@ -52,6 +52,6 @@
     onclick={() => {
       gameStyle = "onevone";
     }}
-    tile={gameStyle ? "Cross" : undefined}
+    tile={gameStyle == "onevone" ? "Cross" : undefined}
   />
 </Board>

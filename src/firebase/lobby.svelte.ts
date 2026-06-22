@@ -45,24 +45,17 @@ export class Lobby {
   gamesStarted = $state(false);
   isOwner: boolean;
   private cleanup: (() => void)[] = [];
-  fillBots: boolean = false;
 
   private async startGames() {
     if (this.gamesStarted) return;
 
-    if (!this.isOwner) throw "You are not the lobby owner";
+    if (!this.isOwner) throw new SiteError("NOT_LOBBY_OWNER");
     let gamesRef = child(this.lobbyRef, "games");
     let membersRef = child(this.lobbyRef, "members");
 
     let members = Object.keys(get(this.members)).sort(() => Math.random());
-    // if (members.length > 0) throw "no one in lobby";
-    if (members.length % 2 !== 0) {
-      if (this.fillBots) {
-        members.push("clanker");
-      } else {
-        return;
-      }
-    }
+    if (members.length < 2) throw "not enough people in lobby";
+    if (members.length % 2 !== 0) throw "uneven amount of people in lobby";
     set(child(this.lobbyRef, "locked"), true);
 
     for (let i = 0; i < members.length; i += 2) {
@@ -104,14 +97,12 @@ export class Lobby {
     lobbyRef: DatabaseReference,
     lobbyCode: string,
     members: { [x: string]: LobbyMember },
-    fillBots = false,
   ) {
     this.owner = owner;
     this.members = writable(members);
     this.settings = writable(settings);
     this.lobbyRef = lobbyRef;
     this.lobbyCode = lobbyCode;
-    this.fillBots = fillBots;
     this.isOwner = owner == AUTH.currentUser?.uid;
 
     let membersRef = child(this.lobbyRef, "members");
@@ -124,11 +115,7 @@ export class Lobby {
       let gameStartUnsubscribe = this.members.subscribe((members) => {
         let membersList = Object.values(members);
 
-        if (
-          fillBots ||
-          (membersList.length == 0 && membersList.length % 2 == 0)
-        )
-          return;
+        if (membersList.length == 0 && membersList.length % 2 == 0) return;
         const allReady = membersList.every((member) => member.ready);
 
         if (allReady) {

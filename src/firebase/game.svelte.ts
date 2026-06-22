@@ -11,7 +11,7 @@ import {
 import { Board, type TileType } from "../game/board";
 import { AUTH } from ".";
 import { SiteError } from "../models/error";
-import { writable, type Readable, get as getStore } from "svelte/store";
+import { writable, type Readable, get as getStore, readable } from "svelte/store";
 import { LOBBY } from "./lobby.svelte";
 
 // the host when starting the game splits members into games, setting the `activeGame` setting in there members list to the game id
@@ -56,6 +56,7 @@ type DatabaseGame = {
 
 export class Game {
   opponentUid: string;
+  selfUid:string;
   tileType: TileType;
   ourTurn: boolean;
   gameRef: DatabaseReference;
@@ -86,9 +87,11 @@ export class Game {
     opponentUid: string,
     gameRef: DatabaseReference,
   ) {
+    if (!AUTH.currentUser) throw new SiteError("USER_NOT_AUTHENTICATED")
     this.tileType = tileType;
     this.gameRef = gameRef;
     this.opponentUid = opponentUid;
+    this.selfUid = AUTH.currentUser.uid
     this.ourTurn = $state(tileType == "Circle" ? true : false);
 
     onDisconnect(this.gameRef).remove();
@@ -118,27 +121,12 @@ export class Game {
         moveUnsubscribe();
         this.handleFinish();
       }
-
-      // if vs the ai, make a move for it
-      if (opponentUid === "clanker" && data.userUid !== "clanker") {
-        let robotMove = 0;
-        // get a valid move
-        while (!this.board.checkMoveValid(robotMove)) {
-          robotMove = Math.floor(Math.random() * 10);
-        }
-        push(child(this.gameRef, "moves"), {
-          position: robotMove,
-          userUid: "clanker",
-        } as DatabaseMove);
-      }
     });
 
     // so these get destoryed when the game is over
     this._subscriptions.push(
       onValue(gameRef, (snapshot) => {
         if (!snapshot.exists()) {
-          console.log("yerted");
-
           this.destroy();
         }
       }),

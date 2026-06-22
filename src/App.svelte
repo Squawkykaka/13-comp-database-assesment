@@ -1,5 +1,5 @@
 <script>
-// @ts-nocheck
+  // @ts-nocheck
 
   import Game from "./components/Game.svelte";
   import LobbyList from "./components/LobbyList.svelte";
@@ -42,7 +42,9 @@
       >
     </section>
 
-    <Game />
+    {#if $activeGame}
+      <Game LOBBY={$LOBBY} activeGame={$activeGame} />
+    {/if}
   </div>
 {:else}
   <MainMenu />

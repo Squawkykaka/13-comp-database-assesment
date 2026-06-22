@@ -1,23 +1,21 @@
 <script lang="ts">
-  import { writable } from "svelte/store";
-  import { AUTH } from "../firebase";
-  import { activeGame } from "../firebase/game.svelte";
-  import { LOBBY } from "../firebase/lobby.svelte";
-  import type { LobbyMember } from "../models/types";
+  import { Game } from "../firebase/game.svelte";
+  import { Lobby } from "../firebase/lobby.svelte";
   import Tile from "./Tile.svelte";
   import Board from "./Board.svelte";
+  
+  let { LOBBY, activeGame }: { LOBBY: Lobby; activeGame: Game } = $props();
 
-  let members = $derived(
-    $LOBBY?.members ?? writable<{ [t: string]: LobbyMember }>({}),
-  );
-  let currentMember = $state($members[AUTH.currentUser?.uid ?? ""]);
+  let members = $derived(LOBBY.members);
+  let currentMember = $derived($members[activeGame.selfUid]);
+  let opponentMember = $derived($members[activeGame.opponentUid]);
 
-  let winData = $derived($activeGame?.winData);
+  let winData = $derived(activeGame.winData);
+  let boardShape = $derived(activeGame.boardShape)
 
   async function handleClick(index: number) {
-    await $activeGame?.createMove(index);
+    await activeGame.createMove(index);
   }
-  let boardShape = $derived($activeGame?.boardShape);
 </script>
 
 <div popover="manual" id="winPopover">
@@ -25,7 +23,7 @@
     <p>Draw</p>
   {:else if $winData !== undefined}
     <h4>
-      Game {$winData.winnerUid == AUTH.currentUser?.uid ? "Won" : "Lost"}
+      Game {$winData.winnerUid == activeGame.selfUid ? "Won" : "Lost"}
     </h4>
     <table>
       <thead>
@@ -43,17 +41,15 @@
     </table>
   {/if}
   <p>Wait for a new game.</p>
-  <button onclick={() => $LOBBY?.leave()}>Leave Lobby</button>
+  <button onclick={() => LOBBY?.leave()}>Leave Lobby</button>
 </div>
 
-{#if $activeGame}
+{#if activeGame}
   <section class="game">
     <div class="game-ui">
       <h3>
-        {($activeGame.ourTurn
-          ? currentMember
-          : ($members[$activeGame.opponentUid] ?? { displayName: "Loading..." })
-        ).displayName}'s Turn
+        {(activeGame.ourTurn ? currentMember : opponentMember).displayName}'s
+        Turn
       </h3>
     </div>
 
@@ -64,7 +60,7 @@
             tile={tile?.type}
             onclick={() => handleClick(idx)}
             status={tile?.win
-              ? tile.type === $activeGame.tileType
+              ? tile.type === activeGame.tileType
                 ? "win"
                 : "loss"
               : undefined}
