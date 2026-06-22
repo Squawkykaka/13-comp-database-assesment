@@ -4,8 +4,9 @@
   import Tile from "./Tile.svelte";
   import { AUTH } from "../firebase";
   import { Lobby, LOBBY } from "../firebase/lobby.svelte";
+  import CreateLobby from "./CreateLobby.svelte";
 
-  let joinPressed = $state(false);
+  let menuState: "menu" | "join" | "create" = $state("menu");
 
   let joinSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -18,8 +19,8 @@
 </script>
 
 <div class="container">
-  <Board>
-    {#if joinPressed}
+  {#if menuState === "join"}
+    <Board>
       <form id="join-form" class="joinInput" onsubmit={joinSubmit}>
         <input
           type="text"
@@ -30,17 +31,38 @@
       </form>
 
       <Tile message="Submit" type="submit" form="join-form" />
-    {:else}
-      <Tile tile="Cross" />
+
       <Tile
-        message="Join"
+        message="Go Back"
         onclick={() => {
-          joinPressed = true;
+          menuState = "menu";
         }}
       />
       <Tile disabled />
-    {/if}
-    <Tile message="Create" />
+      <Tile disabled />
+      <Tile disabled />
+      <Tile disabled />
+      <Tile tile="Circle" />
+    </Board>
+  {:else if menuState == "create"}
+    <CreateLobby></CreateLobby>
+  {:else if menuState == "menu"}
+  <Board>
+
+    <Tile tile="Cross" />
+    <Tile
+      message="Join"
+      onclick={() => {
+        menuState = "join";
+      }}
+    />
+    <Tile disabled />
+    <Tile
+      message="Create"
+      onclick={() => {
+        menuState = "create";
+      }}
+    />
     <Tile disabled />
     <Tile
       message="Sign Out"
@@ -52,6 +74,7 @@
     <Tile disabled />
     <Tile tile="Circle" />
   </Board>
+  {/if}
 </div>
 
 <style>

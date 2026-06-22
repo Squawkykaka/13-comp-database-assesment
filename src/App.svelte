@@ -1,4 +1,6 @@
 <script>
+// @ts-nocheck
+
   import Game from "./components/Game.svelte";
   import LobbyCreator from "./components/LobbyCreator.svelte";
   import LobbyList from "./components/LobbyList.svelte";
