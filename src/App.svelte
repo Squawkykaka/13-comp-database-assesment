@@ -2,7 +2,6 @@
 // @ts-nocheck
 
   import Game from "./components/Game.svelte";
-  import LobbyCreator from "./components/LobbyCreator.svelte";
   import LobbyList from "./components/LobbyList.svelte";
   import MainMenu from "./components/MainMenu.svelte";
   import PlayerList from "./components/PlayerList.svelte";
@@ -46,9 +45,6 @@
     <Game />
   </div>
 {:else}
-  <!-- <h2>Join or Create a lobby</h2> -->
-  <LobbyCreator></LobbyCreator>
-  <!-- <LobbyList></LobbyList> -->
   <MainMenu />
 {/if}
 

@@ -15,9 +15,9 @@
   let winData = $derived($activeGame?.winData);
 
   async function handleClick(index: number) {
-    await $activeGame.createMove(index);
+    await $activeGame?.createMove(index);
   }
-  let boardShape = $derived($activeGame.boardShape);
+  let boardShape = $derived($activeGame?.boardShape);
 </script>
 
 <div popover="manual" id="winPopover">

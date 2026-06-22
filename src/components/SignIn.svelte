@@ -8,11 +8,11 @@
   <Board>
     <Tile message="Sign In" onclick={signInGoogle} />
     <Tile tile="Circle" />
-    <Tile />
-    <Tile />
+    <Tile disabled/>
+    <Tile disabled/>
     <Tile tile="Cross" />
-    <Tile />
-    <Tile />
+    <Tile disabled/>
+    <Tile disabled/>
     <Tile tile="Circle" />
     <Tile tile="Cross" />
   </Board>

@@ -32,48 +32,47 @@
 
       <Tile message="Submit" type="submit" form="join-form" />
 
+      <Tile message="<"/>
+        <Tile message=">" />
       <Tile
         message="Go Back"
         onclick={() => {
           menuState = "menu";
         }}
       />
-      <Tile disabled />
-      <Tile disabled />
-      <Tile disabled />
-      <Tile disabled />
-      <Tile tile="Circle" />
+      <Tile message="Game 1" />
+      <Tile message="Game 2" />
+      <Tile message="Game 3" />
     </Board>
   {:else if menuState == "create"}
     <CreateLobby></CreateLobby>
   {:else if menuState == "menu"}
-  <Board>
-
-    <Tile tile="Cross" />
-    <Tile
-      message="Join"
-      onclick={() => {
-        menuState = "join";
-      }}
-    />
-    <Tile disabled />
-    <Tile
-      message="Create"
-      onclick={() => {
-        menuState = "create";
-      }}
-    />
-    <Tile disabled />
-    <Tile
-      message="Sign Out"
-      onclick={() => {
-        signOut(AUTH);
-      }}
-    />
-    <Tile disabled />
-    <Tile disabled />
-    <Tile tile="Circle" />
-  </Board>
+    <Board>
+      <Tile tile="Cross" />
+      <Tile
+        message="Join"
+        onclick={() => {
+          menuState = "join";
+        }}
+      />
+      <Tile disabled />
+      <Tile
+        message="Create"
+        onclick={() => {
+          menuState = "create";
+        }}
+      />
+      <Tile disabled />
+      <Tile
+        message="Sign Out"
+        onclick={() => {
+          signOut(AUTH);
+        }}
+      />
+      <Tile disabled />
+      <Tile disabled />
+      <Tile tile="Circle" />
+    </Board>
   {/if}
 </div>
 
