@@ -3,10 +3,9 @@
   import Board from "./Board.svelte";
   import Tile from "./Tile.svelte";
   import { AUTH } from "../firebase";
-  import { Lobby, LOBBY } from "../firebase/lobby.svelte";
-  import CreateLobby from "./CreateLobby.svelte";
+  import { activeGame, Game } from "../firebase/game.svelte";
 
-  let menuState: "menu" | "join" | "create" = $state("menu");
+  let menuState: "menu" | "join" = $state("menu");
 
   let joinSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -14,7 +13,7 @@
       new FormData(event.target as HTMLFormElement),
     );
     let code = data.code as string;
-    LOBBY.set(await Lobby.joinPincode(code));
+    activeGame.set(await Game.joinGame(code));
   };
 </script>
 
@@ -32,20 +31,18 @@
 
       <Tile message="Submit" type="submit" form="join-form" />
 
-      <Tile message="<"/>
-        <Tile message=">" />
+      <Tile disabled />
+      <Tile disabled />
       <Tile
         message="Go Back"
         onclick={() => {
           menuState = "menu";
         }}
       />
-      <Tile message="Game 1" />
-      <Tile message="Game 2" />
-      <Tile message="Game 3" />
+      <Tile disabled />
+      <Tile disabled />
+      <Tile disabled />
     </Board>
-  {:else if menuState == "create"}
-    <CreateLobby></CreateLobby>
   {:else if menuState == "menu"}
     <Board>
       <Tile tile="Cross" />
@@ -58,8 +55,8 @@
       <Tile disabled />
       <Tile
         message="Create"
-        onclick={() => {
-          menuState = "create";
+        onclick={async () => {
+          activeGame.set(await Game.createGame())
         }}
       />
       <Tile disabled />

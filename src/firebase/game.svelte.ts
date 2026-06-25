@@ -5,14 +5,17 @@ import {
   onDisconnect,
   onValue,
   push,
+  ref,
   runTransaction,
+  set,
   type DatabaseReference,
 } from "firebase/database";
 import { Board, type TileType } from "../game/board";
-import { AUTH } from ".";
+import { AUTH, RDB } from ".";
 import { SiteError } from "../models/error";
-import { writable, type Readable, get as getStore, readable } from "svelte/store";
-import { LOBBY } from "./lobby.svelte";
+import {
+  writable,
+} from "svelte/store";
 
 // the host when starting the game splits members into games, setting the `activeGame` setting in there members list to the game id
 // the host chooses what member is circle or cross
@@ -39,75 +42,106 @@ import { LOBBY } from "./lobby.svelte";
 
 export const activeGame = writable<Game | undefined>();
 
+function makeid(length: number) {
+  let result = "";
+  const characters = "abcdefghijklmnopqrstuvwxyz";
+  const charactersLength = characters.length;
+  let counter = 0;
+  while (counter < length) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    counter += 1;
+  }
+  return result;
+}
+
 type DatabaseMove = {
-  userUid: string;
+  uid: string;
   position: number;
 };
 
 type DatabaseGame = {
-  circleUid: string;
-  crossUid: string;
+  owner: string;
+  opponent: string;
 
   moves: { [id: string]: DatabaseMove };
-
-  winner: string | undefined;
-  completed: boolean;
 };
 
 export class Game {
-  opponentUid: string;
-  selfUid:string;
-  tileType: TileType;
+  isOwner: boolean;
+  selfUid: string;
   ourTurn: boolean;
+  pincode: string;
+
+  state:
+    | {
+        kind: "active";
+        opponentUid: string;
+      }
+    | { kind: "awaitingOpponent" } = $state({ kind: "awaitingOpponent" });
+
+  tileType: TileType;
   gameRef: DatabaseReference;
   board = $state(new Board());
+  winData = $state<{ winnerUid: string; loserUid: string } | "draw">();
 
-  winData = writable<{ winnerUid: string; loserUid: string } | "draw">();
-
-  private _boardShapeStore = writable<
-    ({ type: TileType; win: boolean } | null)[]
-  >(Array(9).fill(null));
+  boardShape = $state<({ type: TileType; win: boolean } | null)[]>(
+    Array(9).fill(null),
+  );
 
   private _subscriptions: (() => void)[] = [];
-
-  get boardShape(): Readable<({ type: TileType; win: boolean } | null)[]> {
-    return { subscribe: this._boardShapeStore.subscribe };
-  }
 
   private updateBoardShapeStore() {
     let array = [];
     for (let i = 0; i < 9; i++) {
       array.push(this.board.getTile(i));
     }
-    this._boardShapeStore.set(array);
+    this.boardShape = array;
   }
 
   private constructor(
     tileType: TileType,
-    opponentUid: string,
+    opponentUid: string | undefined,
+    isOwner: boolean,
     gameRef: DatabaseReference,
+    pincode: string,
   ) {
-    if (!AUTH.currentUser) throw new SiteError("USER_NOT_AUTHENTICATED")
+    if (!AUTH.currentUser) throw new SiteError("USER_NOT_AUTHENTICATED");
     this.tileType = tileType;
     this.gameRef = gameRef;
-    this.opponentUid = opponentUid;
-    this.selfUid = AUTH.currentUser.uid
-    this.ourTurn = $state(tileType == "Circle" ? true : false);
+    this.isOwner = isOwner;
+    this.ourTurn = isOwner
+    this.pincode = pincode;
 
+    if (opponentUid) {
+      this.state = { kind: "active", opponentUid }
+    } else {
+      this.state = { kind: "awaitingOpponent" }
+      let opponentListener = onValue(child(gameRef, "opponent"), snapshot => {
+        if (!snapshot.exists()) return
+        
+        this.state = { kind: "active", opponentUid: snapshot.val()}
+        opponentListener()
+      })
+      this._subscriptions.push(opponentListener)
+    }
+
+    this.selfUid = AUTH.currentUser.uid;
+
+    // remove for everyone if you leave
     onDisconnect(this.gameRef).remove();
-
     this.updateBoardShapeStore();
 
     // runs when theres a new move
     let moveUnsubscribe = onChildAdded(child(gameRef, "moves"), (snapshot) => {
+      if (this.state.kind == "awaitingOpponent") return
       let data = snapshot.val() as DatabaseMove;
 
-      if (data.userUid == opponentUid) {
+      if (data.uid == this.state.opponentUid) {
         this.ourTurn = true;
       }
-
+      // if its the opponents move, the tile is the opposite of yours
       let tileType: TileType =
-        data.userUid == opponentUid
+        data.uid == this.state.opponentUid
           ? this.tileType == "Circle"
             ? "Cross"
             : "Circle"
@@ -117,13 +151,14 @@ export class Game {
       this.board.$updateGameState();
       this.updateBoardShapeStore();
 
+      // if the game is over, stop listening for moves, and handle the finish
       if (this.board.state.status !== "playing") {
         moveUnsubscribe();
         this.handleFinish();
       }
     });
 
-    // so these get destoryed when the game is over
+    // remove the subscriptions if someone leaves
     this._subscriptions.push(
       onValue(gameRef, (snapshot) => {
         if (!snapshot.exists()) {
@@ -139,24 +174,19 @@ export class Game {
 
   private async handleFinish() {
     const status = this.board.state.status;
-    const currentUid = AUTH.currentUser?.uid;
-    const lobbyInstance = getStore(LOBBY);
 
-    if (!currentUid || !lobbyInstance || !AUTH.currentUser) return;
+    if (!AUTH.currentUser || this.state.kind !== "active" ) return;
     document.getElementById("winPopover")!.showPopover();
 
     // Check if there's a definitive winner (ignore draws)
     if (status === "won") {
       const weWon = this.board.state.data.winner == this.tileType;
 
-      this.winData.set({
-        winnerUid: weWon ? AUTH.currentUser.uid : this.opponentUid,
-        loserUid: weWon ? this.opponentUid : AUTH.currentUser.uid,
-      });
-      const memberScoreRef = child(
-        lobbyInstance.lobbyRef,
-        `members/${currentUid}`,
-      );
+      this.winData = {
+        winnerUid: weWon ? this.selfUid : this.state.opponentUid,
+        loserUid: weWon ? this.state.opponentUid : this.selfUid,
+      };
+      const memberScoreRef = ref(RDB, `users/${this.selfUid}`);
 
       // Run a transaction to safely increment win/loss records inside the lobby
       await runTransaction(memberScoreRef, (memberData) => {
@@ -169,6 +199,8 @@ export class Game {
         }
         return memberData;
       });
+    } else if (status == "draw") {
+      this.winData = "draw";
     }
   }
 
@@ -182,27 +214,34 @@ export class Game {
     // no need to set it locally, the listener will handle that
     await push(child(this.gameRef, "moves"), {
       position: index,
-      userUid: AUTH.currentUser?.uid,
+      uid: this.selfUid,
     } as DatabaseMove);
 
     this.ourTurn = false;
   }
 
-  static async joinGame(gameRef: DatabaseReference): Promise<Game> {
+  // Creates a new game, and puts a new pincode to allow people to join
+  static async createGame(): Promise<Game> {
+    let user = AUTH.currentUser?.uid;
+    if (!user) throw new SiteError("USER_NOT_AUTHENTICATED");
+
+    let gamesRef = ref(RDB, "games");
+    let gameRef = push(gamesRef, {
+      owner: user,
+      moves: [],
+    });
+    let pincode = makeid(5);
+    set(ref(RDB, `pincodes/${pincode}`), gameRef.key);
+
+    return new Game("Circle", undefined, true, gameRef, pincode);
+  }
+  static async joinGame(pincode: string): Promise<Game> {
+    if (!AUTH.currentUser) throw new SiteError("USER_NOT_AUTHENTICATED")
+    let gameId = (await get(ref(RDB, `pincodes/${pincode}`))).val();
+    let gameRef = ref(RDB, `games/${gameId}`);
+    await set(child(gameRef, "opponent"), AUTH.currentUser?.uid)
     let info = (await get(gameRef)).val() as DatabaseGame;
 
-    let opponentUid =
-      info.circleUid == AUTH.currentUser?.uid ? info.crossUid : info.circleUid;
-    let tileType: TileType | undefined =
-      info.circleUid == AUTH.currentUser?.uid
-        ? "Circle"
-        : info.crossUid == AUTH.currentUser?.uid
-          ? "Cross"
-          : undefined;
-    if (tileType === undefined) {
-      throw new SiteError("USER_NOT_AUTHENTICATED");
-    }
-
-    return new Game(tileType, opponentUid, gameRef);
+    return new Game("Cross", info.owner, false, gameRef, pincode);
   }
 }

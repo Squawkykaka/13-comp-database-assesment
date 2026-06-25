@@ -2,50 +2,26 @@
   // @ts-nocheck
 
   import Game from "./components/Game.svelte";
-  import LobbyList from "./components/LobbyList.svelte";
   import MainMenu from "./components/MainMenu.svelte";
-  import PlayerList from "./components/PlayerList.svelte";
-  import SettingPicker from "./components/SettingPicker.svelte";
   import SignIn from "./components/SignIn.svelte";
   import Tile from "./components/Tile.svelte";
   import { AUTH, currentUser } from "./firebase";
   import { activeGame } from "./firebase/game.svelte";
-  import { LOBBY } from "./firebase/lobby.svelte";
 
-  let members = $derived($LOBBY?.members);
-  let readyStatus = $derived(
-    AUTH.currentUser ? $members?.[AUTH.currentUser.uid]?.ready : false,
-  );
+  let jsoned = $derived(JSON.stringify($activeGame));
 </script>
 
 {#if $currentUser.auth === undefined}
   <SignIn></SignIn>
-{:else if $LOBBY}
-  <div class="container">
-    <section class="settings {$LOBBY.locked ? 'locked' : ''}">
-      <p hidden={!$LOBBY.locked}>Lobby Locked</p>
-      {#if $LOBBY?.isOwner}
-        <section>
-          <p><strong>Code: </strong> {$LOBBY.lobbyCode}</p>
-        </section>
-      {/if}
-      <PlayerList lobby={$LOBBY} />
-      <SettingPicker />
-      <button
-        onclick={() => ($LOBBY.ready = !readyStatus)}
-        hidden={$activeGame !== undefined}
-        >{AUTH.currentUser
-          ? readyStatus
-            ? "Unready"
-            : "Ready Up"
-          : "Loading..."}</button
-      >
-    </section>
-
-    {#if $activeGame}
-      <Game LOBBY={$LOBBY} activeGame={$activeGame} />
-    {/if}
-  </div>
+{:else if $activeGame}
+  {jsoned}
+  {#if $activeGame.state.kind == "awaitingOpponent"}
+    <p>
+      Code: {$activeGame.pincode}
+    </p>
+  {:else if $activeGame.state.kind == "active"}
+    <Game LOBBY={$LOBBY} activeGame={$activeGame} />
+  {/if}
 {:else}
   <MainMenu />
 {/if}

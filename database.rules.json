@@ -1,65 +1,22 @@
 {
   /* Visit https://firebase.google.com/docs/database/security to learn more about security rules. */
   "rules": {
-    "lobbies": {
+    "games": {
+      ".write": true,
       ".read": true,
-      "$lobbyid": {
-        // Anyone can read a lobby's structure
-        // TODO: make it so its only readable if the lobby isnt private
-        ".read": true,
-
-        // Allows creating the lobby itself if it doesn't exist yet
-        ".write": "!data.exists() || (!newData.exists() && auth.uid === data.child('owner').val())",
-
-        "members": {
-          "$uid": {
-            // Anyone can read member info, but a user can only write to their own UID slot
-            ".read": true,
-            ".write": "$uid === auth.uid && (data.parent().parent().child('locked').val() !== true || data.exists())",
-            ".validate": "newData.hasChildren(['displayName', 'quote'])",
-            "displayName": { ".validate": "newData.isString()" },
-            "losses": { ".validate": "newData.isNumber()" },
-            "quote": { ".validate": "newData.isString()" },
-            "wins": { ".validate": "newData.isNumber()" },
-            "ready": { ".validate": "newData.isBoolean()" },
-            "activeGame": {
-              ".validate": "newData.isString()",
-              ".write": "data.parent().parent().parent().child('owner').val() === auth.uid"
-            },
-            "$other": { ".validate": false }
+      "$uid": {
+        "owner": { ".validate": "newData.isString()" },
+        "opponent": { ".validate": "newData.isString()" },
+        "moves": {
+          "$moveid": {
+            "position": { ".validate": "newData.isNumber()" },
+            "uid": { ".validate": "newData.isString()" }
           }
-        },
-
-        "owner": {
-          // Can only be written to on creation (immutable).
-          // Enforces that the string value matches the creator's UID.
-          ".write": "!data.exists() && newData.val() === auth.uid",
-          ".validate": "newData.isString()"
-        },
-
-        "settings": {
-          ".validate": true,
-          ".write": "data.parent().child('owner').val() === auth.uid"
-        },
-
-        "locked": {
-          ".validate": "newData.isBoolean()",
-          ".write": "data.parent().child('owner').val() === auth.uid"
-        },
-
-        "games": {
-          "$uid": {
-            ".read": true,
-            ".write": "!data.exists() || (auth.uid === data.child('circleUid').val() || auth.uid === data.child('crossUid').val())",
-            ".validate": "newData.child('circleUid').isString() && newData.child('crossUid').isString()"
-          }
-        },
-
-        // Prevents any keys other than members, owner, or settings from being created
-        "$other": {
-          ".validate": false
         }
       }
+    },
+    "matchmaking": {
+      ".write": true
     },
     "pincodes": {
       "$shortid": {
@@ -67,29 +24,12 @@
         ".validate": "newData.isString()",
 
         // Dynamically picks newData (creation) or data (deletion) to do a single owner check
-        ".write": "root.child('lobbies/' + (newData.exists() ? newData.val() : data.val()) + '/owner').val() === auth.uid"
+        ".write": true
       }
     },
     "users": {
       ".write": true,
       ".read": true
-      //      "$uid": {
-      //        ".read": true,
-      //        ".write": "$uid === auth.uid",
-      //        ".validate": "newData.hasChildren(['displayName', 'quote', 'joinDate'])",
-      //        "displayName": {
-      //          ".validate": "newData.isString()"
-      //        },
-      //        "quote": {
-      //          ".validate": "newData.isString()"
-      //        },
-      //        "joinDate": {
-      //          ".validate": "newData.isNumber()"
-      //        },
-      //        "$other": {
-      //          ".validate": false
-      //        }
-      //      }
     }
   }
 }
