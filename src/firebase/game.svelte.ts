@@ -10,12 +10,10 @@ import {
   set,
   type DatabaseReference,
 } from "firebase/database";
-import { Board, type TileType } from "../game/board";
+import { Board, type TileType } from "../game/board.svelte";
 import { AUTH, RDB } from ".";
 import { SiteError } from "../models/error";
-import {
-  writable,
-} from "svelte/store";
+import { writable } from "svelte/store";
 
 // the host when starting the game splits members into games, setting the `activeGame` setting in there members list to the game id
 // the host chooses what member is circle or cross
@@ -84,18 +82,28 @@ export class Game {
   board = $state(new Board());
   winData = $state<{ winnerUid: string; loserUid: string } | "draw">();
 
-  boardShape = $state<({ type: TileType; win: boolean } | null)[]>(
-    Array(9).fill(null),
-  );
+  boardShape = $derived.by(() => {
+    return [...Array(9)].map((_, i) => this.board.getTile(i))
+  })
 
   private _subscriptions: (() => void)[] = [];
 
-  private updateBoardShapeStore() {
-    let array = [];
-    for (let i = 0; i < 9; i++) {
-      array.push(this.board.getTile(i));
-    }
-    this.boardShape = array;
+  private get opponentTileType(): TileType {
+    return this.tileType === "Circle" ? "Cross" : "Circle";
+  }
+  private setupOpponentListener() {
+    const unsub = onValue(child(this.gameRef, "opponent"), (snapshot) => {
+      if (!snapshot.exists()) return;
+
+      this.state = {
+        kind: "active",
+        opponentUid: snapshot.val(),
+      };
+
+      unsub();
+    });
+
+    this._subscriptions.push(unsub);
   }
 
   private constructor(
@@ -109,31 +117,24 @@ export class Game {
     this.tileType = tileType;
     this.gameRef = gameRef;
     this.isOwner = isOwner;
-    this.ourTurn = isOwner
+    this.ourTurn = isOwner;
     this.pincode = pincode;
+    this.selfUid = AUTH.currentUser.uid;
 
     if (opponentUid) {
-      this.state = { kind: "active", opponentUid }
+      this.state = { kind: "active", opponentUid };
     } else {
-      this.state = { kind: "awaitingOpponent" }
-      let opponentListener = onValue(child(gameRef, "opponent"), snapshot => {
-        if (!snapshot.exists()) return
-        
-        this.state = { kind: "active", opponentUid: snapshot.val()}
-        opponentListener()
-      })
-      this._subscriptions.push(opponentListener)
+      this.state = { kind: "awaitingOpponent" };
+      this.setupOpponentListener()
     }
 
-    this.selfUid = AUTH.currentUser.uid;
 
     // remove for everyone if you leave
     onDisconnect(this.gameRef).remove();
-    this.updateBoardShapeStore();
 
     // runs when theres a new move
     let moveUnsubscribe = onChildAdded(child(gameRef, "moves"), (snapshot) => {
-      if (this.state.kind == "awaitingOpponent") return
+      if (this.state.kind == "awaitingOpponent") return;
       let data = snapshot.val() as DatabaseMove;
 
       if (data.uid == this.state.opponentUid) {
@@ -142,14 +143,11 @@ export class Game {
       // if its the opponents move, the tile is the opposite of yours
       let tileType: TileType =
         data.uid == this.state.opponentUid
-          ? this.tileType == "Circle"
-            ? "Cross"
-            : "Circle"
+          ? this.opponentTileType
           : this.tileType;
 
       this.board.change(data.position, tileType);
       this.board.$updateGameState();
-      this.updateBoardShapeStore();
 
       // if the game is over, stop listening for moves, and handle the finish
       if (this.board.state.status !== "playing") {
@@ -174,8 +172,8 @@ export class Game {
 
   private async handleFinish() {
     const status = this.board.state.status;
+    if (this.state.kind !== "active") return;
 
-    if (!AUTH.currentUser || this.state.kind !== "active" ) return;
     document.getElementById("winPopover")!.showPopover();
 
     // Check if there's a definitive winner (ignore draws)
@@ -235,11 +233,12 @@ export class Game {
 
     return new Game("Circle", undefined, true, gameRef, pincode);
   }
+  
   static async joinGame(pincode: string): Promise<Game> {
-    if (!AUTH.currentUser) throw new SiteError("USER_NOT_AUTHENTICATED")
+    if (!AUTH.currentUser) throw new SiteError("USER_NOT_AUTHENTICATED");
     let gameId = (await get(ref(RDB, `pincodes/${pincode}`))).val();
     let gameRef = ref(RDB, `games/${gameId}`);
-    await set(child(gameRef, "opponent"), AUTH.currentUser?.uid)
+    await set(child(gameRef, "opponent"), AUTH.currentUser?.uid);
     let info = (await get(gameRef)).val() as DatabaseGame;
 
     return new Game("Cross", info.owner, false, gameRef, pincode);

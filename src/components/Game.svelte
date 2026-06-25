@@ -6,7 +6,7 @@
   import type { GameUser } from "../models/types";
   import Tile from "./Tile.svelte";
 
-  let { activeGame }: { activeGame: Game } = $props();
+  let { activeGame }: { activeGame: Game} = $props();
 
   let opponent = $state<GameUser>({
     displayName: "Loading...",
@@ -21,14 +21,13 @@
     uid: "676767676767",
   });
 
-  $inspect(opponent, current)
   $effect(() => {
     if (activeGame.state.kind == "awaitingOpponent") return;
 
     let selfListener = onValue(
       ref(RDB, `users/${activeGame.selfUid}`),
       (snapshot) => {
-        if (!snapshot.exists()) return
+        if (!snapshot.exists()) return;
         let data = snapshot.val();
 
         current = {
@@ -43,7 +42,7 @@
     let opponentListener = onValue(
       ref(RDB, `users/${activeGame.state.opponentUid}`),
       (snapshot) => {
-        if (!snapshot.exists()) return
+        if (!snapshot.exists()) return;
         let data = snapshot.val();
         opponent = {
           displayName: data.displayName,
@@ -56,9 +55,9 @@
     );
 
     return () => {
-      selfListener()
-      opponentListener()
-    }
+      selfListener();
+      opponentListener();
+    };
   });
 
   let winData = $derived(activeGame.winData);
@@ -68,7 +67,6 @@
     await activeGame.createMove(index);
   }
 </script>
-
 
 <div popover="manual" id="winPopover">
   {#if winData == "draw"}
@@ -86,22 +84,28 @@
       </thead>
       <tbody>
         <tr>
-          <td>{winData.loserUid == opponent.uid ? opponent.displayName : current.displayName}</td>
-          <td>{winData.loserUid == opponent.uid ? current.displayName : opponent.displayName}</td>
+          <td
+            >{winData.loserUid == opponent.uid
+              ? opponent.displayName
+              : current.displayName}</td
+          >
+          <td
+            >{winData.loserUid == opponent.uid
+              ? current.displayName
+              : opponent.displayName}</td
+          >
         </tr>
       </tbody>
     </table>
   {/if}
   <p>Wait for a new game.</p>
-  <!-- <button onclick={() => LOBBY?.leave()}>Leave Lobby</button> -->
 </div>
 
 {#if activeGame}
   <section class="game">
     <div class="game-ui">
       <h3>
-        {(activeGame.ourTurn ? current : opponent).displayName}'s
-        Turn
+        {(activeGame.ourTurn ? current : opponent).displayName}'s Turn
       </h3>
     </div>
 
@@ -124,13 +128,13 @@
 {/if}
 
 <style>
-  .game {
-    position: relative;
-  }
-
   .game-board {
-    height: 70%;
+    width: min(70vh, 90vw);
     aspect-ratio: 1;
-    inset: 0;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 </style>

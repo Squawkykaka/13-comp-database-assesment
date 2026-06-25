@@ -24,31 +24,10 @@ export function numberToBits(num: number) {
 // crosses = 0b110110001
 // checking for wins is super easy this way as you just AND the bit streams with all the possible win conditions, and if it equals the pattern
 export class Board {
-  $circleList = 0;
-  $crossList = 0;
+  $circleList = $state(0);
+  $crossList = $state(0);
   $currentlyCirclesTurn = true;
-  $state: GameState = { status: "playing" };
-
-  runMove(position: number) {
-    if (this.$state.status !== "playing") {
-      return null;
-    }
-
-    this.change(position, this.$currentlyCirclesTurn ? "Circle" : "Cross");
-
-    this.$updateGameState();
-    if (this.$state.status === "playing") {
-      this.$currentlyCirclesTurn = !this.$currentlyCirclesTurn;
-    }
-  }
-
-  public get currentTurn(): TileType {
-    return this.$currentlyCirclesTurn ? "Circle" : "Cross";
-  }
-
-  get state(): GameState {
-    return this.$state;
-  }
+  state = $state<GameState>({ status: "playing" });
 
   change(position: number, tileType: TileType) {
     if (position > 8) {
@@ -104,11 +83,11 @@ export class Board {
     const winner = this.$getWinner();
 
     if (winner) {
-      this.$state = { status: "won", data: winner };
+      this.state = { status: "won", data: winner };
     } else if (this.$isBoardFull()) {
-      this.$state = { status: "draw" };
+      this.state = { status: "draw" };
     } else {
-      this.$state = { status: "playing" };
+      this.state = { status: "playing" };
     }
   }
 

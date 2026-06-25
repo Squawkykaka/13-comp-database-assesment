@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TileType } from "../game/board";
+  import type { TileType } from "../game/board.svelte";
   import Circle from "../assets/Circle.svg";
   import Cross from "../assets/Cross.svg";
   import type { HTMLButtonAttributes } from "svelte/elements";

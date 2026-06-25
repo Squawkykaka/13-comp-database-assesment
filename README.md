@@ -51,6 +51,8 @@ a button to start the game is visible and the lobby code is shown in multiplayer
 - [ ] maybe have preset games, like local original 1v1 for ease of use
 - [x] add code enter to the top of the screen
 - [ ] make it so you can only change the next and previous elements in the signup, not all
+- [ ] make it so someone leaving a game kicks the other person out
+- [ ] make it so activegame updates?
 
 # TODO
 
