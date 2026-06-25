@@ -1,9 +1,9 @@
 <script lang="ts">
   import { signOut } from "firebase/auth";
-  import Board from "./Board.svelte";
-  import Tile from "./Tile.svelte";
+  import { type Cell } from "./Board.svelte";
   import { AUTH } from "../firebase";
   import { activeGame, Game } from "../firebase/game.svelte";
+  import Board from "./Board.svelte";
 
   let menuState: "menu" | "join" = $state("menu");
 
@@ -15,62 +15,44 @@
     let code = data.code as string;
     activeGame.set(await Game.joinGame(code));
   };
+
+  let menu: Cell[] = [
+    { kind: "tile", tile: "Cross" },
+    { kind: "button", text: "Join", action: () => (menuState = "join") },
+    { kind: "empty" },
+    {
+      kind: "button",
+      text: "Create",
+      // action: () => (createGame = Game.createGame()),
+      action: async () => (activeGame.set(await Game.createGame())),
+    },
+    { kind: "empty" },
+    { kind: "button", text: "Sign Out", action: () => signOut(AUTH) },
+    { kind: "empty" },
+    { kind: "empty" },
+    { kind: "tile", tile: "Circle" },
+  ];
+  let join: Cell[] = [
+    { kind: "input", placeholder: "Enter Code...", onsubmit: joinSubmit },
+    { kind: "empty" },
+    { kind: "empty" },
+    {
+      kind: "button",
+      text: "Go Back",
+      action: () => {
+        menuState = "menu";
+      },
+    },
+    { kind: "empty" },
+    { kind: "empty" },
+    { kind: "empty" },
+  ];
+
+  let createGame = $state<Promise<Game>>();
 </script>
 
 <div class="container">
-  {#if menuState === "join"}
-    <Board>
-      <form id="join-form" class="joinInput" onsubmit={joinSubmit}>
-        <input
-          type="text"
-          name="code"
-          placeholder="Enter Code..."
-          aria-label="join code"
-        />
-      </form>
-
-      <Tile message="Submit" type="submit" form="join-form" />
-
-      <Tile disabled />
-      <Tile disabled />
-      <Tile
-        message="Go Back"
-        onclick={() => {
-          menuState = "menu";
-        }}
-      />
-      <Tile disabled />
-      <Tile disabled />
-      <Tile disabled />
-    </Board>
-  {:else if menuState == "menu"}
-    <Board>
-      <Tile tile="Cross" />
-      <Tile
-        message="Join"
-        onclick={() => {
-          menuState = "join";
-        }}
-      />
-      <Tile disabled />
-      <Tile
-        message="Create"
-        onclick={async () => {
-          activeGame.set(await Game.createGame())
-        }}
-      />
-      <Tile disabled />
-      <Tile
-        message="Sign Out"
-        onclick={() => {
-          signOut(AUTH);
-        }}
-      />
-      <Tile disabled />
-      <Tile disabled />
-      <Tile tile="Circle" />
-    </Board>
-  {/if}
+  <Board cells={menuState == "menu" ? menu : menuState == "join" ? join : []} />
 </div>
 
 <style>
@@ -82,34 +64,5 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-  }
-
-  :global(.joinInput) {
-    grid-column: span 2;
-    display: grid;
-    > input {
-      width: 100%;
-      height: 100%;
-      /* box-sizing: border-box; */
-
-      background: #d9d9d9;
-      border: none;
-      outline: none;
-      box-shadow: none;
-
-      font-size: 2rem;
-      color: inherit;
-
-      padding: 0 1rem;
-      box-sizing: border-box;
-
-      caret-color: currentColor; /* blinking cursor */
-    }
-
-    > input::placeholder {
-      color: inherit;
-      opacity: 0.5;
-      font-style: italic;
-    }
   }
 </style>

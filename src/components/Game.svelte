@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onValue, ref } from "firebase/database";
   import { Game } from "../firebase/game.svelte";
-  import Board from "./Board.svelte";
+  import Board, { type Cell } from "./Board.svelte";
   import { RDB } from "../firebase";
   import type { GameUser } from "../models/types";
   import Tile from "./Tile.svelte";
 
-  let { activeGame }: { activeGame: Game} = $props();
+  let { activeGame }: { activeGame: Game } = $props();
 
   let opponent = $state<GameUser>({
     displayName: "Loading...",
@@ -61,7 +61,21 @@
   });
 
   let winData = $derived(activeGame.winData);
-  let boardShape = $derived(activeGame.boardShape);
+  let boardShape = $derived<Cell[]>(
+    activeGame.boardShape.map((old, idx) =>
+      old
+        ? {
+            kind: "tile",
+            tile: old.type,
+            status: old.win
+              ? old.type === activeGame.tileType
+                ? "win"
+                : "loss"
+              : undefined,
+          }
+        : { kind: "button", text: "", action: () => handleClick(idx) },
+    ),
+  );
 
   async function handleClick(index: number) {
     await activeGame.createMove(index);
@@ -110,19 +124,7 @@
     </div>
 
     <div class="game-board">
-      <Board>
-        {#each boardShape?.entries() as [idx, tile]}
-          <Tile
-            tile={tile?.type}
-            onclick={() => handleClick(idx)}
-            status={tile?.win
-              ? tile.type === activeGame.tileType
-                ? "win"
-                : "loss"
-              : undefined}
-          />
-        {/each}
-      </Board>
+      <Board cells={boardShape} />
     </div>
   </section>
 {/if}

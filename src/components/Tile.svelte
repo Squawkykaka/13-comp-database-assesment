@@ -3,6 +3,8 @@
   import Circle from "../assets/Circle.svg";
   import Cross from "../assets/Cross.svg";
   import type { HTMLButtonAttributes } from "svelte/elements";
+  import { fade, fly, scale, slide } from "svelte/transition";
+  import { bounceInOut } from "svelte/easing";
 
   type Props = HTMLButtonAttributes & {
     tile?: TileType;
@@ -26,10 +28,16 @@
   disabled={tile !== undefined}
   {...extra}
 >
-  {#if tile == "Circle"}
-    <img src={Circle} alt="Circle tile" width="100%" />
-  {:else if tile == "Cross"}
-    <img src={Cross} alt="Cross tile" width="100%" />
+  {#if tile}
+    <img
+      src={tile == "Circle" ? Circle : Cross}
+      alt="{tile} tile"
+      width="100%"
+      transition:scale={{
+        duration: 200,
+        start: 1.3
+      }}
+    />
   {:else if message}
     {message}
   {/if}
