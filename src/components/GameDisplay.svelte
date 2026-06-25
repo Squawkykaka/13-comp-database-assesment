@@ -1,10 +1,8 @@
 <script lang="ts">
   import { onValue, ref } from "firebase/database";
   import { Game } from "../firebase/game.svelte";
-  import Board, { type Cell } from "./Board.svelte";
   import { RDB } from "../firebase";
   import type { GameUser } from "../models/types";
-  import Tile from "./Tile.svelte";
 
   let { activeGame }: { activeGame: Game } = $props();
 
@@ -61,25 +59,6 @@
   });
 
   let winData = $derived(activeGame.winData);
-  let boardShape = $derived<Cell[]>(
-    activeGame.boardShape.map((old, idx) =>
-      old
-        ? {
-            kind: "tile",
-            tile: old.type,
-            status: old.win
-              ? old.type === activeGame.tileType
-                ? "win"
-                : "loss"
-              : undefined,
-          }
-        : { kind: "button", text: "", action: () => handleClick(idx) },
-    ),
-  );
-
-  async function handleClick(index: number) {
-    await activeGame.createMove(index);
-  }
 </script>
 
 <div popover="manual" id="winPopover">
@@ -115,28 +94,10 @@
   <p>Wait for a new game.</p>
 </div>
 
-{#if activeGame}
-  <section class="game">
-    <div class="game-ui">
-      <h3>
-        {(activeGame.ourTurn ? current : opponent).displayName}'s Turn
-      </h3>
-    </div>
-
-    <div class="game-board">
-      <Board cells={boardShape} />
-    </div>
-  </section>
-{/if}
-
-<style>
-  .game-board {
-    width: min(70vh, 90vw);
-    aspect-ratio: 1;
-
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-</style>
+<section class="game">
+  <div class="game-ui">
+    <h3>
+      {(activeGame.ourTurn ? current : opponent).displayName}'s Turn
+    </h3>
+  </div>
+</section>

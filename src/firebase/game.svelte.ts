@@ -82,9 +82,7 @@ export class Game {
   board = $state(new Board());
   winData = $state<{ winnerUid: string; loserUid: string } | "draw">();
 
-  boardShape = $derived.by(() => {
-    return [...Array(9)].map((_, i) => this.board.getTile(i))
-  })
+  boardShape = $derived([...Array(9)].map((_, i) => this.board.getTile(i)));
 
   private _subscriptions: (() => void)[] = [];
 
@@ -125,9 +123,8 @@ export class Game {
       this.state = { kind: "active", opponentUid };
     } else {
       this.state = { kind: "awaitingOpponent" };
-      this.setupOpponentListener()
+      this.setupOpponentListener();
     }
-
 
     // remove for everyone if you leave
     onDisconnect(this.gameRef).remove();
@@ -233,7 +230,7 @@ export class Game {
 
     return new Game("Circle", undefined, true, gameRef, pincode);
   }
-  
+
   static async joinGame(pincode: string): Promise<Game> {
     if (!AUTH.currentUser) throw new SiteError("USER_NOT_AUTHENTICATED");
     let gameId = (await get(ref(RDB, `pincodes/${pincode}`))).val();

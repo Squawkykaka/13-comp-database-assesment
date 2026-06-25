@@ -3,9 +3,8 @@
   import Circle from "../assets/Circle.svg";
   import Cross from "../assets/Cross.svg";
   import type { HTMLButtonAttributes } from "svelte/elements";
-  import { fade, fly, scale, slide } from "svelte/transition";
-  import { bounceInOut } from "svelte/easing";
-
+  import { scale } from "svelte/transition";
+  
   type Props = HTMLButtonAttributes & {
     tile?: TileType;
     message?: string;
