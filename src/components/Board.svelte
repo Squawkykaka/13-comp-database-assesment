@@ -18,7 +18,7 @@
 <div class="container">
   {#each cells as c}
     {#if c.kind == "tile"}
-      <Tile tile={c.tile} status={c.status} />
+      <Tile tile={c.tile} status={c.status}/>
     {:else if c.kind == "button"}
       <Tile message={c.text} onclick={c.action} />
     {:else if c.kind == "empty"}

@@ -6,6 +6,7 @@ import {
   onValue,
   push,
   ref,
+  remove,
   runTransaction,
   set,
   type DatabaseReference,
@@ -13,7 +14,6 @@ import {
 import { Board, type TileType } from "../game/board.svelte";
 import { AUTH, RDB } from ".";
 import { SiteError } from "../models/error";
-import { writable } from "svelte/store";
 
 // the host when starting the game splits members into games, setting the `activeGame` setting in there members list to the game id
 // the host chooses what member is circle or cross
@@ -37,8 +37,6 @@ import { writable } from "svelte/store";
 // when theres enough players for another round without the same users the host starts a new game
 
 // after 15 minutes, the player with the highest score is declared the winner (this is for onevone mode)
-
-export const activeGame = writable<Game | undefined>();
 
 function makeid(length: number) {
   let result = "";
@@ -81,7 +79,6 @@ export class Game {
   gameRef: DatabaseReference;
   board = $state(new Board());
   winData = $state<{ winnerUid: string; loserUid: string } | "draw">();
-
   boardShape = $derived([...Array(9)].map((_, i) => this.board.getTile(i)));
 
   private _subscriptions: (() => void)[] = [];
@@ -161,10 +158,20 @@ export class Game {
         }
       }),
       moveUnsubscribe,
+      
     );
   }
   destroy() {
     this._subscriptions.forEach((unsub) => unsub());
+  }
+
+  reset() {
+    if (this.isOwner) {
+      remove(child(this.gameRef, "moves"))
+      this.board = new Board();
+      this.winData = undefined;
+    }
+    // TODO: implement
   }
 
   private async handleFinish() {

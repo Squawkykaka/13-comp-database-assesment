@@ -58,6 +58,29 @@
     };
   });
 
+  let rematchTimer = $state(0);
+  $effect(() => {
+    if (winData === undefined ) return;
+
+    rematchTimer = 5;
+
+    const interval = setInterval(() => {
+      if (rematchTimer! <= 1) {
+        rematchTimer = 0;
+        clearInterval(interval);
+
+        if (activeGame.isOwner) {
+          activeGame.reset()
+        }
+        return;
+      }
+
+      rematchTimer!--;
+    }, 1000);
+
+    return () => clearInterval(interval);
+  });
+
   let winData = $derived(activeGame.winData);
 </script>
 
@@ -92,6 +115,8 @@
     </table>
   {/if}
   <p>Wait for a new game.</p>
+  <button onclick={() => activeGame.reset()}>Rematch</button>
+  <p>{rematchTimer}</p>
 </div>
 
 <section class="game">

@@ -4,6 +4,7 @@
   import GameDisplay from "./components/GameDisplay.svelte";
   import { AUTH, signInGoogle, currentUser } from "./firebase";
   import { Game } from "./firebase/game.svelte";
+  import { onValue } from "firebase/database";
 
   let activeGame = $state<Game>();
   let boardShape = $derived<Cell[] | undefined>(
@@ -25,6 +26,18 @@
           },
     ),
   );
+
+  $effect(() => {
+    if (activeGame) {
+      return onValue(activeGame.gameRef, snapshot => {
+        if (!snapshot.exists()) {
+          activeGame?.destroy()
+          activeGame = undefined
+        } 
+      })
+    }
+  })
+
 
   let menuState: "menu" | "join" = $state("menu");
 
