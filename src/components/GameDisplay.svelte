@@ -60,7 +60,7 @@
 
   let rematchTimer = $state(0);
   $effect(() => {
-    if (winData === undefined ) return;
+    if (winData === undefined) return;
 
     rematchTimer = 5;
 
@@ -69,9 +69,7 @@
         rematchTimer = 0;
         clearInterval(interval);
 
-        if (activeGame.isOwner) {
-          activeGame.reset()
-        }
+        activeGame.reset();
         return;
       }
 

@@ -145,7 +145,6 @@ export class Game {
 
       // if the game is over, stop listening for moves, and handle the finish
       if (this.board.state.status !== "playing") {
-        moveUnsubscribe();
         this.handleFinish();
       }
     });
@@ -158,7 +157,14 @@ export class Game {
         }
       }),
       moveUnsubscribe,
-      
+      onValue(child(this.gameRef, "moves"), (snapshot) => {
+        if (!snapshot.exists()) {
+          this.board = new Board();
+          this.winData = undefined;
+          // when the moves has been reset, hide the popup as well
+          document.getElementById("winPopover")!.hidePopover();
+        }
+      }),
     );
   }
   destroy() {
@@ -167,9 +173,7 @@ export class Game {
 
   reset() {
     if (this.isOwner) {
-      remove(child(this.gameRef, "moves"))
-      this.board = new Board();
-      this.winData = undefined;
+      remove(child(this.gameRef, "moves"));
     }
     // TODO: implement
   }
