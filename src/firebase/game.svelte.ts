@@ -65,7 +65,7 @@ type DatabaseGame = {
 export class Game {
   isOwner: boolean;
   selfUid: string;
-  ourTurn: boolean;
+  ourTurn: boolean = $state(false);
   pincode: string;
 
   state:
@@ -158,11 +158,11 @@ export class Game {
       }),
       moveUnsubscribe,
       onValue(child(this.gameRef, "moves"), (snapshot) => {
-        if (!snapshot.exists()) {
+        if (!snapshot.exists() && this.winData) {
           this.board = new Board();
           this.winData = undefined;
           // when the moves has been reset, hide the popup as well
-          document.getElementById("winPopover")!.hidePopover();
+          document.getElementById("winPopover")?.hidePopover();
         }
       }),
     );

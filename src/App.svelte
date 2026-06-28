@@ -29,15 +29,14 @@
 
   $effect(() => {
     if (activeGame) {
-      return onValue(activeGame.gameRef, snapshot => {
+      return onValue(activeGame.gameRef, (snapshot) => {
         if (!snapshot.exists()) {
-          activeGame?.destroy()
-          activeGame = undefined
-        } 
-      })
+          activeGame?.destroy();
+          activeGame = undefined;
+        }
+      });
     }
-  })
-
+  });
 
   let menuState: "menu" | "join" = $state("menu");
 
@@ -95,14 +94,14 @@
 </script>
 
 <div class="container">
-  <div>
-    {#if activeGame?.state.kind == "awaitingOpponent"}
+  {#if activeGame?.state.kind == "awaitingOpponent"}
+    <div>
       <p>Waiting for Opponent...</p>
       <p>Code: {activeGame.pincode}</p>
-    {:else if activeGame?.state.kind == "active"}
-      <GameDisplay {activeGame} />
-    {/if}
-  </div>
+    </div>
+  {:else if activeGame?.state.kind == "active"}
+    <GameDisplay {activeGame} />
+  {/if}
   <div class="game-board">
     <Board
       cells={$currentUser.auth
@@ -122,6 +121,7 @@
   .container {
     position: absolute;
     height: 100%;
+    width: 100%;
 
     display: grid;
     grid-template-columns: 1fr 2fr;
@@ -130,8 +130,11 @@
   }
 
   .game-board {
+    position: relative;
     width: min(70vh, 90vw);
+    left: 50%;
     grid-column: 2;
     aspect-ratio: 1;
+    transform: translate(-50%);
   }
 </style>

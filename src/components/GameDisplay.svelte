@@ -113,14 +113,36 @@
     </table>
   {/if}
   <p>Wait for a new game.</p>
-  <button onclick={() => activeGame.reset()}>Rematch</button>
+  <button onclick={() => activeGame.reset()} hidden={!activeGame.isOwner}
+    >Rematch</button
+  >
   <p>{rematchTimer}</p>
 </div>
 
-<section class="game">
-  <div class="game-ui">
-    <h3>
-      {(activeGame.ourTurn ? current : opponent).displayName}'s Turn
-    </h3>
-  </div>
-</section>
+<div class="game-ui">
+  <h3>
+    {activeGame.ourTurn ? "Your" : opponent.displayName + "'s"} Turn
+  </h3>
+  <img
+    src={activeGame.ourTurn ? current.photoURL : opponent.photoURL}
+    alt="profile"
+    class="profileImage"
+  />
+</div>
+
+<style>
+  .game-ui {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+  }
+  .profileImage {
+    border: 25px solid black;
+    border-radius: 100%;
+    height: min(50%, 400px);
+    aspect-ratio: 1;
+  }
+</style>
