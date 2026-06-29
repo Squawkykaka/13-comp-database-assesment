@@ -142,7 +142,7 @@
   .profileImage {
     border: 25px solid black;
     border-radius: 100%;
-    height: min(50%, 400px);
+    height: min(50%, 100px);
     aspect-ratio: 1;
   }
 </style>

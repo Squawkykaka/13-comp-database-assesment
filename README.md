@@ -54,7 +54,8 @@ a button to start the game is visible and the lobby code is shown in multiplayer
 - [x] make it so someone leaving a game kicks the other person out
 - [ ] make it so activegame updates?
 - [ ] incorrectly says the winner after a rematch
-- [ ] says Loading... is the user after second rematch, fixes itself??/
+- [ ] says Loading... is the user after second rematch, fixes itself??
+- [ ] add a timer showing how long a round took
 
 # TODO
 

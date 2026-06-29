@@ -19,7 +19,6 @@ import {
   ref,
   set,
 } from "firebase/database";
-import type { GameUser } from "../models/types";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBjjSwm8ARN8jb-Z23XXMEymlCgLzv7qOI",
@@ -45,7 +44,7 @@ await setPersistence(AUTH, browserLocalPersistence);
 
 export async function signInGoogle() {
   const userCred = await signInWithPopup(AUTH, new GoogleAuthProvider());
-  let q = child(userRef, userCred.user.uid);
+  let q = ref(RDB, `users/${userCred.user.uid}`);
 
   let snapshot = await get(q);
   if (!snapshot.exists()) {
@@ -59,14 +58,12 @@ export async function signInGoogle() {
   }
 }
 
-export const userRef = ref(RDB, "users");
-
 // #####################
 // Firebase Svelte Stores
 // These keep local variables in sync with firestore
 // #####################
 
-let currentFirebaseUser = writable<User | undefined>();
+export let currentFirebaseUser = writable<User | undefined>();
 onAuthStateChanged(AUTH, (user) => {
   if (user === null) {
     currentFirebaseUser.set(undefined);
@@ -74,40 +71,5 @@ onAuthStateChanged(AUTH, (user) => {
     currentFirebaseUser.set(user);
   }
 });
-
-let unsubscribeUserDoc = () => {};
-let currentUserWritable = writable<GameUser | undefined>();
-currentFirebaseUser.subscribe((user) => {
-  unsubscribeUserDoc();
-  if (user) {
-    unsubscribeUserDoc = onValue(child(userRef, user.uid), (next) => {
-      if (next.exists()) {
-        currentUserWritable.set({ ...next.val(), uid: next.key });
-      } else {
-        currentUserWritable.set(undefined);
-      }
-    });
-  } else {
-    currentUserWritable.set(undefined);
-  }
-});
-
-export const currentUser = derived(
-  [currentFirebaseUser, currentUserWritable],
-  ([currentFirebaseUser, currentUserWritable]) => {
-    return {
-      auth: currentFirebaseUser,
-      info: currentUserWritable,
-      async updateDisplay(displayName: string) {
-        if (currentFirebaseUser !== undefined) {
-          set(
-            child(userRef, currentFirebaseUser?.uid + "/" + "displayName"),
-            displayName,
-          );
-        }
-      },
-    };
-  },
-);
 
 export { AUTH, RDB };

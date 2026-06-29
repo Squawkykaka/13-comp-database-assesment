@@ -2,7 +2,7 @@
   import { signOut } from "firebase/auth";
   import Board, { type Cell } from "./components/Board.svelte";
   import GameDisplay from "./components/GameDisplay.svelte";
-  import { AUTH, signInGoogle, currentUser } from "./firebase";
+  import { AUTH, currentFirebaseUser, signInGoogle } from "./firebase";
   import { Game } from "./firebase/game.svelte";
   import { onValue } from "firebase/database";
 
@@ -104,7 +104,7 @@
   {/if}
   <div class="game-board">
     <Board
-      cells={$currentUser.auth
+      cells={$currentFirebaseUser
         ? boardShape
           ? boardShape
           : menuState == "menu"
