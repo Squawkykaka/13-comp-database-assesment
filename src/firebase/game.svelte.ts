@@ -11,9 +11,9 @@ import {
   set,
   type DatabaseReference,
 } from "firebase/database";
-import { Board, type TileType } from "../game/board.svelte";
 import { AUTH, RDB } from ".";
 import { SiteError } from "../models/error";
+import { Board, type TileType } from "./board.svelte";
 
 // the host when starting the game splits members into games, setting the `activeGame` setting in there members list to the game id
 // the host chooses what member is circle or cross
