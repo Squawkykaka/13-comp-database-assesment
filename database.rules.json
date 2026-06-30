@@ -29,7 +29,8 @@
     },
     "users": {
       ".write": true,
-      ".read": true
+      ".read": true,
+      ".indexOn": ["wins", "losses"]
     }
   }
 }

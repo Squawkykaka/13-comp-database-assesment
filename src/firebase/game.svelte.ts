@@ -32,7 +32,6 @@ import { Board, type TileType } from "./board.svelte";
 
 // once a game is done, `completed = true` is marked on the game, and the winner's uid is set on the `winner` field
 // both members then remove activeGame from there profiles
-
 // the screen lets them pick games to spectate,
 // when theres enough players for another round without the same users the host starts a new game
 
@@ -79,7 +78,6 @@ export class Game {
   gameRef: DatabaseReference;
   board = $state(new Board());
   winData = $state<{ winnerUid: string; loserUid: string } | "draw">();
-  boardShape = $derived([...Array(9)].map((_, i) => this.board.getTile(i)));
 
   private _subscriptions: (() => void)[] = [];
 
@@ -141,7 +139,6 @@ export class Game {
           : this.tileType;
 
       this.board.change(data.position, tileType);
-      this.board.$updateGameState();
 
       // if the game is over, stop listening for moves, and handle the finish
       if (this.board.state.status !== "playing") {

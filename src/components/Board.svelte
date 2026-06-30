@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TileType } from "../game/board.svelte";
+  import type { TileType } from "../firebase/board.svelte";
   import Tile from "./Tile.svelte";
 
   export type Cell =
@@ -10,6 +10,7 @@
         placeholder: string;
         onsubmit: (event: SubmitEvent) => void;
       }
+    | { kind: "message", text: string}
     | { kind: "empty" };
 
   let { cells }: { cells: Cell[] } = $props();
@@ -19,6 +20,8 @@
   {#each cells as c}
     {#if c.kind == "tile"}
       <Tile tile={c.tile} status={c.status}/>
+    {:else if c.kind == "message"}
+      <Tile message={c.text}/>
     {:else if c.kind == "button"}
       <Tile message={c.text} onclick={c.action} />
     {:else if c.kind == "empty"}

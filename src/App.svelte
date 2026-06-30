@@ -5,16 +5,24 @@
   import { AUTH, currentFirebaseUser, signInGoogle } from "./firebase";
   import { Game } from "./firebase/game.svelte";
   import { onValue } from "firebase/database";
+  import { FirebaseError } from "firebase/app";
+  import Leaderboard from "./components/Leaderboard.svelte";
+
+  let errorText = $state("");
+  function showError(error: FirebaseError) {
+    errorText = error.message;
+    console.error(`[${error.code}]: ${error.message}\n${error}`);
+  }
 
   let activeGame = $state<Game>();
   let boardShape = $derived<Cell[] | undefined>(
-    activeGame?.boardShape.map((old, idx) =>
+    activeGame?.board.gameBoard.map((old, idx) =>
       old
         ? {
             kind: "tile",
-            tile: old.type,
+            tile: old.tile,
             status: old.win
-              ? old.type === activeGame?.tileType
+              ? old.tile === activeGame?.tileType
                 ? "win"
                 : "loss"
               : undefined,
@@ -38,7 +46,7 @@
     }
   });
 
-  let menuState: "menu" | "join" = $state("menu");
+  let menuState: "menu" | "join" | "leaderboard" = $state("menu");
 
   let joinSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -62,7 +70,13 @@
     { kind: "empty" },
     { kind: "button", text: "Sign Out", action: () => signOut(AUTH) },
     { kind: "empty" },
-    { kind: "empty" },
+    {
+      kind: "button",
+      text: "Scores",
+      action: () => {
+        menuState = "leaderboard";
+      },
+    },
     { kind: "tile", tile: "Circle" },
   ];
   let join: Cell[] = [
@@ -80,8 +94,30 @@
     { kind: "empty" },
     { kind: "empty" },
   ];
-  let signin: Cell[] = [
-    { kind: "button", text: "Sign In", action: () => signInGoogle() },
+  let signInPressed = $state(false);
+  currentFirebaseUser.subscribe((user) => {
+    if (user == null) {
+      signInPressed = false;
+    }
+  });
+  let signin: Cell[] = $derived([
+    signInPressed
+      ? { kind: "message", text: "Loading..." }
+      : {
+          kind: "button",
+          text: "Sign In",
+          action: async () => {
+            signInPressed = true;
+            try {
+              await signInGoogle();
+            } catch (error) {
+              if (error instanceof FirebaseError) {
+                showError(error);
+              }
+              signInPressed = false;
+            }
+          },
+        },
     { kind: "tile", tile: "Circle" },
     { kind: "empty" },
     { kind: "empty" },
@@ -90,7 +126,7 @@
     { kind: "empty" },
     { kind: "tile", tile: "Circle" },
     { kind: "tile", tile: "Cross" },
-  ];
+  ]);
 </script>
 
 <div class="container">
@@ -102,19 +138,24 @@
   {:else if activeGame?.state.kind == "active"}
     <GameDisplay {activeGame} />
   {/if}
-  <div class="game-board">
-    <Board
-      cells={$currentFirebaseUser
-        ? boardShape
+  {#if menuState == "leaderboard"}
+    <Leaderboard />
+  {:else}
+    <div class="game-board">
+      <Board
+        cells={$currentFirebaseUser
           ? boardShape
-          : menuState == "menu"
-            ? menu
-            : menuState == "join"
-              ? join
-              : []
-        : signin}
-    />
-  </div>
+            ? boardShape
+            : menuState == "menu"
+              ? menu
+              : menuState == "join"
+                ? join
+                : []
+          : signin}
+      />
+      <p>{errorText}</p>
+    </div>
+  {/if}
 </div>
 
 <style>
