@@ -27,7 +27,7 @@
 </script>
 
 <div>
-  <a href="/">Go Back</a>
+  <a href="./.">Go Back</a>
   <table>
     <caption>High Scores (Top 20)</caption>
     <thead>
