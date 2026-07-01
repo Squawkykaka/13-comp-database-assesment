@@ -1,62 +1,12 @@
 <script lang="ts">
-  import { onValue, ref } from "firebase/database";
   import { Game } from "../firebase/game.svelte";
-  import { RDB } from "../firebase";
   import type { GameUser } from "../models/types";
 
-  let { activeGame }: { activeGame: Game } = $props();
-
-  let opponent = $state<GameUser>({
-    displayName: "Loading...",
-    joinDate: new Date(),
-    quote: "Are we there yet?",
-    uid: "676767676767",
-  });
-  let current = $state<GameUser>({
-    displayName: "Loading...",
-    joinDate: new Date(),
-    quote: "Are we there yet?",
-    uid: "676767676767",
-  });
-
-  $effect(() => {
-    if (activeGame.state.kind == "awaitingOpponent") return;
-
-    let selfListener = onValue(
-      ref(RDB, `users/${activeGame.selfUid}`),
-      (snapshot) => {
-        if (!snapshot.exists()) return;
-        let data = snapshot.val();
-
-        current = {
-          displayName: data.displayName,
-          photoURL: data.photoURL,
-          joinDate: data.joinDate,
-          quote: data.quote,
-          uid: snapshot.key!,
-        };
-      },
-    );
-    let opponentListener = onValue(
-      ref(RDB, `users/${activeGame.state.opponentUid}`),
-      (snapshot) => {
-        if (!snapshot.exists()) return;
-        let data = snapshot.val();
-        opponent = {
-          displayName: data.displayName,
-          photoURL: data.photoURL,
-          joinDate: data.joinDate,
-          quote: data.quote,
-          uid: snapshot.key!,
-        };
-      },
-    );
-
-    return () => {
-      selfListener();
-      opponentListener();
-    };
-  });
+  let {
+    activeGame,
+    current,
+    opponent,
+  }: { activeGame: Game; opponent: GameUser; current: GameUser } = $props();
 
   let rematchTimer = $state(0);
   $effect(() => {

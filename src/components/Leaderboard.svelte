@@ -1,9 +1,7 @@
 <script lang="ts">
   import {
     limitToFirst,
-    onChildAdded,
-    onChildChanged,
-    onChildRemoved,
+    onValue,
     orderByChild,
     query,
     ref,
@@ -14,14 +12,8 @@
   let users: { [uid: string]: GameUser } = $state({});
 
   let q = query(ref(RDB, "users"), orderByChild("wins"), limitToFirst(20));
-  onChildAdded(q, (snapshot) => {
-    users[snapshot.key!] = snapshot.val();
-  });
-  onChildChanged(q, (snapshot) => {
-    users[snapshot.key!] = snapshot.val();
-  })
-  onChildRemoved(q, (snapshot) => {
-    delete users[snapshot.key!]
+  onValue(q, snapshot => {
+    users = snapshot.val() ?? {}
   })
 </script>
 

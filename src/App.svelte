@@ -2,12 +2,13 @@
   import { signOut } from "firebase/auth";
   import Board, { type Cell } from "./components/Board.svelte";
   import GameDisplay from "./components/GameDisplay.svelte";
-  import { AUTH, currentFirebaseUser, signInGoogle } from "./firebase";
+  import { AUTH, currentFirebaseUser, RDB, signInGoogle } from "./firebase";
   import { Game } from "./firebase/game.svelte";
-  import { onValue } from "firebase/database";
+  import { onValue, ref } from "firebase/database";
   import { FirebaseError } from "firebase/app";
   import Leaderboard from "./components/Leaderboard.svelte";
   import { SiteError } from "./models/error";
+  import type { GameUser } from "./models/types";
 
   let errorText = $state("");
   function showError(error: FirebaseError) {
@@ -45,6 +46,51 @@
         }
       });
     }
+  });
+  // user listener to get user data
+  let opponent = $state<GameUser>();
+  let current = $state<GameUser>();
+  $effect(() => {
+    if (!activeGame || activeGame.state.kind == "awaitingOpponent") return;
+
+    let selfListener = onValue(
+      ref(RDB, `users/${activeGame.selfUid}`),
+      (snapshot) => {
+        if (!snapshot.exists()) return;
+        let data = snapshot.val();
+
+        current = {
+          displayName: data.displayName,
+          photoURL: data.photoURL,
+          joinDate: data.joinDate,
+          quote: data.quote,
+          losses: data.losses ?? 0,
+          wins: data.wins ?? 0,
+          uid: snapshot.key!,
+        };
+      },
+    );
+    let opponentListener = onValue(
+      ref(RDB, `users/${activeGame.state.opponentUid}`),
+      (snapshot) => {
+        if (!snapshot.exists()) return;
+        let data = snapshot.val();
+        opponent = {
+          displayName: data.displayName,
+          photoURL: data.photoURL,
+          joinDate: data.joinDate,
+          quote: data.quote,
+          losses: data.losses ?? 0,
+          wins: data.wins ?? 0,
+          uid: snapshot.key!,
+        };
+      },
+    );
+
+    return () => {
+      selfListener();
+      opponentListener();
+    };
   });
 
   let menuState: "menu" | "join" | "leaderboard" = $state("menu");
@@ -155,7 +201,11 @@
       <p>Code: {activeGame.pincode}</p>
     </div>
   {:else if activeGame?.state.kind == "active"}
-    <GameDisplay {activeGame} />
+    {#if !opponent || !current}
+      Joining Game...
+    {:else}
+      <GameDisplay {activeGame} {opponent} {current} />
+    {/if}
   {/if}
   {#if menuState == "leaderboard"}
     <Leaderboard />

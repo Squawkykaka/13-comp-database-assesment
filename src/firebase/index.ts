@@ -9,13 +9,11 @@ import {
   signInWithPopup,
   type User,
 } from "firebase/auth";
-import { derived, writable } from "svelte/store";
+import { writable } from "svelte/store";
 import {
-  child,
   connectDatabaseEmulator,
   get,
   getDatabase,
-  onValue,
   ref,
   set,
 } from "firebase/database";
