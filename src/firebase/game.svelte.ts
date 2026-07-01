@@ -241,8 +241,9 @@ export class Game {
 
   static async joinGame(pincode: string): Promise<Game> {
     if (!AUTH.currentUser) throw new SiteError("USER_NOT_AUTHENTICATED");
-    let gameId = (await get(ref(RDB, `pincodes/${pincode}`))).val();
-    let gameRef = ref(RDB, `games/${gameId}`);
+    let gameIdSnap = (await get(ref(RDB, `pincodes/${pincode}`)));
+    if (!gameIdSnap.exists()) throw new SiteError("GAME_DOESNT_EXIST")
+    let gameRef = ref(RDB, `games/${gameIdSnap.val()}`);
     await set(child(gameRef, "opponent"), AUTH.currentUser?.uid);
     let info = (await get(gameRef)).val() as DatabaseGame;
 

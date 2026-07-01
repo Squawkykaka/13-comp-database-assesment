@@ -1,5 +1,6 @@
 export const ERROR_MESSAGES = {
   USER_NOT_AUTHENTICATED: "The user is not signed in.",
+  GAME_DOESNT_EXIST: "The requested game does not exist."
 };
 type ErrorCode = keyof typeof ERROR_MESSAGES;
 

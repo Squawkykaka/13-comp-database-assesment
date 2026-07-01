@@ -7,6 +7,7 @@
   import { onValue } from "firebase/database";
   import { FirebaseError } from "firebase/app";
   import Leaderboard from "./components/Leaderboard.svelte";
+  import { SiteError } from "./models/error";
 
   let errorText = $state("");
   function showError(error: FirebaseError) {
@@ -50,11 +51,29 @@
 
   let joinSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
-    let data = Object.fromEntries(
-      new FormData(event.target as HTMLFormElement),
-    );
-    let code = data.code as string;
-    activeGame = await Game.joinGame(code);
+
+    const form = event.target as HTMLFormElement;
+    const codeInput = form.elements.namedItem("code") as HTMLInputElement;
+    codeInput.addEventListener("input", () => {
+      codeInput.setCustomValidity("");
+    });
+    const data = Object.fromEntries(new FormData(form));
+    const code = data.code as string;
+    codeInput.setCustomValidity("");
+    try {
+      activeGame = await Game.joinGame(code);
+    } catch (error) {
+      form.reset();
+
+      if (error instanceof SiteError) {
+        codeInput.setCustomValidity(error.message);
+      } else {
+        codeInput.setCustomValidity("[UNKNOWN ERROR] " + error);
+      }
+
+      codeInput.reportValidity();
+      console.error(error);
+    }
   };
 
   let menu: Cell[] = [
@@ -140,7 +159,7 @@
   {/if}
   {#if menuState == "leaderboard"}
     <Leaderboard />
-    <button onclick={() => menuState = "menu"}>Go Back</button>
+    <button onclick={() => (menuState = "menu")}>Go Back</button>
   {:else}
     <div class="game-board">
       <Board
