@@ -140,6 +140,7 @@
   {/if}
   {#if menuState == "leaderboard"}
     <Leaderboard />
+    <button onclick={() => menuState = "menu"}>Go Back</button>
   {:else}
     <div class="game-board">
       <Board
