@@ -4,7 +4,6 @@
     onChildAdded,
     onChildChanged,
     onChildRemoved,
-    onValue,
     orderByChild,
     query,
     ref,

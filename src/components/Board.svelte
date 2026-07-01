@@ -33,6 +33,13 @@
           name="code"
           placeholder={c.placeholder}
           aria-label={c.placeholder}
+          minlength="5"
+          maxlength="5"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          required
+          pattern="[a-z]{"{5}"}"
         />
       </form>
       <Tile message="Submit" form="submit-form" />
@@ -71,6 +78,13 @@
       box-sizing: border-box;
 
       caret-color: currentColor; /* blinking cursor */
+    }
+
+    > input:valid {
+      border: green solid 10px;
+    }
+    > input:invalid {
+      border: red solid 10px
     }
 
     > input::placeholder {
