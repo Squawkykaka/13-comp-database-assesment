@@ -63,9 +63,12 @@ export type GameUser = {
   displayName: string;
   joinDate: Date;
   quote: string;
-  wins: number
-  losses: number
-  readonly uid: string,
+  gender: "male" | "female" | "non-binary" | "prefernottosay";
+  age: number;
+  colour: string;
+  wins: number;
+  losses: number;
+  readonly uid: string;
 };
 
 export type LobbyMember = {
@@ -73,7 +76,6 @@ export type LobbyMember = {
   quote: string;
   losses: number;
   wins: number;
-  ready: boolean
+  ready: boolean;
   readonly uid: string;
 };
-

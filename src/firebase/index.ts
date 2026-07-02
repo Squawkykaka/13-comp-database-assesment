@@ -39,23 +39,6 @@ if (import.meta.env.DEV) {
 }
 
 await setPersistence(AUTH, browserLocalPersistence);
-
-export async function signInGoogle() {
-  const userCred = await signInWithPopup(AUTH, new GoogleAuthProvider());
-  let q = ref(RDB, `users/${userCred.user.uid}`);
-
-  let snapshot = await get(q);
-  if (!snapshot.exists()) {
-    console.log("MAKING USER");
-    await set(q, {
-      displayName: userCred.user.displayName,
-      joinDate: Date.now(),
-      quote: "",
-      photoURL: userCred.user.photoURL,
-    });
-  }
-}
-
 // #####################
 // Firebase Svelte Stores
 // These keep local variables in sync with firestore

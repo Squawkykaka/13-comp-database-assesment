@@ -1,14 +1,16 @@
 <script lang="ts">
-  import { signOut } from "firebase/auth";
+  import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
   import Board, { type Cell } from "./components/Board.svelte";
   import GameDisplay from "./components/GameDisplay.svelte";
-  import { AUTH, currentFirebaseUser, RDB, signInGoogle } from "./firebase";
+  import { AUTH, currentFirebaseUser, RDB } from "./firebase";
   import { Game } from "./firebase/game.svelte";
-  import { onValue, ref } from "firebase/database";
+  import { onValue, ref, update } from "firebase/database";
   import { FirebaseError } from "firebase/app";
   import Leaderboard from "./components/Leaderboard.svelte";
   import { SiteError } from "./models/error";
   import type { GameUser } from "./models/types";
+
+  let signupPopup = $state<HTMLDialogElement>();
 
   let errorText = $state("");
   function showError(error: FirebaseError) {
@@ -52,25 +54,7 @@
   let current = $state<GameUser>();
   $effect(() => {
     if (!activeGame || activeGame.state.kind == "awaitingOpponent") return;
-
-    let selfListener = onValue(
-      ref(RDB, `users/${activeGame.selfUid}`),
-      (snapshot) => {
-        if (!snapshot.exists()) return;
-        let data = snapshot.val();
-
-        current = {
-          displayName: data.displayName,
-          photoURL: data.photoURL,
-          joinDate: data.joinDate,
-          quote: data.quote,
-          losses: data.losses ?? 0,
-          wins: data.wins ?? 0,
-          uid: snapshot.key!,
-        };
-      },
-    );
-    let opponentListener = onValue(
+    return onValue(
       ref(RDB, `users/${activeGame.state.opponentUid}`),
       (snapshot) => {
         if (!snapshot.exists()) return;
@@ -82,15 +66,41 @@
           quote: data.quote,
           losses: data.losses ?? 0,
           wins: data.wins ?? 0,
+          age: data.age,
+          colour: data.colour,
+          gender: data.gender,
           uid: snapshot.key!,
         };
       },
     );
+  });
+  $effect(() => {
+    if (!$currentFirebaseUser) return;
+    return onValue(
+      ref(RDB, `users/${$currentFirebaseUser.uid}`),
+      (snapshot) => {
+        if (!snapshot.exists()) {
+          current = undefined;
+          signupPopup?.showModal();
+          return
+        }
+        signupPopup?.close()
+        let data = snapshot.val();
 
-    return () => {
-      selfListener();
-      opponentListener();
-    };
+        current = {
+          displayName: data.displayName,
+          photoURL: data.photoURL,
+          joinDate: data.joinDate,
+          quote: data.quote,
+          losses: data.losses ?? 0,
+          wins: data.wins ?? 0,
+          age: data.age,
+          colour: data.colour,
+          gender: data.gender,
+          uid: snapshot.key!,
+        };
+      },
+    );
   });
 
   let menuState: "menu" | "join" | "leaderboard" = $state("menu");
@@ -174,7 +184,7 @@
           action: async () => {
             signInPressed = true;
             try {
-              await signInGoogle();
+              await signInWithPopup(AUTH, new GoogleAuthProvider());
             } catch (error) {
               if (error instanceof FirebaseError) {
                 showError(error);
@@ -192,7 +202,114 @@
     { kind: "tile", tile: "Circle" },
     { kind: "tile", tile: "Cross" },
   ]);
+
+  let updateSettings = (event: SubmitEvent) => {
+    event.preventDefault()
+    let target = event.target as HTMLFormElement;
+    let data = Object.fromEntries(new FormData(target));    
+
+    update(ref(RDB, `users/${AUTH.currentUser!.uid}`), {
+      displayName: data.displayName,
+      quote: data.quote,
+      age: data.age,
+      colour: data.colour,
+      gender: data.gender,
+    });
+  };
 </script>
+
+<dialog bind:this={signupPopup}>
+  <h3>Input Details</h3>
+  <form onsubmit={updateSettings}>
+    <div>
+      <label for="displayName">Display Name</label>
+      <input
+        type="text"
+        name="displayName"
+        minlength="5"
+        maxlength="15"
+        value={current?.displayName}
+        required
+      />
+    </div>
+
+    <div>
+      <label for="quote">Quote</label>
+      <input type="text" name="quote" value={current?.quote} maxlength="50" />
+    </div>
+
+    <fieldset>
+      <legend>Select a Gender:</legend>
+      <div>
+        <input
+          type="radio"
+          id="male"
+          name="gender"
+          value="male"
+          required
+          checked={current?.gender == "male"}
+        />
+        <label for="male">Male</label>
+      </div>
+      <div>
+        <input
+          type="radio"
+          id="female"
+          name="gender"
+          value="female"
+          checked={current?.gender == "female"}
+        />
+        <label for="female">Female</label>
+      </div>
+      <div>
+        <input
+          type="radio"
+          id="non-binary"
+          name="gender"
+          value="non-binary"
+          checked={current?.gender == "non-binary"}
+        />
+        <label for="non-binary">Non Binary</label>
+      </div>
+      <div>
+        <input
+          type="radio"
+          name="gender"
+          id="prefernottosay"
+          value="prefernottosay"
+          checked={current?.gender == "prefernottosay"}
+        />
+        <label for="prefernottosay">Prefer not to say</label>
+      </div>
+    </fieldset>
+
+    <div>
+      <label for="age">Age</label>
+      <input
+        type="number"
+        name="age"
+        id="age"
+        min="5"
+        max="99"
+        value={current?.age}
+        required
+      />
+    </div>
+
+    <div>
+      <label for="colour">Favourite Colour</label>
+      <input
+        type="color"
+        name="colour"
+        id="colour"
+        required
+        value={current?.colour}
+      />
+    </div>
+
+    <button>Save Changes</button>
+  </form>
+</dialog>
 
 <div class="container">
   {#if activeGame?.state.kind == "awaitingOpponent"}
@@ -211,7 +328,7 @@
     <Leaderboard />
     <button onclick={() => (menuState = "menu")}>Go Back</button>
   {:else}
-    <div class="game-board">
+    <main class="game-board">
       <Board
         cells={$currentFirebaseUser
           ? boardShape
@@ -224,7 +341,7 @@
           : signin}
       />
       <p>{errorText}</p>
-    </div>
+    </main>
   {/if}
 </div>
 
@@ -247,5 +364,10 @@
     grid-column: 2;
     aspect-ratio: 1;
     transform: translate(-50%);
+  }
+
+  dialog::backdrop {
+    backdrop-filter: blur(8px);
+    background: rgb(0 0 0 / 40%);
   }
 </style>
