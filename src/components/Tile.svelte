@@ -1,9 +1,9 @@
 <script lang="ts">
-  import type { TileType } from "../game/board.svelte";
   import Circle from "../assets/Circle.svg";
   import Cross from "../assets/Cross.svg";
   import type { HTMLButtonAttributes } from "svelte/elements";
   import { scale } from "svelte/transition";
+  import type { TileType } from "../firebase/board.svelte";
   
   type Props = HTMLButtonAttributes & {
     tile?: TileType;

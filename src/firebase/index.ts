@@ -3,19 +3,14 @@ import {
   browserLocalPersistence,
   connectAuthEmulator,
   getAuth,
-  GoogleAuthProvider,
   onAuthStateChanged,
   setPersistence,
-  signInWithPopup,
   type User,
 } from "firebase/auth";
 import { writable } from "svelte/store";
 import {
   connectDatabaseEmulator,
-  get,
   getDatabase,
-  ref,
-  set,
 } from "firebase/database";
 
 const firebaseConfig = {
@@ -33,6 +28,7 @@ const app = initializeApp(firebaseConfig);
 const RDB = getDatabase(app);
 const AUTH = getAuth(app);
 
+// if developing connect to the dev server
 if (import.meta.env.DEV) {
   connectAuthEmulator(AUTH, "http://localhost:9099");
   connectDatabaseEmulator(RDB, "localhost", 9000);

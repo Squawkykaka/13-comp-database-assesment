@@ -15,11 +15,6 @@ import { AUTH, RDB } from ".";
 import { SiteError } from "../models/error";
 import { Board, type TileType } from "./board.svelte";
 
-// the host when starting the game splits members into games, setting the `activeGame` setting in there members list to the game id
-// the host chooses what member is circle or cross
-
-// when a member listener fires with the active game, the client begins listening, and updates the screen with the opponent
-
 // if the player is circle, its there turn and they can append a move to the moves list
 // ```yaml
 // user: uid,
@@ -28,15 +23,10 @@ import { Board, type TileType } from "./board.svelte";
 
 // this has no cheating prevention but whatevs,
 // the other user waits until a move is added to the moves list, then lets there player make a move,
-// this switches back and forth until a member detects the game is won, which then sets `winner = uidofwinner`
+// this switches back and forth until a member detects the game is won, then
+// a timeout is started of 5 seconds, then if you are the owner of the game the game is reset
 
-// once a game is done, `completed = true` is marked on the game, and the winner's uid is set on the `winner` field
-// both members then remove activeGame from there profiles
-// the screen lets them pick games to spectate,
-// when theres enough players for another round without the same users the host starts a new game
-
-// after 15 minutes, the player with the highest score is declared the winner (this is for onevone mode)
-
+// makes a random id of length charachters long
 function makeid(length: number) {
   let result = "";
   const characters = "abcdefghijklmnopqrstuvwxyz";
@@ -61,6 +51,7 @@ type DatabaseGame = {
   moves: { [id: string]: DatabaseMove };
 };
 
+// this class handles syncing internal board state to firebase
 export class Game {
   isOwner: boolean;
   selfUid: string;
@@ -146,8 +137,8 @@ export class Game {
       }
     });
 
-    // remove the subscriptions if someone leaves
     this._subscriptions.push(
+      // remove the subscriptions if someone leaves
       onValue(gameRef, (snapshot) => {
         if (!snapshot.exists()) {
           this.destroy();
@@ -172,7 +163,6 @@ export class Game {
     if (this.isOwner) {
       remove(child(this.gameRef, "moves"));
     }
-    // TODO: implement
   }
 
   private async handleFinish() {
@@ -181,7 +171,6 @@ export class Game {
 
     document.getElementById("winPopover")!.showPopover();
 
-    // Check if there's a definitive winner (ignore draws)
     if (status === "won") {
       const weWon = this.board.state.data.winner == this.tileType;
 
@@ -189,10 +178,8 @@ export class Game {
         winnerUid: weWon ? this.selfUid : this.state.opponentUid,
         loserUid: weWon ? this.state.opponentUid : this.selfUid,
       };
-      const memberScoreRef = ref(RDB, `users/${this.selfUid}`);
-
       // Run a transaction to safely increment win/loss records inside the lobby
-      await runTransaction(memberScoreRef, (memberData) => {
+      await runTransaction(ref(RDB, `users/${this.selfUid}`), (memberData) => {
         if (memberData) {
           if (weWon) {
             memberData.wins = (memberData.wins || 0) + 1;
@@ -207,6 +194,7 @@ export class Game {
     }
   }
 
+  // if its our turn, and we are in the playing state and the move is valid push a new move to the moves list, and set it to not be our turn
   async createMove(index: number) {
     if (
       !this.ourTurn ||
@@ -239,10 +227,11 @@ export class Game {
     return new Game("Circle", undefined, true, gameRef, pincode);
   }
 
+  // joins a already created game
   static async joinGame(pincode: string): Promise<Game> {
     if (!AUTH.currentUser) throw new SiteError("USER_NOT_AUTHENTICATED");
-    let gameIdSnap = (await get(ref(RDB, `pincodes/${pincode}`)));
-    if (!gameIdSnap.exists()) throw new SiteError("GAME_DOESNT_EXIST")
+    let gameIdSnap = await get(ref(RDB, `pincodes/${pincode}`));
+    if (!gameIdSnap.exists()) throw new SiteError("GAME_DOESNT_EXIST");
     let gameRef = ref(RDB, `games/${gameIdSnap.val()}`);
     await set(child(gameRef, "opponent"), AUTH.currentUser?.uid);
     let info = (await get(gameRef)).val() as DatabaseGame;

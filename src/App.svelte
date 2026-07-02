@@ -19,6 +19,8 @@
   }
 
   let activeGame = $state<Game>();
+  // converts the board shape into a format that can be be rendered by the board.
+  //
   let boardShape = $derived<Cell[] | undefined>(
     activeGame?.board.gameBoard.map((old, idx) =>
       old
@@ -39,6 +41,8 @@
     ),
   );
 
+  // automatically sets up the listener on firebase to destroy the local game if the other player leaves
+  // via deleting the lobby
   $effect(() => {
     if (activeGame) {
       return onValue(activeGame.gameRef, (snapshot) => {
@@ -52,6 +56,7 @@
   // user listener to get user data
   let opponent = $state<GameUser>();
   let current = $state<GameUser>();
+  // if in a active game, then set up a listner on the opponent
   $effect(() => {
     if (!activeGame || activeGame.state.kind == "awaitingOpponent") return;
     return onValue(
@@ -71,6 +76,9 @@
       },
     );
   });
+  // set up a listener for the current user
+  // TODO: perhaps move this globally? as its useful to keep around
+  // also fetch and store private data as well maybe
   $effect(() => {
     if (!$currentFirebaseUser) return;
     return onValue(
@@ -79,9 +87,9 @@
         if (!snapshot.exists()) {
           current = undefined;
           signupPopup?.showModal();
-          return
+          return;
         }
-        signupPopup?.close()
+        signupPopup?.close();
         let data = snapshot.val();
 
         current = {
@@ -97,6 +105,8 @@
     );
   });
 
+  // the game renders in multiple different modes, each of these modes renders a different board layout
+  // the Board.svelte file handles taking this list of different tile types and rendering it onto the board
   let menuState: "menu" | "join" | "leaderboard" = $state("menu");
 
   let joinSubmit = async (event: SubmitEvent) => {
@@ -126,6 +136,7 @@
     }
   };
 
+  // the main menu screen
   let menu: Cell[] = [
     { kind: "tile", tile: "Cross" },
     { kind: "button", text: "Join", action: () => (menuState = "join") },
@@ -148,6 +159,7 @@
     },
     { kind: "tile", tile: "Circle" },
   ];
+  // after you press on join
   let join: Cell[] = [
     { kind: "input", placeholder: "Enter Code...", onsubmit: joinSubmit },
     { kind: "empty" },
@@ -163,12 +175,14 @@
     { kind: "empty" },
     { kind: "empty" },
   ];
+  // this is stored so loading... can be displayed when signing in
   let signInPressed = $state(false);
   currentFirebaseUser.subscribe((user) => {
     if (user == null) {
       signInPressed = false;
     }
   });
+  // what you see by default
   let signin: Cell[] = $derived([
     signInPressed
       ? { kind: "message", text: "Loading..." }
@@ -197,12 +211,13 @@
     { kind: "tile", tile: "Cross" },
   ]);
 
+  // this function handles updating the data from the sign up form.
   let updateSettings = (event: SubmitEvent) => {
-    event.preventDefault()
+    event.preventDefault();
     let target = event.target as HTMLFormElement;
     let uid = AUTH.currentUser?.uid;
     if (!uid) return;
-    let data = Object.fromEntries(new FormData(target));    
+    let data = Object.fromEntries(new FormData(target));
 
     update(ref(RDB), {
       [`users/${uid}/displayName`]: data.displayName,
@@ -237,31 +252,15 @@
     <fieldset>
       <legend>Select a Gender:</legend>
       <div>
-        <input
-          type="radio"
-          id="male"
-          name="gender"
-          value="male"
-          required
-        />
+        <input type="radio" id="male" name="gender" value="male" required />
         <label for="male">Male</label>
       </div>
       <div>
-        <input
-          type="radio"
-          id="female"
-          name="gender"
-          value="female"
-        />
+        <input type="radio" id="female" name="gender" value="female" />
         <label for="female">Female</label>
       </div>
       <div>
-        <input
-          type="radio"
-          id="non-binary"
-          name="gender"
-          value="non-binary"
-        />
+        <input type="radio" id="non-binary" name="gender" value="non-binary" />
         <label for="non-binary">Non Binary</label>
       </div>
       <div>
@@ -277,24 +276,12 @@
 
     <div>
       <label for="age">Age</label>
-      <input
-        type="number"
-        name="age"
-        id="age"
-        min="5"
-        max="99"
-        required
-      />
+      <input type="number" name="age" id="age" min="5" max="99" required />
     </div>
 
     <div>
       <label for="colour">Favourite Colour</label>
-      <input
-        type="color"
-        name="colour"
-        id="colour"
-        required
-      />
+      <input type="color" name="colour" id="colour" required />
     </div>
 
     <button>Save Changes</button>
@@ -319,6 +306,7 @@
     <button onclick={() => (menuState = "menu")}>Go Back</button>
   {:else}
     <main class="game-board">
+      <!-- if not logged in, display signup, then if in a game display the board, otherwise display the menu if in the menu, or join if in join -->
       <Board
         cells={$currentFirebaseUser
           ? boardShape

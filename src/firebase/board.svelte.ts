@@ -23,50 +23,30 @@ export function numberToBits(num: number) {
 // circles = 0b001001110
 // crosses = 0b110110001
 // checking for wins is super easy this way as you just AND the bit streams with all the possible win conditions, and if it equals the pattern
-//
-//
-  /**
-   * Returns the tile at the specified position.
-   * @param position The index of the tile you want to fetch
-   * @returns The tile type, or null if none is present
-   */
-  // getTile(position: number): { type: TileType; win: boolean } | null {
-  //   let circleShifted = this.$circleList >> position;
-  //   let crossShifted = this.$crossList >> position;
-  //   let winData =
-  //     (this.state.status == "won" ? this.state.data.winCond : 0) >> position;
-  //   let win = (winData & 1) != 0;
 
-  //   if ((circleShifted & 1) != 0) {
-  //     return { type: "Circle", win };
-  //   } else if ((crossShifted & 1) != 0) {
-  //     return { type: "Cross", win };
-  //   } else {
-  //     return null;
-  //   }
-  
 export class Board {
   $circleList = $state(0);
   $crossList = $state(0);
   $currentlyCirclesTurn = true;
   state = $state<GameState>({ status: "playing" });
   gameBoard = $derived.by(() => {
-    let next: ({ tile: TileType, win: boolean } | null)[] = [];
+    let next: ({ tile: TileType; win: boolean } | null)[] = [];
     for (let i = 0; i < 9; i++) {
       let circleShifted = this.$circleList >> i;
       let crossShifted = this.$crossList >> i;
-      let winData = (this.state.status == "won" ? this.state.data.winCond : 0) >> i;
+      let winData =
+        (this.state.status == "won" ? this.state.data.winCond : 0) >> i;
       let win = (winData & 1) != 0;
       if ((circleShifted & 1) != 0) {
-        next[i] = { tile: "Circle", win }
+        next[i] = { tile: "Circle", win };
       } else if ((crossShifted & 1) != 0) {
-        next[i] = { tile: "Cross", win }
+        next[i] = { tile: "Cross", win };
       } else {
         next[i] = null;
       }
     }
-    return next
-  })
+    return next;
+  });
 
   change(position: number, tileType: TileType) {
     if (position > 8) {
@@ -86,8 +66,8 @@ export class Board {
       } else {
         this.$crossList |= moveInt;
       }
-      
-      this.$updateGameState()
+
+      this.$updateGameState();
     } else {
       console.error(
         `Attempted to set tile type to ${tileType} at position ${position} when it is already ${this.gameBoard[position]?.tile ?? "Nothing"}`,
@@ -115,6 +95,7 @@ export class Board {
     }
   }
 
+  // if both lists added together is full, then we must have reached a draw
   $isBoardFull(): boolean {
     const allMoves = this.$circleList | this.$crossList;
     return allMoves === 0b111111111;
