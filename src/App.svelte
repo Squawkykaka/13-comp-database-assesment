@@ -66,9 +66,6 @@
           quote: data.quote,
           losses: data.losses ?? 0,
           wins: data.wins ?? 0,
-          age: data.age,
-          colour: data.colour,
-          gender: data.gender,
           uid: snapshot.key!,
         };
       },
@@ -94,9 +91,6 @@
           quote: data.quote,
           losses: data.losses ?? 0,
           wins: data.wins ?? 0,
-          age: data.age,
-          colour: data.colour,
-          gender: data.gender,
           uid: snapshot.key!,
         };
       },
@@ -206,14 +200,16 @@
   let updateSettings = (event: SubmitEvent) => {
     event.preventDefault()
     let target = event.target as HTMLFormElement;
+    let uid = AUTH.currentUser?.uid;
+    if (!uid) return;
     let data = Object.fromEntries(new FormData(target));    
 
-    update(ref(RDB, `users/${AUTH.currentUser!.uid}`), {
-      displayName: data.displayName,
-      quote: data.quote,
-      age: data.age,
-      colour: data.colour,
-      gender: data.gender,
+    update(ref(RDB), {
+      [`users/${uid}/displayName`]: data.displayName,
+      [`users/${uid}/quote`]: data.quote,
+      [`private/${uid}/age`]: data.age,
+      [`private/${uid}/colour`]: data.colour,
+      [`private/${uid}/gender`]: data.gender,
     });
   };
 </script>
@@ -247,7 +243,6 @@
           name="gender"
           value="male"
           required
-          checked={current?.gender == "male"}
         />
         <label for="male">Male</label>
       </div>
@@ -257,7 +252,6 @@
           id="female"
           name="gender"
           value="female"
-          checked={current?.gender == "female"}
         />
         <label for="female">Female</label>
       </div>
@@ -267,7 +261,6 @@
           id="non-binary"
           name="gender"
           value="non-binary"
-          checked={current?.gender == "non-binary"}
         />
         <label for="non-binary">Non Binary</label>
       </div>
@@ -277,7 +270,6 @@
           name="gender"
           id="prefernottosay"
           value="prefernottosay"
-          checked={current?.gender == "prefernottosay"}
         />
         <label for="prefernottosay">Prefer not to say</label>
       </div>
@@ -291,7 +283,6 @@
         id="age"
         min="5"
         max="99"
-        value={current?.age}
         required
       />
     </div>
@@ -303,7 +294,6 @@
         name="colour"
         id="colour"
         required
-        value={current?.colour}
       />
     </div>
 

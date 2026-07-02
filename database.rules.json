@@ -2,12 +2,19 @@
   /* Visit https://firebase.google.com/docs/database/security to learn more about security rules. */
   "rules": {
     "games": {
-      ".write": true,
-      ".read": true,
       "$uid": {
-        "owner": { ".validate": "newData.isString()" },
-        "opponent": { ".validate": "newData.isString()" },
+        ".read": true,
+        ".write": "!data.exists()",
+        "owner": {
+          ".validate": "newData.isString()",
+          ".write": "!data.exists() && newData.val() === auth.uid"
+        },
+        "opponent": {
+          ".validate": "newData.isString()",
+          ".write": "!data.exists() && newData.val() === auth.uid"
+        },
         "moves": {
+          ".write": "data.parent().child('owner').val() === auth.uid || data.parent().child('opponent').val() === auth.uid",
           "$moveid": {
             "position": { ".validate": "newData.isNumber()" },
             "uid": { ".validate": "newData.isString()" }
@@ -15,22 +22,25 @@
         }
       }
     },
-    "matchmaking": {
-      ".write": true
-    },
     "pincodes": {
       "$shortid": {
         ".read": true,
-        ".validate": "newData.isString()",
-
-        // Dynamically picks newData (creation) or data (deletion) to do a single owner check
-        ".write": true
+        ".write": true,
+        ".validate": "newData.isString()"
       }
     },
     "users": {
-      ".write": true,
+      ".indexOn": ["wins", "losses"],
       ".read": true,
-      ".indexOn": ["wins", "losses"]
+      "$uid": {
+        ".write": "auth.uid === $uid"
+      }
+    },
+    "private": {
+      "$uid": {
+        ".read": "auth.uid === $uid",
+        ".write": "auth.uid === $uid"
+      }
     }
   }
 }

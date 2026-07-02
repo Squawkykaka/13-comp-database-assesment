@@ -63,9 +63,6 @@ export type GameUser = {
   displayName: string;
   joinDate: Date;
   quote: string;
-  gender: "male" | "female" | "non-binary" | "prefernottosay";
-  age: number;
-  colour: string;
   wins: number;
   losses: number;
   readonly uid: string;
