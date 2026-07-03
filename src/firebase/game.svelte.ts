@@ -76,13 +76,15 @@ export class Game {
     return this.tileType === "Circle" ? "Cross" : "Circle";
   }
   private setupOpponentListener() {
-    const unsub = onValue(child(this.gameRef, "opponent"), (snapshot) => {
+    const unsub = onValue(child(this.gameRef, "opponent"), async (snapshot) => {
       if (!snapshot.exists()) return;
 
       this.state = {
         kind: "active",
         opponentUid: snapshot.val(),
       };
+
+      await remove(ref(RDB, `pincodes/${this.pincode}`));
 
       unsub();
     });
@@ -166,11 +168,14 @@ export class Game {
   }
 
   private async handleFinish() {
+    // make sure the game is not awaiting a opponent
     const status = this.board.state.status;
     if (this.state.kind !== "active") return;
 
+    // show the win popover
     document.getElementById("winPopover")!.showPopover();
 
+    // if the game status is won, set the windata so it can be displayed in the popover 
     if (status === "won") {
       const weWon = this.board.state.data.winner == this.tileType;
 
@@ -178,7 +183,7 @@ export class Game {
         winnerUid: weWon ? this.selfUid : this.state.opponentUid,
         loserUid: weWon ? this.state.opponentUid : this.selfUid,
       };
-      // Run a transaction to safely increment win/loss records inside the lobby
+      // update the scores of the current user to score+1
       await runTransaction(ref(RDB, `users/${this.selfUid}`), (memberData) => {
         if (memberData) {
           if (weWon) {
@@ -213,29 +218,39 @@ export class Game {
 
   // Creates a new game, and puts a new pincode to allow people to join
   static async createGame(): Promise<Game> {
+    // if not logged in, error out
     let user = AUTH.currentUser?.uid;
     if (!user) throw new SiteError("USER_NOT_AUTHENTICATED");
 
+    // create a new game, `push` generates a random id
+    // this sets the owner, and a blank move list
     let gamesRef = ref(RDB, "games");
     let gameRef = push(gamesRef, {
       owner: user,
       moves: [],
     });
+    // generate a random pincode and set it in firebase so other people can join the game.
     let pincode = makeid(5);
     set(ref(RDB, `pincodes/${pincode}`), gameRef.key);
 
+    // return out the newly created game, setting the opponent of the game to undefined
+    // to signify the game should be awaiting an opponent
     return new Game("Circle", undefined, true, gameRef, pincode);
   }
 
   // joins a already created game
   static async joinGame(pincode: string): Promise<Game> {
+    // if not logged in, error out
     if (!AUTH.currentUser) throw new SiteError("USER_NOT_AUTHENTICATED");
+    // get the lobby id from the pincode, and if it doesnt exist error out.
     let gameIdSnap = await get(ref(RDB, `pincodes/${pincode}`));
     if (!gameIdSnap.exists()) throw new SiteError("GAME_DOESNT_EXIST");
+    // set the user id on the opponent field of the game, so that both parties know to activate the game.
     let gameRef = ref(RDB, `games/${gameIdSnap.val()}`);
     await set(child(gameRef, "opponent"), AUTH.currentUser?.uid);
-    let info = (await get(gameRef)).val() as DatabaseGame;
+    // get game owner for the game.
+    let gameOwner = (await get(child(gameRef, "owner"))).val() as string;
 
-    return new Game("Cross", info.owner, false, gameRef, pincode);
+    return new Game("Cross", gameOwner, false, gameRef, pincode);
   }
 }
