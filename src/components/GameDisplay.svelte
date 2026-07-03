@@ -73,11 +73,13 @@
   <h3>
     {activeGame.ourTurn ? "Your" : opponent.displayName + "'s"} Turn
   </h3>
-  <img
-    src={activeGame.ourTurn ? current.photoURL : opponent.photoURL}
-    alt="profile"
-    class="profileImage"
-  />
+  {#if activeGame.ourTurn ? current.photoURL : opponent.photoURL}
+    <img
+      src={activeGame.ourTurn ? current.photoURL : opponent.photoURL}
+      alt="profile"
+      class="profileImage"
+    />
+  {/if}
 </div>
 
 <style>
